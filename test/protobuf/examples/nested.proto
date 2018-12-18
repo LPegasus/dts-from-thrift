@@ -1,0 +1,19 @@
+syntax = "proto3";
+package nested;
+
+message AlbumLink {
+  string label = 1;
+  message Foo {
+      string baz = 1;
+  }
+  Foo bar = 2;
+  message Poo {
+    int32 Lol = 1; // LOL
+  }
+  Poo poo = 3;
+  enum LinkType {
+    A = 1;
+    B = 2;
+  }
+  LinkType type = 4;
+}

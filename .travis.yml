@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - "10"
+sudo: false
+script:
+  - yarn test
+branches:
+  only:
+    - master
+cache:
+  yarn: true
+  directories:
+    - "node_modules"
+after_script:
+  - yarn cov

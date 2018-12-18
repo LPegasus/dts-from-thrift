@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "outDir": "./lib",
+    "composite": true,
+    "importHelpers": true,
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "rootDirs": [
+      "src/", "test/"
+    ]
+  },
+  "exclude": [
+    "./test/",
+    "./lib"
+  ]
+}

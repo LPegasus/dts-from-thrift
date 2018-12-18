@@ -1,0 +1,20 @@
+syntax = "proto3";
+package anote_op;
+
+import "base.proto";
+
+message StatusInfo {
+    string status_msg = 1;
+    int64 now = 2;
+    string log_id = 3;
+}
+
+message GeneralResponse {
+    int32 status_code = 1;
+    repeated StatusInfo status_info = 2;
+}
+
+enum FooEnum {
+    Foo = 1;
+    Bar = 2;    // comment of bar
+}
