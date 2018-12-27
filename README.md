@@ -1,8 +1,6 @@
 # dts-from-thrift
 
-[![npm version](https://badge.fury.io/js/dts-from-thrift.svg)](https://www.npmjs.com/package/dts-from-thrift)
-[![build](https://travis-ci.org/LPegasus/dts-from-thrift.svg?branch=master)](https://travis-ci.org/LPegasus/dts-from-thrift)
-[![coverage](https://img.shields.io/codecov/c/github/LPegasus/dts-from-thrift.svg?style=flat-square)](https://codecov.io/gh/LPegasus/dts-from-thrift)
+[![npm version](https://badge.fury.io/js/dts-from-thrift.svg)](https://www.npmjs.com/package/dts-from-thrift)[![build](https://travis-ci.org/LPegasus/dts-from-thrift.svg?branch=master)](https://travis-ci.org/LPegasus/dts-from-thrift)[![coverage](https://img.shields.io/codecov/c/github/LPegasus/dts-from-thrift.svg?style=flat-square)](https://codecov.io/gh/LPegasus/dts-from-thrift)[![install size](https://packagephobia.now.sh/badge?p=dts-from-thrift)](https://packagephobia.now.sh/result?p=dts-from-thrift)
 
 thrift RPC 定义文件转 d.ts 工具
 
