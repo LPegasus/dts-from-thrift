@@ -8,4 +8,10 @@ describe('thrift - parse typedef statement', () => {
       type: 'CollectionBase'
     });
   });
+  it('reslove generic currect', () => {
+    expect(parseTypedef('typedef list<string> StringList')).to.deep.eq({
+      alias: 'StringList',
+      type: 'string[]'
+    });
+  });
 });

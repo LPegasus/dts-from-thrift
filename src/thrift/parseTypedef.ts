@@ -1,18 +1,20 @@
 import { TypeDefEntity, CMDOptions } from '../interfaces';
+import { typeMapping } from './typeMapping';
 
 export function parseTypedef(
   code: string,
   _options?: Partial<CMDOptions>
 ): TypeDefEntity | null {
-  if (isTypeDef(code)) {
+  const mc = isTypeDef(code);
+  if (mc && mc.length === 3) {
     return {
-      type: RegExp.$1,
-      alias: RegExp.$2
+      type: typeMapping(mc[1]),
+      alias: mc[2]
     };
   }
   return null;
 }
 
-function isTypeDef(code: string): boolean {
-  return /^typedef\s([\w\d_>.<]+)\s([\w\d_]+)/.test(code);
+function isTypeDef(code: string): null | string[] {
+  return code.match(/^typedef\s([\w\d_>.<]+)\s([\w\d_]+)/);
 }

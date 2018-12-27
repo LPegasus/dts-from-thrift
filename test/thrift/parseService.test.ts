@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import {
   parseServiceInterface,
   parseService,
+  formatServiceFirstLine,
   isServiceBlockStart
 } from '../../src/thrift/parseService';
 import { ServiceEntity, RpcEntity } from '../../src/interfaces';
@@ -86,9 +87,8 @@ describe('thrift - parseService test', () => {
 
   it('parseService bugfix #1', () => {
     const codes = [
-      'service LocationService {',
+      'service LocationService {PigEntityResponse CreatePig(1: PigResult request)',
       '// xxxxxxxx',
-      'PigEntityResponse CreatePig(1: PigResult request)',
       'EmptyStatusResponse Status( )',
       '  }'
     ];
@@ -107,5 +107,37 @@ describe('thrift - parseService test', () => {
         }
       }
     } as ServiceEntity);
+  });
+
+  it('formatServiceFirstLine OK', () => {
+    const codes = [
+      'service LocationService {PigEntityResponse CreatePig(1: PigResult request) //xxxxx',
+      'EmptyStatusResponse Status( )',
+      '  }'
+    ];
+    formatServiceFirstLine(codes);
+    expect(codes).to.deep.eq([
+      'service LocationService {',
+      'PigEntityResponse CreatePig(1: PigResult request) //xxxxx',
+      'EmptyStatusResponse Status( )',
+      '  }'
+    ]);
+  });
+
+  it('parseService bugfix #2', () => {
+    const codes = [
+      'service LocationService {PigEntityResponse CreatePig(1: PigResult request)} //xxxxx'
+    ];
+    const entity = parseService(codes);
+    expect(entity).to.deep.eq({
+      name: 'LocationService',
+      interfaces: {
+        CreatePig: {
+          returnType: 'PigEntityResponse',
+          inputType: 'PigResult',
+          comment: 'xxxxx'
+        }
+      }
+    });
   });
 });

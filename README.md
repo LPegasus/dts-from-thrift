@@ -18,6 +18,19 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
+## 0.8.6 - 2018.12.27
+
+### bugfix
+
+- 正确解析单行 service 声明
+
+  parse single line service declaration currectly.
+
+- typeof 泛型映射修复
+
+  typedef generic type fix
+
+
 ## 0.8 - 2018.11.26
 
 ### Added

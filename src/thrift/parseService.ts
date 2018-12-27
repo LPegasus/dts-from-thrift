@@ -13,7 +13,12 @@ import { IHit, ServiceEntity } from '../interfaces';
  * @export
  * @param {string[]} codeLines
  */
-export function parseService(codeLines: string[], _options?: Partial<CMDOptions>): ServiceEntity {
+export function parseService(
+  codeLines: string[],
+  _options?: Partial<CMDOptions>
+): ServiceEntity {
+  // 兼容例如 `service ItemProviderSerivce {  RangeResponse    RangeItem (1: RangeRequest req)  #总是按时间倒序` 的格式
+  formatServiceFirstLine(codeLines);
   const serviceName = isServiceBlockStart(codeLines[0]).mc!;
   const rtn: ServiceEntity = {
     name: serviceName,
@@ -27,6 +32,38 @@ export function parseService(codeLines: string[], _options?: Partial<CMDOptions>
   return rtn;
 }
 
+export function formatServiceFirstLine(lines: string[]) {
+  let firstLine = lines[0];
+  let cmt = ''
+  firstLine = firstLine.replace(/(?:#|\/{2}).*$/, v => {
+    cmt = v;
+    return '';
+  }).replace(/\{/, '{\n').replace(/\}/, '\n}');
+  const newLines = firstLine.split('\n');
+  newLines[Math.min(newLines.length - 1, 1)] += cmt;
+  return lines.splice(0, 1, ...newLines);
+  // let char = '';
+  // let i = 0;
+  // const inserts = [];
+  // while ((char = firstLine[i++])) {
+  //   if ((char === '/' && firstLine[i] === '/') || char === '#') {
+  //     // 如果发现是注释，再见
+  //     break;
+  //   }
+  //   if (char === '{' && firstLine.substr(i).trim().length > 0) {
+  //     inserts.push(lines[0] = firstLine.substr(0, i));
+  //   }
+  //   if (char === '}') {
+  //     inserts.push('}');
+  //   }
+  // }
+  // if (inserts.length > 0) {
+  //   return lines.splice(1, 0, ...inserts);
+  // } else {
+  //   return lines;
+  // }
+}
+
 const trapInterfaceRegExp = /^([^\s\/]+)\s+([^\s\/]+)\s*(?:(?:\(\s*\d+\s*\:\s*([^\s]+)?\s+[^\s]+\s*\))|\(\s*\))(?:\s+throws\(.+\))?[\s,;]?\s*(?:(?:#|\/\/)(.+))?$/;
 export function parseServiceInterface(
   interfaces: ServiceEntity['interfaces'],
@@ -38,7 +75,7 @@ export function parseServiceInterface(
   }
   interfaces[mc[2]] = {
     returnType: mc[1],
-    inputType: (mc[3] || ''),
+    inputType: mc[3] || '',
     comment: (mc[4] || '').trim()
   };
 }
