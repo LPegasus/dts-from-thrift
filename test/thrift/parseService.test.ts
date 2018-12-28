@@ -50,6 +50,7 @@ describe('thrift - parseService test', () => {
   it('parseService pass', () => {
     const codes = [
       'service ItemProviderService {',
+      '# 测试注释',
       '  RangeResponse    RangeItem            (1: RangeRequest req);  #总是按时间倒序',
       '  // 根据时间来请求item信息',
       '  ItemListResponse ItemListByCreateTime (1: RangeRequest req),  ',

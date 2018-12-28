@@ -67,7 +67,7 @@ export function formatServiceFirstLine(lines: string[]) {
   // }
 }
 
-const trapInterfaceRegExp = /^([^\s\/]+)\s+([^\s\/]+)\s*\(([^\)]*)\)(?:\s+throws\(.+\))?[\s,;]?\s*(?:(?:#|\/\/)(.+))?$/;
+const trapInterfaceRegExp = /^([^\s#\/]+)\s+([^\s\/]+)\s*\(([^\)]*)\)(?:\s+throws\(.+\))?[\s,;]?\s*(?:(?:#|\/\/)(.+))?$/;
 export function parseServiceInterface(
   interfaces: ServiceEntity['interfaces'],
   code: string
