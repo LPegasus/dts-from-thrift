@@ -16,6 +16,14 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
+## 0.8.7 - 2018.12.28
+
+## bugfix
+
+- 正确解析有多个形参的 service
+
+  parse service with multiple params currectly
+
 ## 0.8.6 - 2018.12.27
 
 ### bugfix

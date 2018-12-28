@@ -49,7 +49,11 @@ export interface ServiceEntity {
   interfaces: {
     [key: string]: {
       returnType: string;
-      inputType: string;
+      inputParams: Array<{
+        type: string;
+        index: number;
+        name: string;
+      }>;
       comment: string;
     };
   };

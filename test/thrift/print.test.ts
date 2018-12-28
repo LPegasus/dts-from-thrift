@@ -168,49 +168,52 @@ describe('thrift - print', () => {
 
   it('printService success', () => {
     expect(
-      printServices({
-        ns: 'test',
-        includes: [],
-        enums: [],
-        typeDefs: [],
-        fileName: '',
-        interfaces: [
-          {
-            name: 'Input1',
-            properties: {},
-            childrenInterfaces: [],
-            childrenEnums: []
-          }
-        ],
-        services: [
-          {
-            name: 'RpcService1',
-            interfaces: {
-              a: {
-                inputType: 'Input1',
-                returnType: 'Output1',
-                comment: 'comment1'
+      printServices(
+        {
+          ns: 'test',
+          includes: [],
+          enums: [],
+          typeDefs: [],
+          fileName: '',
+          interfaces: [
+            {
+              name: 'Input1',
+              properties: {},
+              childrenInterfaces: [],
+              childrenEnums: []
+            }
+          ],
+          services: [
+            {
+              name: 'RpcService1',
+              interfaces: {
+                a: {
+                  inputParams: [{ type: 'Input1', name: 'req1', index: 1 }, { type: 'Input2', name: 'req2', index: 2 }],
+                  returnType: 'Output1',
+                  comment: 'comment1'
+                }
+              }
+            },
+            {
+              name: 'RpcService2',
+              interfaces: {
+                a: {
+                  inputParams: [{ type: 'Input2', name: 'req2', index: 1 }],
+                  returnType: 'Output2',
+                  comment: ''
+                }
               }
             }
-          },
-          {
-            name: 'RpcService2',
-            interfaces: {
-              a: {
-                inputType: 'Input2',
-                returnType: 'Output2',
-                comment: ''
-              }
-            }
-          }
-        ]
-      }, true)
+          ]
+        },
+        true
+      )
     ).to.eq(`  export interface RpcService1 {
-    a(req: test.Input1): Promise<Output1>;      // comment1
+    a(req1: test.Input1, req2: Input2): Promise<Output1>;   // comment1
   }
 
   export interface RpcService2 {
-    a(req: Input2): Promise<Output2>;
+    a(req2: Input2): Promise<Output2>;
   }
 
 `);
@@ -221,14 +224,18 @@ describe('thrift - print', () => {
       {
         ns: 'l6',
         interfaces: [],
-        typeDefs: [{
-          alias: 'Input1',
-          type: '_Input1'
-        }],
-        enums: [{
-          name: 'Input2',
-          properties: {}
-        }],
+        typeDefs: [
+          {
+            alias: 'Input1',
+            type: '_Input1'
+          }
+        ],
+        enums: [
+          {
+            name: 'Input2',
+            properties: {}
+          }
+        ],
         fileName: '/life/client',
         includes: ['/life/common'],
         services: [
@@ -236,7 +243,7 @@ describe('thrift - print', () => {
             name: 'RpcService1',
             interfaces: {
               a: {
-                inputType: 'Input1',
+                inputParams: [{ type: 'Input1', name: 'req', index: 1 }],
                 returnType: 'common.Output1',
                 comment: 'comment1'
               }
@@ -246,7 +253,7 @@ describe('thrift - print', () => {
             name: 'RpcService2',
             interfaces: {
               a: {
-                inputType: 'Input2',
+                inputParams: [{ type: 'Input2', name: 'req', index: 2 }],
                 returnType: 'common.Output2',
                 comment: ''
               }
@@ -272,7 +279,9 @@ describe('thrift - print', () => {
   });
 
   it('print empty service param interface', async () => {
-    const rtn = await readCode(path.join(__dirname, 'examples', 'service.thrift'));
-    expect(printServices(rtn).indexOf('WebFake()') !== -1).to.eq(true)
+    const rtn = await readCode(
+      path.join(__dirname, 'examples', 'service.thrift')
+    );
+    expect(printServices(rtn).indexOf('WebFake()') !== -1).to.eq(true);
   });
 });

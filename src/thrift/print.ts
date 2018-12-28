@@ -240,18 +240,24 @@ export function printServices(
 ${Object.keys(cur.interfaces)
       .map(key => {
         const i = cur.interfaces[key];
-        const inputType =
-          isGenerateRPC && keyInNs.indexOf(i.inputType) !== -1
-            ? `${entity.ns}.${i.inputType}`
-            : i.inputType;
+        let sortTmp: any[] = [];
+        i.inputParams.forEach(d => (sortTmp[d.index] = d));
+        sortTmp = sortTmp.filter(d => !!d);
+        const inputParamsStr = (sortTmp as (typeof i)['inputParams'])
+          .map(d => {
+            const type =
+              isGenerateRPC && keyInNs.indexOf(d.type) !== -1
+                ? `${entity.ns}.${d.type}`
+                : d.type;
+            return `${d.name}: ${type}`;
+          })
+          .join(', ');
         const returnType =
           isGenerateRPC && keyInNs.indexOf(i.returnType) !== -1
             ? `${entity.ns}.${i.returnType}`
             : i.returnType;
         return attachComment(
-          `    ${key}(${
-            inputType ? `req: ${inputType}` : ''
-          }): Promise<${returnType}>;`,
+          `    ${key}(${inputParamsStr}): Promise<${returnType}>;`,
           i.comment
         );
       })

@@ -162,13 +162,15 @@ describe('thrift - read code file', () => {
         name: 'CircleService',
         interfaces: {
           PackTag: {
-            inputType: 'PackTagRequest',
+            inputParams: [{ type: 'PackTagRequest', index: 1, name: 'req' }],
             returnType: 'PackTagResponse',
             comment: ''
           },
           GetTagIdByNames: {
             returnType: 'GetTagIdByNamesResponse',
-            inputType: 'GetTagIdByNamesRequest',
+            inputParams: [
+              { type: 'GetTagIdByNamesRequest', index: 1, name: 'req' }
+            ],
             comment: ''
           }
         }
@@ -184,13 +186,13 @@ describe('thrift - read code file', () => {
   });
 
   it('func struct block with multiline comments pass', async () => {
-    const rtn = await readCode(path.join(__dirname, 'examples', 'service.thrift'));
+    const rtn = await readCode(
+      path.join(__dirname, 'examples', 'service.thrift')
+    );
     expect(Object.keys(rtn.services[0].interfaces).length).to.eq(3);
   });
 
   it.skip('__trouble_shoot__', async () => {
-    console.log(
-      await readCode(path.join(__dirname, 'examples/test1.thrift'))
-    );
+    console.log(await readCode(path.join(__dirname, 'examples/test1.thrift')));
   });
 });

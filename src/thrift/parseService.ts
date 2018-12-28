@@ -34,11 +34,14 @@ export function parseService(
 
 export function formatServiceFirstLine(lines: string[]) {
   let firstLine = lines[0];
-  let cmt = ''
-  firstLine = firstLine.replace(/(?:#|\/{2}).*$/, v => {
-    cmt = v;
-    return '';
-  }).replace(/\{/, '{\n').replace(/\}/, '\n}');
+  let cmt = '';
+  firstLine = firstLine
+    .replace(/(?:#|\/{2}).*$/, v => {
+      cmt = v;
+      return '';
+    })
+    .replace(/\{/, '{\n')
+    .replace(/\}/, '\n}');
   const newLines = firstLine.split('\n');
   newLines[Math.min(newLines.length - 1, 1)] += cmt;
   return lines.splice(0, 1, ...newLines);
@@ -64,7 +67,7 @@ export function formatServiceFirstLine(lines: string[]) {
   // }
 }
 
-const trapInterfaceRegExp = /^([^\s\/]+)\s+([^\s\/]+)\s*(?:(?:\(\s*\d+\s*\:\s*([^\s]+)?\s+[^\s]+\s*\))|\(\s*\))(?:\s+throws\(.+\))?[\s,;]?\s*(?:(?:#|\/\/)(.+))?$/;
+const trapInterfaceRegExp = /^([^\s\/]+)\s+([^\s\/]+)\s*\(([^\)]*)\)(?:\s+throws\(.+\))?[\s,;]?\s*(?:(?:#|\/\/)(.+))?$/;
 export function parseServiceInterface(
   interfaces: ServiceEntity['interfaces'],
   code: string
@@ -73,9 +76,25 @@ export function parseServiceInterface(
   if (!mc) {
     return;
   }
+  const inputParams: ServiceEntity['interfaces']['d']['inputParams'] = [];
+  mc[3]
+    .split(',')
+    .map(d => d.trim())
+    .filter(d => !!d)
+    .forEach(d => {
+      const _mc = d.match(/(\d+)\s*\:\s*(?:(?:([^\s]+)\s+)|([^\s]+>))(.+)$/);
+      if (_mc) {
+        inputParams.push({
+          index: Number(_mc[1]),
+          name: _mc[4],
+          type: _mc[2]
+        });
+      }
+    });
+
   interfaces[mc[2]] = {
     returnType: mc[1],
-    inputType: mc[3] || '',
+    inputParams,
     comment: (mc[4] || '').trim()
   };
 }

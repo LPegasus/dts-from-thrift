@@ -20,7 +20,7 @@ describe('thrift - parseService test', () => {
       .to.be.deep.eq({
         returnType: 'RangeResponse',
         comment: '总是按时间倒序',
-        inputType: 'RangeRequest'
+        inputParams: [{ type: 'RangeRequest', name: 'req', index: 1 }]
       });
   });
 
@@ -63,22 +63,22 @@ describe('thrift - parseService test', () => {
       interfaces: {
         RangeItem: {
           returnType: 'RangeResponse',
-          inputType: 'RangeRequest',
+          inputParams: [{ type: 'RangeRequest', name: 'req', index: 1 }],
           comment: '总是按时间倒序'
         },
         ItemListByCreateTime: {
           returnType: 'ItemListResponse',
-          inputType: 'RangeRequest',
+          inputParams: [{ type: 'RangeRequest', name: 'req', index: 1 }],
           comment: ''
         },
         ItemListByID: {
           returnType: 'ItemListResponse',
-          inputType: 'ItemIDListRequest',
+          inputParams: [{ type: 'ItemIDListRequest', name: 'req', index: 1 }],
           comment: '按照ID'
         },
         ItemListClear: {
           returnType: 'ItemClearAllResponse',
-          inputType: '',
+          inputParams: [],
           comment: 'NO INPUT'
         }
       }
@@ -97,12 +97,12 @@ describe('thrift - parseService test', () => {
       interfaces: {
         CreatePig: {
           returnType: 'PigEntityResponse',
-          inputType: 'PigResult',
+          inputParams: [{ name: 'request', type: 'PigResult', index: 1 }],
           comment: ''
         },
         Status: {
           returnType: 'EmptyStatusResponse',
-          inputType: '',
+          inputParams: [],
           comment: ''
         }
       }
@@ -134,10 +134,35 @@ describe('thrift - parseService test', () => {
       interfaces: {
         CreatePig: {
           returnType: 'PigEntityResponse',
-          inputType: 'PigResult',
+          inputParams: [{ type: 'PigResult', name: 'request', index: 1 }],
           comment: 'xxxxx'
         }
       }
     });
+  });
+
+  it('parseServiceInterface feat: multi params', () => {
+    const interfaces: ServiceEntity['interfaces'] = {};
+    parseServiceInterface(
+      interfaces,
+      'StringList available_api(1:string src_lang, 2:string trg_lang),       // no need to use, for test'
+    );
+
+    expect(interfaces.available_api).to.deep.eq({
+      comment: 'no need to use, for test',
+      returnType: 'StringList',
+      inputParams: [
+        {
+          type: 'string',
+          name: 'src_lang',
+          index: 1
+        },
+        {
+          type: 'string',
+          name: 'trg_lang',
+          index: 2
+        }
+      ]
+    } as ServiceEntity['interfaces']['d']);
   });
 });
