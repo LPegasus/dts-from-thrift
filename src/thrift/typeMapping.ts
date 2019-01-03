@@ -3,7 +3,7 @@ const ThriftType2JavascriptType: { [key: string]: string } = {
   byte: 'number',
   i16: 'number',
   i32: 'number',
-  i64: 'number',
+  i64: 'Int64',
   double: 'number',
   string: 'string',
   binary: 'any'

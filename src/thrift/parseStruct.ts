@@ -140,6 +140,6 @@ export function preProcessCode(line: string) {
   }
   return {
     comment,
-    lineWithoutComment: resultCode.trim()
+    lineWithoutComment: resultCode.trim().replace(/\s*>/g, '>')
   };
 }

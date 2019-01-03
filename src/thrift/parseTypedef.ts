@@ -16,5 +16,5 @@ export function parseTypedef(
 }
 
 function isTypeDef(code: string): null | string[] {
-  return code.match(/^typedef\s([\w\d_>.<]+)\s([\w\d_]+)/);
+  return code.replace(/\s*</g, '<').match(/^typedef\s([\w\d_>.<]+)\s([\w\d_]+)/);
 }

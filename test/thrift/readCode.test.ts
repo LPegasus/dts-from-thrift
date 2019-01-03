@@ -53,21 +53,21 @@ describe('thrift - read code file', () => {
             defaultValue: ''
           },
           offset: {
-            type: 'number',
+            type: 'Int64',
             index: 2,
             comment: '',
             optional: true,
             defaultValue: ''
           },
           count: {
-            type: 'number',
+            type: 'Int64',
             comment: '',
             optional: true,
             index: 3,
             defaultValue: ''
           },
           user_id: {
-            type: 'number',
+            type: 'Int64',
             comment: '',
             optional: true,
             index: 4,
@@ -95,7 +95,7 @@ describe('thrift - read code file', () => {
             defaultValue: ''
           },
           offset: {
-            type: 'number',
+            type: 'Int64',
             comment: '',
             index: 3,
             optional: true,

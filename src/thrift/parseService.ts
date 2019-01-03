@@ -33,7 +33,8 @@ export function parseService(
 }
 
 export function formatServiceFirstLine(lines: string[]) {
-  let firstLine = lines[0];
+  const newlines = lines.map(d => d.replace(/>\s*/g, ''));
+  let firstLine = newlines[0];
   let cmt = '';
   firstLine = firstLine
     .replace(/(?:#|\/{2}).*$/, v => {
@@ -42,9 +43,9 @@ export function formatServiceFirstLine(lines: string[]) {
     })
     .replace(/\{/, '{\n')
     .replace(/\}/, '\n}');
-  const newLines = firstLine.split('\n');
-  newLines[Math.min(newLines.length - 1, 1)] += cmt;
-  return lines.splice(0, 1, ...newLines);
+  const res = firstLine.split('\n');
+  res[Math.min(res.length - 1, 1)] += cmt;
+  return lines.splice(0, 1, ...res);
   // let char = '';
   // let i = 0;
   // const inserts = [];

@@ -29,7 +29,7 @@ describe('thrift - parse struct', () => {
         },
         user_id: {
           optional: false,
-          type: 'number',
+          type: 'Int64',
           comment: '用户 id',
           index: 1,
           defaultValue: '-1'

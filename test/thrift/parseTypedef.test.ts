@@ -9,7 +9,7 @@ describe('thrift - parse typedef statement', () => {
     });
   });
   it('reslove generic currect', () => {
-    expect(parseTypedef('typedef list<string> StringList')).to.deep.eq({
+    expect(parseTypedef('typedef list <string> StringList')).to.deep.eq({
       alias: 'StringList',
       type: 'string[]'
     });
