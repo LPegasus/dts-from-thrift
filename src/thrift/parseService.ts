@@ -33,7 +33,40 @@ export function parseService(
 }
 
 export function formatServiceFirstLine(lines: string[]) {
-  const newlines = lines.map(d => d.replace(/>\s*/g, ''));
+  const blockChars = lines
+    .filter(d => !!d)
+    .join('\n')
+    .split('');
+  const formattedChars: string[] = [];
+
+  let chr: string | undefined;
+  let commentStart = false;
+  while ((chr = blockChars.shift())) {
+    if (
+      !commentStart &&
+      (chr === '#' || (chr === '/' && blockChars[0] === '/'))
+    ) {
+      commentStart = true;
+    }
+    if (commentStart === true && chr === '\n') {
+      commentStart = false;
+    }
+    if (!commentStart && chr === '\n') {
+      continue;
+    }
+    if (!commentStart) {
+      formattedChars.push(chr);
+    }
+    if (!commentStart && chr === '{') {
+      break;
+    }
+  }
+
+  const fomattedLines = formattedChars
+    .concat(blockChars)
+    .join('')
+    .split('\n');
+  const newlines = fomattedLines.map(d => d.replace(/>\s*/g, ''));
   let firstLine = newlines[0];
   let cmt = '';
   firstLine = firstLine

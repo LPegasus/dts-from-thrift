@@ -50,7 +50,7 @@ const options: CMDOptions = {
   usePrettier: commander.prettier,
   rpcNamespace: commander.rpcNamespace
 };
-
+fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(path.join(__dirname, 'tools/tsHelper.d.ts'), path.join(options.tsRoot, 'tsHelper.d.ts'));
 
 const thriftFiles = glob

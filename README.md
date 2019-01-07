@@ -16,7 +16,15 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
-## 0.9.0 - 2019.1.2
+## 0.9.0-beta.1 - 2019.1.7
+
+### bugfix
+
+- `thrift` `Struct` 字段如果定义了 `defaultValue`，生成的 dts 字段将带 `?`
+
+  fields in `thrift Struct` with `defaultValue` will attach a `?` when in `d.ts` file
+
+## 0.9.0-beta.0 - 2019.1.2
 
 ### Breaking Change
 

@@ -58,7 +58,7 @@ export function parseStruct(
       : !(mc[1] !== 'optional');
     if (defaultValue) {
       // 如果有默认值，不需要指定 optional
-      optional = false;
+      optional = true;
     }
 
     if (

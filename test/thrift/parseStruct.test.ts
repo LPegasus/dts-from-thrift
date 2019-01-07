@@ -28,7 +28,7 @@ describe('thrift - parse struct', () => {
           defaultValue: ''
         },
         user_id: {
-          optional: false,
+          optional: true,
           type: 'Int64',
           comment: '用户 id',
           index: 1,
@@ -36,7 +36,7 @@ describe('thrift - parse struct', () => {
         },
         level: {
           type: 'pack_user.UserLevel',
-          optional: false,
+          optional: true,
           comment: '级别',
           index: 2,
           defaultValue: '"top"'
@@ -45,7 +45,7 @@ describe('thrift - parse struct', () => {
           type: 'string[]',
           index: 3,
           comment: '备注',
-          optional: false,
+          optional: true,
           defaultValue: "''"
         },
         user_type: {
@@ -176,16 +176,28 @@ describe('thrift - parse struct', () => {
     );
     expect(rtn).to.deep.eq({
       comment: 'top_item_list,包含item_id, item_type',
-      lineWithoutComment:
-        'optional list<TopItem> top_item_list,'
+      lineWithoutComment: 'optional list<TopItem> top_item_list,'
     });
   });
 
   it('process pass 2', () => {
-    const rtn = preProcessCode('optional BizType biz_type(go.tag="json:\"url\" example_data:\"http://xx.aa.j/large/saaa.webp\""), // 666');
+    const rtn = preProcessCode(
+      'optional BizType biz_type(go.tag="json:"url" example_data:"http://xx.aa.j/large/saaa.webp""), // 666'
+    );
     expect(rtn).to.deep.eq({
       comment: '666',
-      lineWithoutComment: 'optional BizType biz_type(go.tag="json:\"url\" example_data:\"http://xx.aa.j/large/saaa.webp\""),'
-    })
-  })
+      lineWithoutComment:
+        'optional BizType biz_type(go.tag="json:"url" example_data:"http://xx.aa.j/large/saaa.webp""),'
+    });
+  });
+
+  it('parseStruct bugfix with default value', () => {
+    const codes = [
+      'struct CircleRequest {',
+      '1: list<i64> circle_ids,',
+      '6: optional i64 stime = 0,',
+      '}'
+    ];
+    expect(parseStruct(codes).properties.stime.optional).to.be.eq(true);
+  });
 });

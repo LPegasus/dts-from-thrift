@@ -166,4 +166,24 @@ describe('thrift - parseService test', () => {
       ]
     } as ServiceEntity['interfaces']['d']);
   });
+
+  it('parseService bugfix: with "\n{"', () => {
+    const codes = [
+      'service ItemProviderService',
+      '{',
+      '# 测试注释',
+      '  RangeResponse    RangeItem            (1: RangeRequest req);  #总是按时间倒序',
+      '}'
+    ];
+    expect(parseService(codes)).to.be.deep.eq({
+      name: 'ItemProviderService',
+      interfaces: {
+        RangeItem: {
+          returnType: 'RangeResponse',
+          inputParams: [{ type: 'RangeRequest', name: 'req', index: 1 }],
+          comment: '总是按时间倒序'
+        },
+      }
+    });
+  });
 });
