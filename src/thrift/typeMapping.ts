@@ -6,29 +6,38 @@ const ThriftType2JavascriptType: { [key: string]: string } = {
   i64: 'Int64',
   double: 'number',
   string: 'string',
-  binary: 'any'
+  binary: 'any',
+  list: 'Array',
+  map: 'Map',
+  set: 'Set'
 };
 
-const typeReplaceRegexp = new RegExp(
-  `[\\W\\D]?(${Object.keys(ThriftType2JavascriptType).join('|')})[\\W\\D]?`,
-  'g'
-);
-
 export function typeMapping(str: string) {
-  let rtn = str
-    .replace(/(set|map|list)</g, (_k, v) => {
-      if (v === 'list') {
-        return 'Array<';
+  const tokens: string[] = [];
+  let ch: string;
+  let token = '';
+  let i = 0;
+  const len = str.length;
+  while (true) {
+    ch = str.charAt(i);
+    if (/[\s\b\<>,]/.test(ch)) {
+      token = ThriftType2JavascriptType[token] || token;
+      tokens.push(...[token, ch].filter(Boolean));
+      token = '';
+    } else {
+      token += ch;
+    }
+    i++;
+    if (i >= len) {
+      if (token) {
+        token = ThriftType2JavascriptType[token] || token;
+        tokens.push(token)
       }
-      return v.substr(0, 1).toUpperCase() + v.substr(1) + '<';
-    })
-    .replace(/[\W\D]?Array<([\w\d_.]+)>[\W\D]?/g, (k, v) => {
-      return k.replace(`Array<${v}>`, `${v}[]`);
-    })
-    .replace(typeReplaceRegexp, (k, v) => {
-      const type = ThriftType2JavascriptType[v];
-      return k.replace(v, type);
-    });
+      break;
+    }
+  }
+
+  const rtn = tokens.join('').replace(/Array<([^<>|]+)>/g, '$1[]');
 
   return rtn;
 }

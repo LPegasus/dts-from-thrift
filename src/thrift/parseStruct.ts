@@ -40,7 +40,7 @@ export function parseStruct(
      *        - "[^"]*"|'[^']*'         匹配字符串
      *    - $6 (?:(?:\s+)?(?:\/{2,}|#{1,})(.+))? 捕获注释
      */
-    const mc = /(?:(optional|required)\s+)?([\w\d_>.,\s<]+)\s+([\w\d_]+)\s*(\(.+\))?(?:\s*=\s*([\d\.\w_-]+|true|false|"[^"]*"|'[^']*'))?\s*[,;]?$/.exec(
+    const mc = /(?:(optional|required)\s+)?([\w\d_>.,\s<]+)\s+([\w\d_]+)\s*(\(.+\))?(?:\s*=\s*([\d\.\w_-]+|true|false|"[^"]*"|'[^']*'|\[\]))?\s*[,;]?$/.exec(
       partialRight
     );
 

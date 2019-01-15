@@ -13,7 +13,9 @@ const pb2JavascriptType: { [key: string]: string } = {
   sfixed64: 'number',
   bool: 'boolean',
   bytes: 'Buffer | number[] | Uint8Array',
-  string: 'string'
+  string: 'string',
+  list: 'Array',
+  map: 'Map'
 };
 
 const typeReplaceRegexp = new RegExp(
@@ -21,25 +23,37 @@ const typeReplaceRegexp = new RegExp(
   'g'
 );
 
-export function typeMapping(str: string, isRepeated: boolean = false) {
-  let rtn = str;
+export function typeMapping(s: string, isRepeated: boolean = false) {
+  let str = s;
   // 如果标记了 repeated，则给类型套一个 list 让后续程序处理成 array
   if (isRepeated) {
-    rtn = `list<${str}>`;
+    str = `list<${s}>`;
   }
-  rtn = rtn
-    .replace(/(map|list)</g, (_k, v) => {
-      if (v === 'list') {
-        return 'Array<';
+  const tokens: string[] = [];
+  let ch: string;
+  let token = '';
+  let i = 0;
+  const len = str.length;
+  while (true) {
+    ch = str.charAt(i);
+    if (/[\s\b\<>,]/.test(ch)) {
+      token = pb2JavascriptType[token] || token;
+      tokens.push(...[token, ch].filter(Boolean));
+      token = '';
+    } else {
+      token += ch;
+    }
+    i++;
+    if (i >= len) {
+      if (token) {
+        token = pb2JavascriptType[token] || token;
+        tokens.push(token);
       }
-      return v.substr(0, 1).toUpperCase() + v.substr(1) + '<';
-    })
-    .replace(/[\W\D]?Array<([\w\d_.]+)>[\W\D]?/g, (k, v) => {
-      return k.replace(`Array<${v}>`, `${v}[]`);
-    })
-    .replace(typeReplaceRegexp, (k, v) => {
-      const type = pb2JavascriptType[v] || v;
-      return k.replace(v, type);
-    });
+      break;
+    }
+  }
+
+  const rtn = tokens.join('').replace(/Array<([^<>|]+)>/g, '$1[]');
+
   return rtn;
 }

@@ -191,7 +191,7 @@ describe('thrift - parse struct', () => {
     });
   });
 
-  it('parseStruct bugfix with default value', () => {
+  it('parseStruct bugfix: with default value', () => {
     const codes = [
       'struct CircleRequest {',
       '1: list<i64> circle_ids,',
@@ -199,5 +199,17 @@ describe('thrift - parse struct', () => {
       '}'
     ];
     expect(parseStruct(codes).properties.stime.optional).to.be.eq(true);
+  });
+
+  it('parseStruct bugfix: with default value "[]"', () => {
+    const codes = `struct PackItemResponse {
+  1: list<detail.PackedItem> item_info = [],
+
+  255: optional base.BaseResp BaseResp,
+}
+`;
+    expect(parseStruct(codes.split('\n')))
+      .be.ownProperty('properties')
+      .ownProperty('item_info');
   });
 });

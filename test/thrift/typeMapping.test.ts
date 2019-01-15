@@ -22,5 +22,13 @@ describe('thrift - type mapping', () => {
 
   it('i64 should be Int64', () => {
     expect(typeMapping('i64')).to.be.eq('Int64');
-  })
+  });
+
+  it('typeMapping bugfix: keyword type', () => {
+    expect(typeMapping('i64.rebyte.i16')).to.eq('i64.rebyte.i16');
+    expect(typeMapping('i.i16')).to.eq('i.i16');
+    expect(typeMapping('list<i.i16>')).to.eq('i.i16[]');
+    expect(typeMapping('list<i16>')).to.eq('number[]');
+    expect(typeMapping('list<i161>')).to.eq('i161[]');
+  });
 });
