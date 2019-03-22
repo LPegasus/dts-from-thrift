@@ -7,7 +7,16 @@ const enumDebugger = debug('parser:protobuf-enum');
 export function parseEnum(codes: string[], _options?: Partial<CMDOptions>): EnumEntity {
   const name = /^enum\s+([\w\d_]+)(?:\s+)?{/.exec(codes[0].trim())![1];
   const properties: { [key: string]: { value: number; comment: string } } = {};
-  const propertyLines = codes.filter(d => !!d.trim()).slice(1, codes.length - 1);
+  const propertyLines = codes.filter(d => {
+    const trimedLine = d.trim();
+    if (!trimedLine) {
+      return false;
+    }
+    if (trimedLine.indexOf('//') === 0) {
+      return false;
+    }
+    return true;
+  }).slice(1, codes.length - 1);
 
   for (let i = 0; i < propertyLines.length; i++) {
     const mc = /([\w\d_]+)\s*\=\s*(\d+)[\s,;]?(?:[\s]+)?(?:(?:(?:#+)\s*(.+))|(?:\/{2,}(?:\s+)?(.+)?))?/.exec(
