@@ -10,6 +10,7 @@ const msgTypeTrapRegExp = /^message\s+([\w\d_]+)\s*{/;
 const msgOrEnumTypeTrapRegExp = /^(message|enum)\s+([\w\d_]+)\s*{/;
 const trapFieldIndex = /^([^\/=]+)=\s*(\d+)\s*(?:\[default\s*=\s*(.+)\])?[^\/]+/;
 const trapComments = /(\/\/\s*(.+))$/;
+const multilineComments = /\/\*.*?\*\//;
 const splitToken = /(?:(repeated|optional)\s+)?(map<[^>]+>|[^\s\/]+)\s+([^\s\/]+)/;
 
 export function parseMessage(
@@ -25,7 +26,7 @@ export function parseMessage(
   entity.name = msgTypeTrapRegExp.exec(codes[0].trim())![1];
   entity.properties = {};
   const propertyLines = codes
-    .map(d => d.trim())
+    .map(d => d.replace(multilineComments, '').trim())
     .filter(d => !!d)
     .slice(1, codes.length - 1);
   clearRegExp();

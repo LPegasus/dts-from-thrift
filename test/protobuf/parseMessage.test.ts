@@ -3,6 +3,38 @@ import { parseMessage } from '../../src/protobuf/parseMessage';
 import { InterfaceEntity } from '../../src/interfaces';
 
 describe('protobuf - parseMessage', () => {
+  it('protobuf.parseMessage test with comments', () => {
+    const simpleSource = `message Header {
+     /**协议的版本号**/
+     optional int32 version = 1 [default = 1];
+
+     /**每个event的长度**/
+     optional int64 eventLength = 10;
+    }`.split(/\r?\n/);
+    const simpleSourceEntity = parseMessage(simpleSource);
+    expect(simpleSourceEntity).to.be.deep.eq({
+      name: 'Header',
+      childrenEnums: [],
+      childrenInterfaces: [],
+      properties: {
+        eventLength: {
+          comment: '',
+          defaultValue: '',
+          index: 10,
+          optional: true,
+          type: 'number'
+        },
+        version: {
+          comment: '',
+          defaultValue: '1',
+          index: 1,
+          optional: false,
+          type: 'number'
+        }
+      }
+    });
+  });
+
   it('protobuf.parseMessage test with fomatted code pass', () => {
     const simpleSource = [
       'message UrlInfo {',
