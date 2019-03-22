@@ -7,7 +7,7 @@ describe('protobuf - parseMessage', () => {
     const simpleSource = `message Header {
      /**协议的版本号**/
      optional int32 version = 1 [default = 1];
-
+     required int32 channel = 2;//登录渠道 1:微信
      /**每个event的长度**/
      optional int64 eventLength = 10;
     }`.split(/\r?\n/);
@@ -22,6 +22,13 @@ describe('protobuf - parseMessage', () => {
           defaultValue: '',
           index: 10,
           optional: true,
+          type: 'number'
+        },
+        channel: {
+          comment: '登录渠道 1:微信',
+          defaultValue: '',
+          index: 2,
+          optional: false,
           type: 'number'
         },
         version: {
