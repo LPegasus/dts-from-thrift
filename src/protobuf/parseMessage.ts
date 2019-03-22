@@ -11,7 +11,7 @@ const msgOrEnumTypeTrapRegExp = /^(message|enum)\s+([\w\d_]+)\s*{/;
 const trapFieldIndex = /^([^\/=]+)=\s*(\d+)\s*(?:\[default\s*=\s*(.+)\])?[^\/]+/;
 const trapComments = /(\/\/\s*(.+))$/;
 const multilineComments = /\/\*.*?\*\//;
-const splitToken = /(?:(repeated|optional)\s+)?(map<[^>]+>|[^\s\/]+)\s+([^\s\/]+)/;
+const splitToken = /(?:(repeated|optional|required)\s+)?(map<[^>]+>|[^\s\/]+)\s+([^\s\/]+)/;
 
 export function parseMessage(
   codes: string[],
