@@ -209,12 +209,15 @@ export function fixIncludeNamespace(
     const shouldReplaceNS = path.parse(include).name; // 如果文件中有用到 filename 作为 namespace
 
     result = result.replace(
-      new RegExp(`([^\\w])${shouldReplaceNS}\\.`, 'g'),
-      `$1${shouldBeNS}.`
+      new RegExp(
+        `(\\W)((?<!__SEGMENT__.*)${shouldReplaceNS}\\.|${shouldReplaceNS}(?!.*__SEGMENT__)\\.)`,
+        'g'
+      ),
+      `__SEGMENT__$1${shouldBeNS}__SEGMENT__.`
     );
   });
 
-  return result;
+  return result.replace(new RegExp(`__SEGMENT__`, 'g'), '');
 }
 
 /**

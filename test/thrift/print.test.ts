@@ -166,6 +166,48 @@ describe('thrift - print', () => {
     );
   });
 
+  it('fixIncludeNamespace success with nest path', () => {
+    const res = fixIncludeNamespace(
+      `interface interface1 {
+        data: list<detail.PackedItem>;
+        sort: item.SortType
+      }`,
+      {
+        enums: [],
+        fileName: '/test/root/demo.thrift',
+        includes: ['/test/root/detail.thrift', '/test/root/item.thrift'],
+        ns: 'life.demo',
+        interfaces: [],
+        typeDefs: [],
+        services: []
+      },
+      {
+        '/test/root/detail.thrift': {
+          enums: [],
+          services: [],
+          fileName: '/test/root/detail.thrift',
+          includes: [],
+          ns: 'life.item.detail',
+          interfaces: [],
+          typeDefs: []
+        },
+        '/test/root/item.thrift': {
+          enums: [],
+          services: [],
+          fileName: '/test/root/item.thrift',
+          includes: [],
+          ns: 'life.demo.item',
+          interfaces: [],
+          typeDefs: []
+        }
+      }
+    );
+    expect(res).not.eq(`interface interface1 {
+      data: list<life.item.detail.PackedItem>;
+      sort: life.demo.item.SortType
+    }`);
+  });
+
   it('printService success', () => {
     expect(
       printServices(
@@ -188,7 +230,10 @@ describe('thrift - print', () => {
               name: 'RpcService1',
               interfaces: {
                 a: {
-                  inputParams: [{ type: 'Input1', name: 'req1', index: 1 }, { type: 'Input2', name: 'req2', index: 2 }],
+                  inputParams: [
+                    { type: 'Input1', name: 'req1', index: 1 },
+                    { type: 'Input2', name: 'req2', index: 2 }
+                  ],
                   returnType: 'Output1',
                   comment: 'comment1'
                 }
