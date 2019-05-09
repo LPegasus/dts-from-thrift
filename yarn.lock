@@ -90,6 +90,11 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@creditkarma/thrift-parser@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.npmjs.org/@creditkarma/thrift-parser/-/thrift-parser-1.1.5.tgz#35f4c00cbcd154824022a93a32c38e92c75661d9"
+  integrity sha512-m7eE0KlKbb2vk5jBs9RheuYSuC6q1w7YBaImBA3nymo8TwUTOnYFcuVUc8mGzFpeWYdffeheGgSIIdHYLzPJKw==
+
 "@types/chai@^4.1.4":
   version "4.1.7"
   resolved "https://registry.npmjs.org/@types/chai/-/chai-4.1.7.tgz#1b8e33b61a8c09cbe1f85133071baa0dbf9fa71a"
