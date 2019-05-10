@@ -22,19 +22,25 @@ import {
   EnumEntityMember
 } from '../interfaces';
 import * as fs from 'fs-extra';
-import * as process from 'process';
 
-export async function parser(
+export async function readCode(
   filefullname: string,
   options?: Partial<CMDOptions>, // TODO 添加option支持
   includeMap?: { [key: string]: RpcEntity }
 ): Promise<RpcEntity> {
   const source = await fs.readFile(filefullname);
-  const ast: ThriftDocument | ThriftErrors = parse(source.toString());
+  return parser(filefullname, source.toString(), options, includeMap);
+}
+
+export function parser(
+  filefullname: string,
+  source: string,
+  options?: Partial<CMDOptions>, // TODO 添加option支持
+  includeMap?: { [key: string]: RpcEntity }
+): RpcEntity {
+  const ast: ThriftDocument | ThriftErrors = parse(source);
   if (!isThritDocument(ast)) {
-    console.error('thrift parser error', filefullname);
-    process.exit(1);
-    return {} as any;
+    throw new Error('thrift parser error:' + filefullname);
   }
 
   const rtn: RpcEntity = {
@@ -51,7 +57,7 @@ export async function parser(
     // namespace
     if (ts.type === SyntaxType.NamespaceDefinition) {
       // namespace 的处理逻辑，抓一个就来了
-      // TODO 有限考虑js的namespace，之后是go，再之后随便抓一个
+      // TODO 优先考虑js的namespace，之后是go，再之后随便抓一个
       rtn.ns = ts.name.value;
     }
     // includes
@@ -73,7 +79,8 @@ export async function parser(
       };
       // 添加属性
       ts.fields.forEach(field => {
-        aInterface.properties[field.name.value] = handleField(field);
+        const { entity: temp, name } = handleField(field, options);
+        aInterface.properties[name] = temp;
       });
       rtn.interfaces.push(aInterface);
     }
@@ -93,7 +100,7 @@ export async function parser(
         interfaces: {}
       };
       ts.functions.forEach(func => {
-        aService.interfaces[func.name.value] = handleFunction(func);
+        aService.interfaces[func.name.value] = handleFunction(func, options);
       });
       rtn.services.push(aService);
     }
@@ -131,23 +138,23 @@ export function transformAst(ast: ThriftDocument): RpcEntity {
   return {} as any;
 }
 
-const ThriftType2JavascriptType: { [key: string]: string } = {
-  [SyntaxType.BoolKeyword]: 'boolean',
-  [SyntaxType.ByteKeyword]: 'number',
-  [SyntaxType.I16Keyword]: 'number',
-  [SyntaxType.I32Keyword]: 'number',
-  [SyntaxType.I64Keyword]: 'Int64',
-  [SyntaxType.DoubleKeyword]: 'number',
-  [SyntaxType.StringKeyword]: 'string',
-  [SyntaxType.BinaryKeyword]: 'any',
-  [SyntaxType.ListKeyword]: 'Array',
-  [SyntaxType.MapKeyword]: 'Map',
-  [SyntaxType.SetKeyword]: 'Set',
-  // UPDATE 添加void
-  [SyntaxType.VoidKeyword]: 'void'
-};
-
 function getFieldTypeString(fieldType: FunctionType): string {
+  const ThriftType2JavascriptType: { [key: string]: string } = {
+    [SyntaxType.BoolKeyword]: 'boolean',
+    [SyntaxType.ByteKeyword]: 'number',
+    [SyntaxType.I16Keyword]: 'number',
+    [SyntaxType.I32Keyword]: 'number',
+    [SyntaxType.I64Keyword]: 'Int64',
+    [SyntaxType.DoubleKeyword]: 'number',
+    [SyntaxType.StringKeyword]: 'string',
+    [SyntaxType.BinaryKeyword]: 'any',
+    [SyntaxType.ListKeyword]: 'Array',
+    [SyntaxType.MapKeyword]: 'Map',
+    [SyntaxType.SetKeyword]: 'Set',
+    // UPDATE 添加void
+    [SyntaxType.VoidKeyword]: 'void'
+  };
+
   if (fieldType.type === SyntaxType.Identifier) {
     return fieldType.value;
   }
@@ -179,20 +186,56 @@ function handleComments(comments: Comment[]): string {
     .join('\n');
 }
 
-function handleField(field: FieldDefinition): InterfacePropertyEntity {
+interface IhandleField {
+  entity: InterfacePropertyEntity;
+  name: string;
+}
+
+function handleField(
+  field: FieldDefinition,
+  options: Partial<CMDOptions> = {}
+): IhandleField {
+  let name = field.name.value;
   const comment = handleComments(field.comments);
   // 需要处理typedef
   const type = getFieldTypeString(field.fieldType);
   const index = field.fieldID ? field.fieldID.value : 0;
-  const optional = field.requiredness === 'optional';
+  const optional = options.useStrictMode
+    ? field.requiredness !== 'required'
+    : !(field.requiredness !== 'optional');
   // TODO 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
+  if (options.useTag) {
+    const annotations = field.annotations;
+    const tagValueReg = /json:\"([\w_\d]+).*\"/;
+    const tagNameReg = /(\w+).tag/;
+    if (annotations) {
+      const nameTag = annotations.annotations.find(annotation => {
+        let match;
+        if ((match = tagNameReg.exec(annotation.name.value))) {
+          return match[1] === options.useTag;
+        }
+        return false;
+      });
+      if (nameTag) {
+        const match = tagValueReg.exec(
+          nameTag.value ? nameTag.value.value : ''
+        );
+        if (match) {
+          name = match[1];
+        }
+      }
+    }
+  }
   const defaultValue = '';
   return {
-    type,
-    index,
-    optional,
-    comment,
-    defaultValue
+    entity: {
+      type,
+      index,
+      optional,
+      comment,
+      defaultValue
+    },
+    name
   };
 }
 
@@ -205,14 +248,17 @@ function handleField(field: FieldDefinition): InterfacePropertyEntity {
   }>;
   comment: string;
  */
-function handleFunction(func: FunctionDefinition): FunctionEntity {
+function handleFunction(
+  func: FunctionDefinition,
+  options?: Partial<CMDOptions> | undefined
+): FunctionEntity {
   const returnType = getFieldTypeString(func.returnType);
   const inputParams = func.fields.map(field => {
-    const temp = handleField(field);
+    const { entity: temp, name } = handleField(field, options);
     return {
       type: temp.type,
       index: temp.index,
-      name: field.name.value
+      name
     };
   });
   const comment = handleComments(func.comments);
@@ -223,7 +269,7 @@ function handleFunction(func: FunctionDefinition): FunctionEntity {
   };
 }
 
-function handleEnum(e: EnumDefinition): EnumEntity {
+function handleEnum(e: EnumDefinition, options?: CMDOptions): EnumEntity {
   const name = e.name.value;
   const properties: {
     [key: string]: EnumEntityMember;

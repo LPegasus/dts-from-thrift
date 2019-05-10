@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as path from 'path';
-import { parser as readCode } from '../../src/thriftNew';
+import { readCode, parser } from '../../src/thriftNew';
 import { RpcEntity } from '../../src/interfaces';
 
 describe('thrift - read code file', () => {
@@ -11,6 +11,8 @@ describe('thrift - read code file', () => {
     expect(res).has.ownProperty('ns');
     expect(res).has.ownProperty('fileName');
     expect(res).has.ownProperty('includes');
+    expect(res.includes[0]).to.eq('./common/pack_goods.thrift');
+    expect(res.ns).to.eq('life.api_favorite');
     const expectResult = [
       {
         childrenEnums: [],
@@ -185,7 +187,48 @@ describe('thrift - read code file', () => {
     expect(Object.keys(rtn.services[0].interfaces).length).to.eq(3);
   });
 
-  it.skip('__trouble_shoot__', async () => {
-    console.log(await readCode(path.join(__dirname, 'examples/test1.thrift')));
+  it('invalid format', async () => {
+    try {
+      const subjects = parser(
+        'he',
+        `struct PublishRequest {
+        1: required string name    // 包名称`
+      );
+    } catch (e) {
+      expect(e.toString()).contain('thrift parser error:he');
+    }
+  });
+
+  it('support option.useStrict', async () => {
+    const thirftCode = `
+    struct Collection {
+      1: optional BizType biz_type,
+      2: string biz_id,
+      3: optional pack_goods.ExtensiveGoodsItem sku_collection,
+  }
+    `;
+    const res = await parser('', thirftCode, { useStrictMode: false });
+    const res2 = await parser('', thirftCode, { useStrictMode: true });
+    expect(res.interfaces[0].properties.biz_type.optional).to.eq(true);
+    expect(res.interfaces[0].properties.biz_id.optional).to.eq(false);
+    expect(res2.interfaces[0].properties.biz_type.optional).to.eq(true);
+    expect(res2.interfaces[0].properties.biz_type.optional).to.eq(true);
+  });
+
+  it('support option.useTag', async () => {
+    const res = await readCode(
+      path.resolve(__dirname, './examples/client.thrift'),
+      {
+        useTag: 'go'
+      }
+    );
+    const res2 = await readCode(
+      path.resolve(__dirname, './examples/client.thrift'),
+      {
+        useTag: 'js'
+      }
+    );
+    expect(res.interfaces[0].properties.biz_type_go).not.eq(undefined);
+    expect(res2.interfaces[0].properties.biz_type_go).eq(undefined);
   });
 });

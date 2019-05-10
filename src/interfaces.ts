@@ -30,7 +30,7 @@ export interface InterfaceEntity {
   properties: {
     [key: string]: InterfacePropertyEntity;
   };
-  childrenInterfaces: InterfaceEntity[]; // 没用的东西
+  childrenInterfaces: InterfaceEntity[];
   childrenEnums: EnumEntity[];
 }
 

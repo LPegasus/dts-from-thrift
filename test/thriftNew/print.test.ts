@@ -9,7 +9,7 @@ import {
   printServices,
   printCollectionRpc
 } from '../../src/thrift/print';
-import { parser as readCode } from '../../src/thriftNew';
+import { readCode } from '../../src/thriftNew';
 
 describe('thrift - print', () => {
   const entity: RpcEntity = {
