@@ -1,5 +1,6 @@
 export type IHit = { hit: false; mc: null } | { hit: true; mc: string };
 
+// TODO: 加入annotation支持
 export interface RpcEntity {
   enums: EnumEntity[];
   fileName: string;
@@ -13,11 +14,13 @@ export interface RpcEntity {
 export interface EnumEntity {
   name: string;
   properties: {
-    [key: string]: {
-      value: number;
-      comment: string;
-    };
+    [key: string]: EnumEntityMember;
   };
+}
+
+export interface EnumEntityMember {
+  value: number;
+  comment: string;
 }
 
 export type Unpack<T> = T extends Array<infer U> ? U : T;
@@ -47,16 +50,18 @@ export interface TypeDefEntity {
 export interface ServiceEntity {
   name: string;
   interfaces: {
-    [key: string]: {
-      returnType: string;
-      inputParams: Array<{
-        type: string;
-        index: number;
-        name: string;
-      }>;
-      comment: string;
-    };
+    [key: string]: FunctionEntity;
   };
+}
+
+export interface FunctionEntity {
+  returnType: string;
+  inputParams: Array<{
+    type: string;
+    index: number;
+    name: string;
+  }>;
+  comment: string;
 }
 
 export interface CMDOptions {
