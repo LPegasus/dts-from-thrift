@@ -78,7 +78,7 @@ export function parser(
         childrenInterfaces: []
       };
       // 添加属性
-      ts.fields.forEach(field => {
+      ts.fields.forEach((field: any) => {
         const { entity: temp, name } = handleField(field, options);
         aInterface.properties[name] = temp;
       });
@@ -209,13 +209,15 @@ function handleField(
     const tagValueReg = /json:\"([\w_\d]+).*\"/;
     const tagNameReg = /(\w+).tag/;
     if (annotations) {
-      const nameTag = annotations.annotations.find(annotation => {
-        let match;
-        if ((match = tagNameReg.exec(annotation.name.value))) {
-          return match[1] === options.useTag;
+      const nameTag = annotations.annotations.find(
+        (annotation: { name: { value: string } }) => {
+          let match;
+          if ((match = tagNameReg.exec(annotation.name.value))) {
+            return match[1] === options.useTag;
+          }
+          return false;
         }
-        return false;
-      });
+      );
       if (nameTag) {
         const match = tagValueReg.exec(
           nameTag.value ? nameTag.value.value : ''
@@ -253,7 +255,7 @@ function handleFunction(
   options?: Partial<CMDOptions> | undefined
 ): FunctionEntity {
   const returnType = getFieldTypeString(func.returnType);
-  const inputParams = func.fields.map(field => {
+  const inputParams = func.fields.map((field: any) => {
     const { entity: temp, name } = handleField(field, options);
     return {
       type: temp.type,

@@ -171,7 +171,7 @@ export function printTypeDefs(entity: RpcEntity): string {
  * @param {string} comment
  * @returns {string}
  */
-function attachComment(
+export function attachComment(
   str: string,
   comment: string,
   defaultValue?: string

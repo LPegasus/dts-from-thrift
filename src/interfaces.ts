@@ -1,3 +1,5 @@
+import * as pb from 'protobufjs';
+
 export type IHit = { hit: false; mc: null } | { hit: true; mc: string };
 
 // TODO: 加入annotation支持
@@ -40,6 +42,7 @@ export interface InterfacePropertyEntity {
   optional: boolean;
   comment: string;
   defaultValue: string;
+  required?: boolean;
 }
 
 export interface TypeDefEntity {
@@ -75,3 +78,21 @@ export interface CMDOptions {
   usePrettier: boolean;
   rpcNamespace: string;
 }
+
+export type PbNodeEntity = (
+  | {
+      type: 'namespace';
+      meta: pb.Namespace;
+    }
+  | {
+      type: 'message';
+      meta: pb.Type;
+    }
+  | {
+      type: 'service';
+      meta: pb.Service;
+    }
+  | {
+      type: 'enum';
+      meta: pb.Enum;
+    }) & { filename: string };

@@ -4,7 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import glob from 'glob';
 import { RpcEntity, CMDOptions } from './interfaces';
-import { readCode } from './thrift/readCode';
+import { readCode } from './thriftNew/index';
 import { print, printCollectionRpc } from './thrift/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
@@ -13,8 +13,8 @@ import { prettier } from './tools/format';
 
 const packageJSON = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8')
-  );
-  updateNotify(packageJSON);
+);
+updateNotify(packageJSON);
 
 commander
   .version(packageJSON.version)
@@ -51,7 +51,10 @@ const options: CMDOptions = {
   rpcNamespace: commander.rpcNamespace
 };
 fs.ensureDirSync(options.tsRoot);
-fs.copyFileSync(path.join(__dirname, 'tools/tsHelper.d.ts'), path.join(options.tsRoot, 'tsHelper.d.ts'));
+fs.copyFileSync(
+  path.join(__dirname, 'tools/tsHelper.d.ts'),
+  path.join(options.tsRoot, 'tsHelper.d.ts')
+);
 
 const thriftFiles = glob
   .sync('**/*.thrift', { cwd: options.root })
