@@ -8,7 +8,17 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceFolder}/test.js"
+      "program": "${workspaceFolder}/bin/dts-from-protobuf",
+      "cwd": "/Users/pegasusknight/git/anote_idl",
+      "args": [
+        "-p",
+        "./",
+        "-o",
+        "typings",
+        "-e",
+        "index.d.ts",
+        "--new"
+      ]
     },
     {
       "type": "node",

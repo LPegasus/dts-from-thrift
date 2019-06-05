@@ -1,6 +1,6 @@
 {
   "name": "dts-from-thrift",
-  "version": "0.9.4",
+  "version": "1.0.0-rc.0",
   "description": "typescript,thrift,protobuf",
   "main": "lib/index.js",
   "scripts": {

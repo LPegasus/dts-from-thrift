@@ -9,13 +9,11 @@ import fs from 'fs';
  *
  * @export
  */
-export default function combine(options: CMDOptions) {
+export default function combine(options: Partial<CMDOptions> = {}) {
   const files = glob
     .sync('./**/*.ts', { cwd: options.tsRoot })
-    .map(d => path.resolve(options.tsRoot, d));
-  const isFilenameConflict = !!files.find(
-    f => f === options.entryName
-  );
+    .map(d => path.resolve(options.tsRoot || process.cwd(), d));
+  const isFilenameConflict = !!files.find(f => f === options.entryName);
   if (isFilenameConflict) {
     console.log(
       `\u001b[33mentry filename [${
@@ -26,9 +24,13 @@ export default function combine(options: CMDOptions) {
   }
 
   const lines = files.map(f => {
-    const relativePath = path.relative(options.tsRoot, f);
+    const relativePath = path.relative(options.tsRoot || process.cwd(), f);
     return `/// <reference path="${relativePath}" />`;
   });
 
-  fs.writeFileSync(options.entryName, lines.join('\n') + '\n', 'utf8');
+  fs.writeFileSync(
+    options.entryName || 'index.d.ts',
+    lines.join('\n') + '\n',
+    'utf8'
+  );
 }

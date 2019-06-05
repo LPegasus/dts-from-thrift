@@ -4,7 +4,8 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import glob from 'glob';
 import { RpcEntity, CMDOptions } from './interfaces';
-import { readCode } from './thriftNew/index';
+import { readCode as readCodeNew } from './thriftNew/index';
+import { readCode } from './thrift/readCode';
 import { print, printCollectionRpc } from './thrift/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
@@ -26,6 +27,7 @@ commander
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--use-tag <tagName>', '使用 tag 名称替换 field 名称')
   .option('--prettier', '输出时使用 prettier 格式化', false)
+  .option('--new', '使用新版 AST 解析')
   .option(
     '--rpc-namespace <rpc-namespace>',
     '指定一个独立的 namespace 存放所有 service',
@@ -48,7 +50,8 @@ const options: CMDOptions = {
   useTimestamp: commander.timestamp,
   useTag: commander.useTag,
   usePrettier: commander.prettier,
-  rpcNamespace: commander.rpcNamespace
+  rpcNamespace: commander.rpcNamespace,
+  lint: false
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
@@ -64,7 +67,11 @@ const includeMap: { [key: string]: RpcEntity } = {};
 const tasks = thriftFiles.map(async filename => {
   let entity: RpcEntity | null = null;
   try {
-    entity = await readCode(filename, options, includeMap);
+    entity = await (commander.new ? readCodeNew : readCode)(
+      filename,
+      options,
+      includeMap
+    );
   } catch (e) {
     console.error(e);
     console.error(`read file fail.(${filename})`);

@@ -4,3 +4,4 @@ package-lock.json
 lib/
 coverage/
 .nyc_output
+test.js

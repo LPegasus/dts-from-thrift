@@ -5,7 +5,6 @@ import glob from 'glob';
 import * as os from 'os';
 import {
   CMDOptions,
-  RpcEntity,
   FunctionEntity,
   PbNodeEntity,
   InterfaceEntity,
@@ -21,12 +20,9 @@ import {
   attachComment
 } from '../protobuf/print';
 import { prettier } from '../tools/format';
+import combine from '../tools/combine';
 
-const now = new Date();
-const timeString = `${now.getFullYear()}-${now.getMonth() +
-  1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-
-export async function loadPb(options?: Partial<CMDOptions>) {
+export async function loadPb(options: Partial<CMDOptions>) {
   const rootDir = (options && options.root) || process.cwd();
   const files = glob
     .sync('**/*.proto', { cwd: rootDir })
@@ -45,6 +41,8 @@ export async function loadPb(options?: Partial<CMDOptions>) {
   // key 为 namespace 访问路径
   const nodeMap = new Map<string, PbNodeEntity[]>([]);
 
+  const astList: pb.IParserResult[] = [];
+
   fileList.forEach(({ code, filename }) => {
     let ast: pb.IParserResult;
     try {
@@ -55,6 +53,14 @@ export async function loadPb(options?: Partial<CMDOptions>) {
     } catch (e) {
       console.error(`filename: ${filename}`);
       console.error(e);
+      if (options.lint) {
+        process.stderr.write(`pb lint ERROR: ${filename}${os.EOL}`);
+        console.error((e && e.message) || '');
+      }
+      return;
+    }
+
+    if (options.lint) {
       return;
     }
 
@@ -72,6 +78,7 @@ export async function loadPb(options?: Partial<CMDOptions>) {
       throw new Error();
     }
 
+    astList.push(ast);
     crawlAST(namespaceNode, nodeMap, filename);
   });
 
@@ -88,6 +95,12 @@ export async function loadPb(options?: Partial<CMDOptions>) {
       data.push(datum);
     }
   }
+
+  // 收集完所有文件的 nodeMap，就可以去处理 import 进来的 namespace 的类型，转成 namespace.type
+  astList.forEach(ast => {
+    crawlAstAndAttachNamespace(ast, nodeMap);
+  });
+
   // 按照 filename 写文件
   await Promise.all(
     fileList.map(async ({ filename }) => {
@@ -112,10 +125,8 @@ export async function loadPb(options?: Partial<CMDOptions>) {
       await fs.ensureDir(path.parse(targetFilename).dir);
 
       const strLines: string[] = [
-        `// prettier-ignore
-// generate${
-          (options || {}).useTimestamp ? ` at ${timeString}` : ''
-        } by dts-from-protobuf
+        `
+// generate by dts-from-protobuf
 declare namespace ${namespace.meta.fullName.replace(/^\./, '')} {`,
         printEnums(
           data
@@ -142,6 +153,8 @@ declare namespace ${namespace.meta.fullName.replace(/^\./, '')} {`,
       );
     })
   );
+
+  await combine(options as any);
 
   return nodeMap;
 }
@@ -214,13 +227,13 @@ function isService(v: pb.ReflectionObject): v is pb.Service {
   return v instanceof pb.Service;
 }
 
-function isMethod(v: pb.ReflectionObject): v is pb.Method {
-  return v instanceof pb.Method;
-}
+// function isMethod(v: pb.ReflectionObject): v is pb.Method {
+//   return v instanceof pb.Method;
+// }
 
-function isRpcMethod(v: pb.ReflectionObject): v is pb.Method & { type: 'rpc' } {
-  return v instanceof pb.Method && v.type === 'rpc';
-}
+// function isRpcMethod(v: pb.ReflectionObject): v is pb.Method & { type: 'rpc' } {
+//   return v instanceof pb.Method && v.type === 'rpc';
+// }
 
 export function convertMethodToFunctionEntity(node: pb.Method): FunctionEntity {
   return {
@@ -359,4 +372,81 @@ ${Object.keys(cur.interfaces)
 `;
     return rtn;
   }, '');
+}
+
+export function isField(v: any): v is pb.Field {
+  return v instanceof pb.Field;
+}
+
+export function crawlAstAndAttachNamespace(
+  ast: pb.IParserResult,
+  nodeMap: Map<string, PbNodeEntity[]>
+) {
+  (ast.root.lookup(ast.package!)! as pb.Namespace).nestedArray.forEach(d => {
+    if (isMessage(d)) {
+      d.fieldsArray.forEach(field => {
+        if (
+          !field.resolved &&
+          !field.resolvedType &&
+          !isOriginType(field.type)
+        ) {
+          // 优先取同命名空间下的 同名 Type
+          // TODO: 由于 import 语句的文件取决于 protoc 的 proto_path 参数
+          // 所以我们并不能确切定位未知类型到底属于哪个 namespace，只能先以策略
+          // 形式去猜
+          [ast.package! + '.' + field.type, field.type].some(fieldType => {
+            const ff =
+              fieldType.indexOf('.') !== -1 ? fieldType : `.${fieldType}`;
+            for (const [ns, node] of nodeMap) {
+              if (ns.indexOf(ff) === -1) {
+                continue;
+              }
+
+              // 此时已找到 fullname 与 field.type 匹配的类型了，从 fullname 找 meta 信息匹配的类就行了
+              const filteredData = node.filter(
+                d =>
+                  (d.type === 'enum' && d.meta.name === field.type) ||
+                  (d.type === 'message' && d.meta.name === field.type)
+              );
+              if (!filteredData.length) {
+                continue;
+              }
+              console.log(
+                `${field.type} => ${filteredData[0].meta.fullName.replace(
+                  /^\./,
+                  ''
+                )}`
+              );
+              field.type = filteredData[0].meta.fullName.replace(/^\./, '');
+              return;
+            }
+          });
+        }
+      });
+    }
+  });
+}
+
+export function isOriginType(type: string) {
+  return (
+    [
+      'double',
+      'float',
+      'int32',
+      'int64',
+      'uint32',
+      'uint64',
+      'sint32',
+      'sint64',
+      'fixed32',
+      'fixed64',
+      'sfixed32',
+      'sfixed64',
+      'bool',
+      'bytes',
+      'string',
+      'list',
+      'map'
+    ].indexOf(type) !== -1
+  );
 }
