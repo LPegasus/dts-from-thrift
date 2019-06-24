@@ -28,7 +28,7 @@ export async function loadPb(options: Partial<CMDOptions>) {
     .sync('**/*.proto', { cwd: rootDir })
     .map(d => path.resolve(rootDir, d));
 
-  const fileList = await Promise.all(
+  let fileList = await Promise.all(
     files.map(async filename => {
       return {
         code: (await fs.readFile(filename, 'utf8')).replace(/singular /g, ''), // FIXME: singular 解析报错，先删掉这个关键词
@@ -43,7 +43,7 @@ export async function loadPb(options: Partial<CMDOptions>) {
 
   const astList: pb.IParserResult[] = [];
 
-  fileList.forEach(({ code, filename }) => {
+  fileList = fileList.filter(({ code, filename }) => {
     let ast: pb.IParserResult;
     try {
       ast = pb.parse(code, {
@@ -67,7 +67,7 @@ export async function loadPb(options: Partial<CMDOptions>) {
     const ns = ast.package;
     if (!ns) {
       console.log(`Package name not found. File: ${filename}`);
-      throw new Error();
+      return false;
     }
 
     // 通过 namespace 获取 namespace 所在节点，理论上不可能为 null
@@ -75,11 +75,12 @@ export async function loadPb(options: Partial<CMDOptions>) {
       ast.root.lookup(ns)
     );
     if (!namespaceNode) {
-      throw new Error();
+      return false;
     }
 
     astList.push(ast);
     crawlAST(namespaceNode, nodeMap, filename);
+    return true;
   });
 
   // 当所有 namespace 下的类型收集完毕，可以开始写文件了
