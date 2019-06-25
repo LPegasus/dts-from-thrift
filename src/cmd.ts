@@ -51,7 +51,8 @@ const options: CMDOptions = {
   useTag: commander.useTag,
   usePrettier: commander.prettier,
   rpcNamespace: commander.rpcNamespace,
-  lint: false
+  lint: false,
+  i64_as_number: false
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(

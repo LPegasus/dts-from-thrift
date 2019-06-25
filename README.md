@@ -16,6 +16,25 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
+## 1.0.0-rc.2 - 2019.6.25
+
+### Added
+
+- protobuf 如果没有 package，将尝试从 options 中取一个名称作为 namespace。如果没有 options，取文件路径为 namespace
+- dts-from-protobuf 新增 `--i64_as_number` 参数，将 i64 降级为 number
+
+## 1.0.0-rc.1 - 2019.6.24
+
+### Changed
+
+- protobuf 如果没有 package，将跳过该文件，而非中断报错
+
+## 1.0.0-rc.0 - 2019.6.5
+
+### Added
+
+- 新增 `--new` 参数，分别使用 [protobufjs](https://github.com/protobufjs/protobuf.js) 解析 pb、使用 [@creditkarma/thrift-parser](https://github.com/creditkarma/thrift-parser) 解析 thrift
+
 ## 0.9.0-beta.1 - 2019.1.7
 
 ### bugfix

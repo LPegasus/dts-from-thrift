@@ -78,6 +78,7 @@ export interface CMDOptions {
   usePrettier: boolean;
   rpcNamespace: string;
   lint: boolean;
+  i64_as_number: boolean;
 }
 
 export type PbNodeEntity = (

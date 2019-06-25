@@ -22,6 +22,7 @@ commander
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--lint', '检查 pb 文件是否规范，不输出内容')
   .option('--new', '使用新版')
+  .option('--i64_as_number', '将 i64 类型设置为 number')
   .option(
     '-o, --out [out dir]',
     '输出 d.ts 文件根目录',
@@ -36,8 +37,11 @@ const options: Partial<CMDOptions> &
   tsRoot: path.resolve(process.cwd(), commander.out),
   entryName: path.resolve(process.cwd(), commander.out, commander.entry),
   rpcNamespace: '',
-  lint: !!commander.lint
+  lint: !!commander.lint,
+  i64_as_number: !!commander.i64_as_number
 };
+
+console.log(commander.i64_as_number);
 
 if (commander.new) {
   console.log('protobuf => d.ts using protobuf.js...');

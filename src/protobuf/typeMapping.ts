@@ -1,12 +1,13 @@
+const Int64 = 'Int64';
 const pb2JavascriptType: { [key: string]: string } = {
   double: 'number',
   float: 'number',
   int32: 'number',
-  int64: 'Int64',
+  int64: Int64,
   uint32: 'number',
-  uint64: 'Int64',
+  uint64: Int64,
   sint32: 'number',
-  sint64: 'Int64',
+  sint64: Int64,
   fixed32: 'number',
   fixed64: 'number',
   sfixed32: 'number',
@@ -23,7 +24,11 @@ const typeReplaceRegexp = new RegExp(
   'g'
 );
 
-export function typeMapping(s: string, isRepeated: boolean = false) {
+export function typeMapping(
+  s: string,
+  isRepeated: boolean = false,
+  i64_as_number: boolean = false
+) {
   let str = s;
   // 如果标记了 repeated，则给类型套一个 list 让后续程序处理成 array
   if (isRepeated) {
@@ -38,6 +43,9 @@ export function typeMapping(s: string, isRepeated: boolean = false) {
     ch = str.charAt(i);
     if (/[\s\b\<>,]/.test(ch)) {
       token = pb2JavascriptType[token] || token;
+      if (i64_as_number && token === Int64) {
+        token = 'number';
+      }
       tokens.push(...[token, ch].filter(Boolean));
       token = '';
     } else {
@@ -47,6 +55,9 @@ export function typeMapping(s: string, isRepeated: boolean = false) {
     if (i >= len) {
       if (token) {
         token = pb2JavascriptType[token] || token;
+        if (i64_as_number && token === Int64) {
+          token = 'number';
+        }
         tokens.push(token);
       }
       break;

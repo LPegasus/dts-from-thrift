@@ -40,16 +40,19 @@ export async function loadPb(options: Partial<CMDOptions>) {
   // nodeMap 用来存放所有反射对象
   // key 为 namespace 访问路径
   const nodeMap = new Map<string, PbNodeEntity[]>([]);
-
+  const pbParseOptions: pb.IParseOptions = {
+    keepCase: true,
+    alternateCommentMode: false
+  };
   const astList: pb.IParserResult[] = [];
 
   fileList = fileList.filter(({ code, filename }) => {
     let ast: pb.IParserResult;
     try {
-      ast = pb.parse(code, {
-        keepCase: true,
-        alternateCommentMode: false
-      });
+      ast = pb.parse(code, pbParseOptions);
+      (ast as any)._ns = getNamespaceFromAst(ast, filename); // 加个 namespace 的属性
+      (ast as any)._filename = filename;
+      (ast.root as any)._hasPackage = !!ast.package;
     } catch (e) {
       console.error(`filename: ${filename}`);
       console.error(e);
@@ -64,22 +67,51 @@ export async function loadPb(options: Partial<CMDOptions>) {
       return;
     }
 
-    const ns = ast.package;
-    if (!ns) {
-      console.log(`Package name not found. File: ${filename}`);
-      return false;
-    }
+    // if (!ast.package) {
+    //   let dummyPkg = '';
+    //   if (ast.root.options) {
+    //     /*
+    //       csharp_namespace: 'Google.Protobuf.WellKnownTypes',
+    //       go_package: 'github.com/golang/protobuf/ptypes/any',
+    //       java_package: 'com.google.protobuf',
+    //     */
+    //     for (const n of ['csharp_namespace', 'java_package', 'go_package']) {
+    //       if (ast.root.options[n]) {
+    //         dummyPkg = ast.root.options[n].replace(/\//g, '_');
+    //         break;
+    //       }
+    //     }
+    //   }
+
+    //   if (!dummyPkg) {
+    //     dummyPkg = filename.replace(/\//g, '.');
+    //   }
+
+    //   ast = pb.parse(
+    //     code.replace(
+    //       new RegExp(`syntax\\s*=\\s*"${ast.syntax}"\\s*;`),
+    //       `\npackage ${dummyPkg};`
+    //     ),
+    //     pbParseOptions
+    //   );
+    // }
+
+    // const ns = ast.package;
+    // if (!ns) {
+    //   console.log(`Package name not found. File: ${filename}`);
+    //   return false;
+    // }
 
     // 通过 namespace 获取 namespace 所在节点，理论上不可能为 null
-    const namespaceNode: pb.Namespace | null = <pb.Namespace>(
-      ast.root.lookup(ns)
-    );
-    if (!namespaceNode) {
-      return false;
-    }
+    // const namespaceNode: pb.Namespace | null = <pb.Namespace>(
+    //   ast.root.lookup(ns)
+    // );
+    // if (!namespaceNode) {
+    //   return false;
+    // }
 
     astList.push(ast);
-    crawlAST(namespaceNode, nodeMap, filename);
+    crawlAST(ast, nodeMap, filename);
     return true;
   });
 
@@ -118,17 +150,20 @@ export async function loadPb(options: Partial<CMDOptions>) {
         )
         .replace('.proto', '.d.ts');
 
-      const namespace = data.filter(d => d.type === 'namespace')[0];
-      if (!namespace) {
-        return;
-      }
+      // const namespace = data.filter(d => d.type === 'namespace')[0];
+      // if (!namespace) {
+      //   return;
+      // }
+      const namespace = (astList.filter(
+        d => (d as any)._filename === filename
+      )[0] as any)._ns;
 
       await fs.ensureDir(path.parse(targetFilename).dir);
 
       const strLines: string[] = [
-        `
-// generate by dts-from-protobuf
-declare namespace ${namespace.meta.fullName.replace(/^\./, '')} {`,
+        '// generate by dts-from-protobuf',
+        // `declare namespace ${namespace.meta.fullName.replace(/^\./, '')} {`,
+        `declare namespace ${namespace} {`,
         printEnums(
           data
             .filter(d => d.type === 'enum')
@@ -137,7 +172,7 @@ declare namespace ${namespace.meta.fullName.replace(/^\./, '')} {`,
         printInterfaces(
           data
             .filter(d => d.type === 'message')
-            .map(d => convertMessageToInterfaceEntity(<pb.Type>d.meta))
+            .map(d => convertMessageToInterfaceEntity(<pb.Type>d.meta, options))
         ),
         printServices(
           data
@@ -161,19 +196,24 @@ declare namespace ${namespace.meta.fullName.replace(/^\./, '')} {`,
 }
 
 function crawlAST(
-  node: pb.ReflectionObject,
+  ast: pb.IParserResult,
   nodeMap: Map<string, PbNodeEntity[]>,
   filename: string
 ) {
-  const nodeList = [node];
+  const nodeList = ast.package
+    ? [...(ast.root.lookup(ast.package) as pb.Namespace).nestedArray]
+    : [...ast.root.nestedArray];
   let current: pb.ReflectionObject | undefined;
   while ((current = nodeList.pop())) {
-    const fullname = current.fullName.replace(/^\./, '');
+    const fullname = ast.package
+      ? current.fullName.replace(/^\./, '')
+      : (ast as any)._ns + '.' + current.fullName.replace(/^\./, '');
+
     let data: PbNodeEntity[];
     if (nodeMap.has(fullname)) {
-      // console.log(
-      //   `${fullname} is duplicated defined.\nDefinition in ${filename} will be ignored.`
-      // );
+      console.log(
+        `${fullname} is duplicated defined.\nDefinition in ${filename} will be ignored.`
+      );
       data = nodeMap.get(fullname)!;
     } else {
       data = [];
@@ -200,7 +240,7 @@ function crawlAST(
         type: 'service',
         filename
       });
-    } else if (isNamespace(current)) {
+    } /* else if (isNamespace(current)) {
       // 处理 namespace
       data.push({
         meta: current,
@@ -209,6 +249,7 @@ function crawlAST(
       });
       nodeList.push(...current.nestedArray);
     }
+    */
   }
 }
 
@@ -253,7 +294,8 @@ export function convertMethodToFunctionEntity(node: pb.Method): FunctionEntity {
 }
 
 export function convertMessageToInterfaceEntity(
-  node: pb.Type
+  node: pb.Type,
+  options: Partial<CMDOptions>
 ): InterfaceEntity {
   const rtn: InterfaceEntity = {
     name: node.name,
@@ -268,14 +310,17 @@ export function convertMessageToInterfaceEntity(
     if (isEnum(d)) {
       rtn.childrenEnums.push(convertToEnumEntity(d));
     } else if (isMessage(d)) {
-      rtn.childrenInterfaces.push(convertMessageToInterfaceEntity(d));
+      rtn.childrenInterfaces.push(convertMessageToInterfaceEntity(d, options));
     }
   });
 
   // 获取所有字段
   node.fieldsArray.forEach(d => {
     const fieldname = d.name;
-    rtn.properties[fieldname] = convertFieldToInterfacePropertyEntity(d);
+    rtn.properties[fieldname] = convertFieldToInterfacePropertyEntity(
+      d,
+      options
+    );
   });
   return rtn;
 }
@@ -297,13 +342,14 @@ export function convertToEnumEntity(node: pb.Enum): EnumEntity {
 }
 
 export function convertFieldToInterfacePropertyEntity(
-  d: pb.Field
+  d: pb.Field,
+  options: { i64_as_number?: boolean }
 ): InterfacePropertyEntity {
   return {
     comment: d.comment || '',
     defaultValue: '',
     index: d.id,
-    type: typeMapping(d.type, d.repeated),
+    type: typeMapping(d.type, d.repeated, !!options.i64_as_number),
     optional: d.optional,
     required: d.required
   };
@@ -383,7 +429,10 @@ export function crawlAstAndAttachNamespace(
   ast: pb.IParserResult,
   nodeMap: Map<string, PbNodeEntity[]>
 ) {
-  (ast.root.lookup(ast.package!)! as pb.Namespace).nestedArray.forEach(d => {
+  (ast.package
+    ? (ast.root.lookup(ast.package) as pb.Namespace)
+    : ast.root
+  ).nestedArray.forEach(d => {
     if (isMessage(d)) {
       d.fieldsArray.forEach(field => {
         if (
@@ -395,7 +444,7 @@ export function crawlAstAndAttachNamespace(
           // TODO: 由于 import 语句的文件取决于 protoc 的 proto_path 参数
           // 所以我们并不能确切定位未知类型到底属于哪个 namespace，只能先以策略
           // 形式去猜
-          [ast.package! + '.' + field.type, field.type].some(fieldType => {
+          [(ast as any)._ns + '.' + field.type, field.type].some(fieldType => {
             const ff =
               fieldType.indexOf('.') !== -1 ? fieldType : `.${fieldType}`;
             for (const [ns, node] of nodeMap) {
@@ -412,13 +461,11 @@ export function crawlAstAndAttachNamespace(
               if (!filteredData.length) {
                 continue;
               }
-              console.log(
-                `${field.type} => ${filteredData[0].meta.fullName.replace(
-                  /^\./,
-                  ''
-                )}`
-              );
-              field.type = filteredData[0].meta.fullName.replace(/^\./, '');
+              const absName = (filteredData[0].meta.root as any)._hasPackage
+                ? filteredData[0].meta.fullName.replace(/^\./, '')
+                : ns;
+              console.log(`${field.type} => ${absName}`);
+              field.type = absName;
               return;
             }
           });
@@ -450,4 +497,28 @@ export function isOriginType(type: string) {
       'map'
     ].indexOf(type) !== -1
   );
+}
+
+function getNamespaceFromAst(ast: pb.IParserResult, filename: string) {
+  let dummyPkg = ast.package;
+  if (!dummyPkg) {
+    if (ast.root.options) {
+      /*
+          csharp_namespace: 'Google.Protobuf.WellKnownTypes',
+          go_package: 'github.com/golang/protobuf/ptypes/any',
+          java_package: 'com.google.protobuf',
+        */
+      for (const n of ['csharp_namespace', 'java_package', 'go_package']) {
+        if (ast.root.options[n]) {
+          dummyPkg = ast.root.options[n].replace(/\//g, '_');
+          break;
+        }
+      }
+    }
+
+    if (!dummyPkg) {
+      dummyPkg = filename.replace(/\//g, '.');
+    }
+  }
+  return dummyPkg;
 }
