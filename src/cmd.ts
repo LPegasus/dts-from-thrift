@@ -5,6 +5,7 @@ import * as path from 'path';
 import glob from 'glob';
 import { RpcEntity, CMDOptions } from './interfaces';
 import { readCode } from './thrift/readCode';
+import { readCode as readCodeNew } from './thriftNew';
 import { print, printCollectionRpc } from './thrift/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
@@ -13,8 +14,8 @@ import { prettier } from './tools/format';
 
 const packageJSON = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8')
-  );
-  updateNotify(packageJSON);
+);
+updateNotify(packageJSON);
 
 commander
   .version(packageJSON.version)
@@ -22,6 +23,11 @@ commander
   .option('-p, --project [dir]', 'thrift 根目录，默认为当前目录', process.cwd())
   .option('-an, --auto-namespace', '是否使用文件夹路径作为 namespace')
   .option('-s --strict', '如果字段没有指定 required 视为 optional')
+  .option(
+    '-ac --annotation-config <annotationConfig>',
+    '额外的json配置文件，用来读取annotation配置'
+  )
+  .option('-n --new', '使用新的thrift parser，更好的支持annotation')
   .option('--timestamp', '在头部加上生成时间')
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--use-tag <tagName>', '使用 tag 名称替换 field 名称')
@@ -45,13 +51,18 @@ const options: CMDOptions = {
   entryName: path.resolve(process.cwd(), commander.out, commander.entry),
   autoNamespace: commander.autoNamespace,
   useStrictMode: commander.strict,
+  thriftNew: commander.new,
   useTimestamp: commander.timestamp,
   useTag: commander.useTag,
   usePrettier: commander.prettier,
-  rpcNamespace: commander.rpcNamespace
+  rpcNamespace: commander.rpcNamespace,
+  annotationConfigPath: path.resolve(process.cwd(), commander.annotationConfig)
 };
 fs.ensureDirSync(options.tsRoot);
-fs.copyFileSync(path.join(__dirname, 'tools/tsHelper.d.ts'), path.join(options.tsRoot, 'tsHelper.d.ts'));
+fs.copyFileSync(
+  path.join(__dirname, 'tools/tsHelper.d.ts'),
+  path.join(options.tsRoot, 'tsHelper.d.ts')
+);
 
 const thriftFiles = glob
   .sync('**/*.thrift', { cwd: options.root })
@@ -61,7 +72,11 @@ const includeMap: { [key: string]: RpcEntity } = {};
 const tasks = thriftFiles.map(async filename => {
   let entity: RpcEntity | null = null;
   try {
-    entity = await readCode(filename, options, includeMap);
+    if (options.thriftNew) {
+      entity = await readCodeNew(filename, options, includeMap);
+    } else {
+      entity = await readCode(filename, options, includeMap);
+    }
   } catch (e) {
     console.error(e);
     console.error(`read file fail.(${filename})`);

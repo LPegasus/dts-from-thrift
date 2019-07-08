@@ -64,6 +64,13 @@ export interface FunctionEntity {
   comment: string;
 }
 
+export interface IAnnotationConfig {
+  fieldKey?: string;
+  fieldComment?: string[];
+  functionMethod?: string;
+  functionUri?: string;
+}
+
 export interface CMDOptions {
   root: string;
   tsRoot: string;
@@ -74,4 +81,7 @@ export interface CMDOptions {
   useTag: string;
   usePrettier: boolean;
   rpcNamespace: string;
+  thriftNew?: boolean;
+  annotationConfigPath?: string;
+  annotationConfig?: IAnnotationConfig;
 }

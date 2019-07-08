@@ -219,16 +219,45 @@ describe('thrift - read code file', () => {
     const res = await readCode(
       path.resolve(__dirname, './examples/client.thrift'),
       {
-        useTag: 'go'
+        useTag: 'go',
+        annotationConfig: {}
       }
     );
     const res2 = await readCode(
       path.resolve(__dirname, './examples/client.thrift'),
       {
-        useTag: 'js'
+        useTag: 'js',
+        annotationConfig: {}
       }
     );
     expect(res.interfaces[0].properties.biz_type_go).not.eq(undefined);
     expect(res2.interfaces[0].properties.biz_type_go).eq(undefined);
+  });
+
+  it('support annotation config', async () => {
+    const thirftCode = `
+      struct Collection {
+        1: optional BizType biz_type (source = 'query',   key = 'bizType'),
+        3: optional pack_goods.ExtensiveGoodsItem sku_collection,
+    }
+    service CollectService {
+      Collection Collect(1:i32 req)  (method = 'GET',  uri = '/api/collect'),
+  }
+      `;
+    const res = await parser('', thirftCode, {
+      annotationConfig: {
+        fieldKey: 'key',
+        fieldComment: ['source'],
+        functionMethod: 'method',
+        functionUri: 'uri'
+      }
+    });
+    expect(res.interfaces[0].properties['bizType'].index).to.eq(1);
+    expect(res.interfaces[0].properties['bizType'].comment).to.eq(
+      '\t\tsource:query'
+    );
+    expect(res.services[0].interfaces['Collect'].comment).to.eq(
+      '\t\t@method: GET\t\t@uri: /api/collect'
+    );
   });
 });
