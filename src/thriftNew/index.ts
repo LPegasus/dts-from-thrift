@@ -42,6 +42,17 @@ export function parser(
   if (!isThritDocument(ast)) {
     throw new Error('thrift parser error:' + filefullname);
   }
+  if (options && options.annotationConfigPath) {
+    if (fs.existsSync(options.annotationConfigPath)) {
+      try {
+        options.annotationConfig = JSON.parse(
+          fs.readFileSync(options.annotationConfigPath).toString()
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
 
   const rtn: RpcEntity = {
     ns: '',
@@ -196,7 +207,7 @@ function handleField(
   options: Partial<CMDOptions> = {}
 ): IhandleField {
   let name = field.name.value;
-  const comment = handleComments(field.comments);
+  let comment = handleComments(field.comments);
   // 需要处理typedef
   const type = getFieldTypeString(field.fieldType);
   const index = field.fieldID ? field.fieldID.value : 0;
@@ -226,6 +237,30 @@ function handleField(
           name = match[1];
         }
       }
+    }
+  }
+  // annotation config 优先级高于useTag
+  if (options && options.annotationConfig) {
+    const { fieldComment, fieldKey } = options.annotationConfig;
+    if (
+      field.annotations &&
+      Array.isArray(field.annotations.annotations) &&
+      (Array.isArray(fieldComment) || fieldKey)
+    ) {
+      field.annotations.annotations.forEach(annotation => {
+        if (Array.isArray(fieldComment)) {
+          if (fieldComment.indexOf(annotation.name.value) > -1) {
+            comment += `\t\t${annotation.name.value}:${
+              annotation!.value!.value
+            }`;
+          }
+        }
+        if (fieldKey) {
+          if (annotation.name.value === fieldKey) {
+            name = annotation!.value!.value;
+          }
+        }
+      });
     }
   }
   const defaultValue = '';
@@ -263,7 +298,27 @@ function handleFunction(
       name
     };
   });
-  const comment = handleComments(func.comments);
+  let comment = handleComments(func.comments);
+  if (options && options.annotationConfig) {
+    // 根据annotation生成config
+    const { functionMethod, functionUri } = options.annotationConfig;
+    if (functionMethod || functionUri) {
+      if (func.annotations && Array.isArray(func.annotations.annotations)) {
+        func.annotations.annotations.forEach(annotation => {
+          if (functionMethod) {
+            if (annotation.name.value === functionMethod) {
+              comment += `\t\t@method: ${annotation!.value!.value}`;
+            }
+          }
+          if (functionUri) {
+            if (annotation.name.value === functionUri) {
+              comment += `\t\t@uri: ${annotation!.value!.value}`;
+            }
+          }
+        });
+      }
+    }
+  }
   return {
     returnType,
     inputParams,

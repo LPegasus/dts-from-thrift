@@ -67,6 +67,13 @@ export interface FunctionEntity {
   comment: string;
 }
 
+export interface IAnnotationConfig {
+  fieldKey?: string;
+  fieldComment?: string[];
+  functionMethod?: string;
+  functionUri?: string;
+}
+
 export interface CMDOptions {
   root: string;
   tsRoot: string;
@@ -79,6 +86,8 @@ export interface CMDOptions {
   rpcNamespace: string;
   lint: boolean;
   i64_as_number: boolean;
+  annotationConfigPath?: string;
+  annotationConfig?: IAnnotationConfig;
 }
 
 export type PbNodeEntity = (
