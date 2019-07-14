@@ -16,9 +16,7 @@ export default function combine(options: Partial<CMDOptions> = {}) {
   const isFilenameConflict = !!files.find(f => f === options.entryName);
   if (isFilenameConflict) {
     console.log(
-      `\u001b[33mentry filename [${
-        options.entryName
-      }] is the same with output d.ts filename, please rename it.\u001b[39m`
+      `\u001b[33mentry filename [${options.entryName}] is the same with output d.ts filename, please rename it.\u001b[39m`
     );
     return;
   }
