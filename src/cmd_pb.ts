@@ -41,8 +41,6 @@ const options: Partial<CMDOptions> &
   i64_as_number: !!commander.i64_as_number
 };
 
-console.log(commander.i64_as_number);
-
 if (commander.new) {
   console.log('protobuf => d.ts using protobuf.js...');
   loadPb(options);

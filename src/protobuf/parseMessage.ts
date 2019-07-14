@@ -91,7 +91,7 @@ export function parseMessage(
     }
     const [_, ...tokens] = Array.prototype.slice.call(tmpMC);
     property.optional = tokens[0] === 'optional' && !property.defaultValue;
-    property.type = typeMapping(tokens[1], tokens[0] === 'repeated');
+    property.type = typeMapping(tokens[1], tokens[0] === 'repeated', options.i64_as_number);
     fieldName = tokens[2];
     /* istanbul ignore if */
     if (!fieldName) {

@@ -16,6 +16,12 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
+## 1.0.0-rc.3 - 2019.7.12
+
+### Fixed
+
+- dts-from-protobuf 旧逻辑没有适配 `--i64_as_number` 参数
+
 ## 1.0.0-rc.2 - 2019.6.25
 
 ### Added
