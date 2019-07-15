@@ -22,7 +22,7 @@ describe('protobuf - parseMessage', () => {
           defaultValue: '',
           index: 10,
           optional: true,
-          type: 'number'
+          type: 'Int64'
         },
         channel: {
           comment: '登录渠道 1:微信',
