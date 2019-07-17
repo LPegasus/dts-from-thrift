@@ -79,6 +79,7 @@ export interface CMDOptions {
   rpcNamespace: string;
   lint: boolean;
   i64_as_number: boolean;
+  tempDir: string;
 }
 
 export type PbNodeEntity = (

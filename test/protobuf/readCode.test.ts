@@ -11,19 +11,21 @@ describe('protobuf - readCode test', () => {
     expect(entity).to.deep.eq({
       fileName: filename,
       services: [],
-      enums: [{
-        name: 'FooEnum',
-        properties: {
-          Foo: {
-            value: 1,
-            comment: '',
-          },
-          Bar: {
-            value: 2,
-            comment: 'comment of bar'
+      enums: [
+        {
+          name: 'FooEnum',
+          properties: {
+            Foo: {
+              value: 1,
+              comment: ''
+            },
+            Bar: {
+              value: 2,
+              comment: 'comment of bar'
+            }
           }
         }
-      }],
+      ],
       includes: ['base.proto'],
       ns: 'anote_op',
       interfaces: [
@@ -39,7 +41,7 @@ describe('protobuf - readCode test', () => {
             },
             now: {
               index: 2,
-              type: 'number',
+              type: 'Int64',
               comment: '',
               defaultValue: '',
               optional: false

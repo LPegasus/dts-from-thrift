@@ -15,6 +15,9 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 
 # 变更历史（ChangeLog)
+## 1.0.0-rc.4 - 2019.7.12
+
+- `dts-from-thrift -p test/fix_thrift_include_outside_file/input/ -o test/fix_thrift_include_outside_file/output/ --new --temp-dir temp` 支持thrift目录之下的thrift文件引入thrift目录之外的文件，并且放在output目录下的temp目录下
 
 ## 1.0.0-rc.3 - 2019.7.12
 

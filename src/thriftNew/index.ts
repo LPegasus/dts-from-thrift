@@ -52,12 +52,14 @@ export function parser(
     typeDefs: [],
     services: []
   };
+  const namespaces: { [key: string]: any } = {};
 
   ast.body.forEach((ts: ThriftStatement) => {
     // namespace
     if (ts.type === SyntaxType.NamespaceDefinition) {
       // namespace 的处理逻辑，抓一个就来了
       // TODO 优先考虑js的namespace，之后是go，再之后随便抓一个
+      namespaces[ts.scope.value] = ts.name.value;
       rtn.ns = ts.name.value;
     }
     // includes
@@ -115,6 +117,13 @@ export function parser(
       //
     }
   });
+  const namespaceKeys = Object.keys(namespaces);
+  rtn.ns =
+    namespaces['js'] ||
+    namespaces['go'] ||
+    namespaces['python'] ||
+    namespaces['java'] ||
+    (namespaceKeys.length && namespaces[namespaceKeys[0]]);
 
   /* istanbul ignore if */
   if (includeMap) {

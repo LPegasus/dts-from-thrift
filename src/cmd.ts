@@ -9,6 +9,7 @@ import { readCode } from './thrift/readCode';
 import { print, printCollectionRpc } from './thrift/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
+import { getExternalFileList } from './tools/helper';
 import { ServiceEntity } from './interfaces';
 import { prettier } from './tools/format';
 
@@ -37,6 +38,11 @@ commander
     '-o, --out [out dir]',
     '输出 d.ts 文件根目录',
     path.resolve(process.cwd(), 'typings')
+  )
+  .option(
+    '--temp-dir <temp-dir>',
+    '指定一个相对temp 目录，存放不在thrift目录下但是被引用到的文件',
+    ''
   );
 
 commander.parse(process.argv);
@@ -52,7 +58,8 @@ const options: CMDOptions = {
   usePrettier: commander.prettier,
   rpcNamespace: commander.rpcNamespace,
   lint: false,
-  i64_as_number: false
+  i64_as_number: false,
+  tempDir: commander.tempDir ? commander.tempDir : 'external_files'
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
@@ -65,7 +72,7 @@ const thriftFiles = glob
   .map(d => path.resolve(options.root, d));
 
 const includeMap: { [key: string]: RpcEntity } = {};
-const tasks = thriftFiles.map(async filename => {
+const genTask = async (filename: string) => {
   let entity: RpcEntity | null = null;
   try {
     entity = await (commander.new ? readCodeNew : readCode)(
@@ -80,21 +87,56 @@ const tasks = thriftFiles.map(async filename => {
   }
 
   return entity;
-});
+};
+const tasks = thriftFiles.map(genTask);
+
+const handleEntity = async (entity?: RpcEntity) => {
+  try {
+    return print(entity!, options, includeMap);
+  } catch (e) {
+    console.error(e);
+    console.error(`write file fail.(${entity!.fileName})`);
+  }
+};
+
+const newEntityListCache: any = {};
+
+const getExtraEntityList = async (
+  extraFiles: string[],
+  newEntityListCache?: any
+): Promise<RpcEntity[]> => {
+  if (newEntityListCache && newEntityListCache.cache) {
+    return newEntityListCache.cache;
+  }
+  let newEntityList: RpcEntity[] = [];
+
+  const newTasks = extraFiles.map(genTask);
+  newEntityList = (await Promise.all(newTasks)).filter(Boolean) as RpcEntity[];
+  newEntityList.forEach(entity => {
+    if (entity && entity.fileName) {
+      entity.fileName = path.resolve(
+        options.root,
+        options.tempDir,
+        path.basename(entity.fileName)
+      );
+    }
+  });
+  if (newEntityListCache) {
+    newEntityListCache.cache = newEntityList;
+  }
+  return newEntityList;
+};
+const externalFiles = getExternalFileList(includeMap, options.root);
 
 const rTasks: Array<Promise<any>> = [];
 rTasks.push(
-  Promise.all(tasks).then(entityList => {
-    return Promise.all(
-      entityList.map(async entity => {
-        try {
-          return print(entity!, options, includeMap);
-        } catch (e) {
-          console.error(e);
-          console.error(`write file fail.(${entity!.fileName})`);
-        }
-      })
+  Promise.all(tasks).then(async entityList => {
+    // 在thrift目录之下额外的文件
+    const newEntityList = await getExtraEntityList(
+      externalFiles,
+      newEntityListCache
     );
+    await Promise.all([...entityList, ...newEntityList].map(handleEntity));
   })
 );
 
@@ -103,6 +145,8 @@ if (options.rpcNamespace) {
   rTasks.push(
     Promise.all(tasks).then(async entityList => {
       const allServices: ServiceEntity[] = [];
+      const e = await getExtraEntityList(externalFiles, newEntityListCache);
+      entityList = [...entityList, ...e];
       const rtn = entityList.reduce((rtn, entity) => {
         if (!entity || !entity.services.length) {
           return rtn;
@@ -142,8 +186,6 @@ ${allServices.map(d => `${d.name}: WrapperService<${d.name}>;`).join('\n  ')}
 Promise.all(rTasks).then(async () => {
   combine(options);
   console.log(
-    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${
-      options.tsRoot
-    }\u001b[39m.`
+    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${options.tsRoot}\u001b[39m.`
   );
 });

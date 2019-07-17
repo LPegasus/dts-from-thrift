@@ -241,30 +241,30 @@ export function printServices(
   return serviceEntity.reduce((rtn, cur) => {
     rtn += `  export interface ${cur.name} {
 ${Object.keys(cur.interfaces)
-      .map(key => {
-        const i = cur.interfaces[key];
-        let sortTmp: any[] = [];
-        i.inputParams.forEach(d => (sortTmp[d.index] = d));
-        sortTmp = sortTmp.filter(d => !!d);
-        const inputParamsStr = (sortTmp as (typeof i)['inputParams'])
-          .map(d => {
-            const type =
-              isGenerateRPC && keyInNs.indexOf(d.type) !== -1
-                ? `${entity.ns}.${d.type}`
-                : d.type;
-            return `${d.name}: ${type}`;
-          })
-          .join(', ');
-        const returnType =
-          isGenerateRPC && keyInNs.indexOf(i.returnType) !== -1
-            ? `${entity.ns}.${i.returnType}`
-            : i.returnType;
-        return attachComment(
-          `    ${key}(${inputParamsStr}): Promise<${returnType}>;`,
-          i.comment
-        );
+  .map(key => {
+    const i = cur.interfaces[key];
+    let sortTmp: any[] = [];
+    i.inputParams.forEach(d => (sortTmp[d.index] = d));
+    sortTmp = sortTmp.filter(d => !!d);
+    const inputParamsStr = (sortTmp as (typeof i)['inputParams'])
+      .map(d => {
+        const type =
+          isGenerateRPC && keyInNs.indexOf(d.type) !== -1
+            ? `${entity.ns}.${d.type}`
+            : d.type;
+        return `${d.name}: ${type}`;
       })
-      .join('\n')}
+      .join(', ');
+    const returnType =
+      isGenerateRPC && keyInNs.indexOf(i.returnType) !== -1
+        ? `${entity.ns}.${i.returnType}`
+        : i.returnType;
+    return attachComment(
+      `    ${key}(${inputParamsStr}): Promise<${returnType}>;`,
+      i.comment
+    );
+  })
+  .join('\n')}
   }
 
 `;

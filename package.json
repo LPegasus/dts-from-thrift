@@ -4,7 +4,7 @@
   "description": "typescript,thrift,protobuf",
   "main": "lib/index.js",
   "scripts": {
-    "test": "nyc -e=.ts --require ts-node/register mocha ./test/**/*.test.ts",
+    "test": "nyc -e=.ts --require ts-node/register mocha --timeout=50000 --exclude **/*.js **/*.test.ts",
     "testThriftNew": "nyc -e=.ts --require ts-node/register mocha ./test/thriftNew/*.test.ts",
     "cov": "nyc --reporter=text-lcov report > coverage.lcov && codecov",
     "build": "rm -rf lib/&&npx tsc -p tsconfig.build.json",
