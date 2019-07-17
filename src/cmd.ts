@@ -9,6 +9,7 @@ import { readCode } from './thrift/readCode';
 import { print, printCollectionRpc } from './thrift/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
+import { getExternalFileList } from './tools/helper';
 import { ServiceEntity } from './interfaces';
 import { prettier } from './tools/format';
 
@@ -98,49 +99,43 @@ const handleEntity = async (entity?: RpcEntity) => {
   }
 };
 
-let newEntityListCache: any;
-const getExtraEntityList = async () => {
+const newEntityListCache: any = {};
+
+const getExtraEntityList = async (
+  extraFiles: string[],
+  newEntityListCache?: any
+): Promise<RpcEntity[]> => {
+  if (newEntityListCache && newEntityListCache.cache) {
+    return newEntityListCache.cache;
+  }
+  let newEntityList: RpcEntity[] = [];
+
+  const newTasks = extraFiles.map(genTask);
+  newEntityList = (await Promise.all(newTasks)).filter(Boolean) as RpcEntity[];
+  newEntityList.forEach(entity => {
+    if (entity && entity.fileName) {
+      entity.fileName = path.resolve(
+        options.root,
+        options.tempDir,
+        path.basename(entity.fileName)
+      );
+    }
+  });
   if (newEntityListCache) {
-    return newEntityListCache;
+    newEntityListCache.cache = newEntityList;
   }
-  // 在thrift目录之下额外的文件
-  let allExtraFiles: string[] = [];
-  let extraFiles: string[] = [];
-  let newEntityList: (RpcEntity | undefined)[] | never[] = [];
-  if (includeMap) {
-    Object.keys(includeMap).forEach(file => {
-      const entity = includeMap[file];
-      entity.includes.forEach(include => {
-        // 收集所有的文件
-        allExtraFiles.push(path.resolve(path.dirname(file), include));
-      });
-    });
-    // 去除在thrift目录下的
-    const basePath = options.root;
-    extraFiles = Array.from(new Set(allExtraFiles)).filter(
-      file => !file.includes(basePath)
-    );
-    const newTasks = extraFiles.map(genTask);
-    newEntityList = await Promise.all(newTasks);
-    newEntityList.forEach(entity => {
-      if (entity && entity.fileName) {
-        entity.fileName = path.resolve(
-          options.root,
-          options.tempDir,
-          path.basename(entity.fileName)
-        );
-      }
-    });
-  }
-  newEntityListCache = newEntityList;
   return newEntityList;
 };
+const externalFiles = getExternalFileList(includeMap, options.root);
 
 const rTasks: Array<Promise<any>> = [];
 rTasks.push(
   Promise.all(tasks).then(async entityList => {
     // 在thrift目录之下额外的文件
-    const newEntityList = await getExtraEntityList();
+    const newEntityList = await getExtraEntityList(
+      externalFiles,
+      newEntityListCache
+    );
     await Promise.all([...entityList, ...newEntityList].map(handleEntity));
   })
 );
@@ -150,7 +145,7 @@ if (options.rpcNamespace) {
   rTasks.push(
     Promise.all(tasks).then(async entityList => {
       const allServices: ServiceEntity[] = [];
-      const e = await getExtraEntityList();
+      const e = await getExtraEntityList(externalFiles, newEntityListCache);
       entityList = [...entityList, ...e];
       const rtn = entityList.reduce((rtn, entity) => {
         if (!entity || !entity.services.length) {
