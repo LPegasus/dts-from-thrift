@@ -5,3 +5,4 @@ lib/
 coverage/
 .nyc_output
 test.js
+test/thriftNew/out

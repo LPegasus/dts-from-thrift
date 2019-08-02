@@ -55,6 +55,8 @@ export function parse(
     source: string,
     options: Partial<ParseOptions> = {},
 ): ThriftDocument | ThriftErrors {
+    // HACK: 末尾加上一个不存在的const来获取末尾的注释
+    source += '\nconst i32 liuqi=1995'
     const mergedOptions: ParseOptions = { ...defaultOptions, ...options }
     const debug: Debugger = createDebugger(source)
     const scanner: Scanner = createScanner(source, handleError)

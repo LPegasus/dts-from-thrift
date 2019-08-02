@@ -9,7 +9,7 @@ import {
   FieldDefinition,
   FunctionDefinition,
   EnumDefinition
-} from '@creditkarma/thrift-parser';
+} from './@creditkarma/thrift-parser';
 import {
   RpcEntity,
   CMDOptions,
@@ -20,8 +20,10 @@ import {
   FunctionEntity,
   EnumEntity,
   EnumEntityMember
-} from '../interfaces';
+} from './interfaces';
+import { handleComments } from './handleComments';
 import * as fs from 'fs-extra';
+import { throws } from 'assert';
 
 export async function readCode(
   filefullname: string,
@@ -42,6 +44,7 @@ export function parser(
   if (!isThritDocument(ast)) {
     throw new Error('thrift parser error:' + filefullname);
   }
+  handleComments(ast);
   if (options && options.annotationConfigPath) {
     if (fs.existsSync(options.annotationConfigPath)) {
       try {
@@ -69,7 +72,9 @@ export function parser(
     if (ts.type === SyntaxType.NamespaceDefinition) {
       // namespace 的处理逻辑，抓一个就来了
       // TODO 优先考虑js的namespace，之后是go，再之后随便抓一个
-      rtn.ns = ts.name.value;
+      if (ts.scope.value === 'go' || ts.scope.value === 'js') {
+        rtn.ns = ts.name.value;
+      }
     }
     // includes
     if (ts.type === SyntaxType.IncludeDefinition) {
@@ -85,8 +90,10 @@ export function parser(
       const aInterface: InterfaceEntity = {
         name,
         properties: {},
-        childrenEnums: [],
-        childrenInterfaces: []
+        loc: ts.loc,
+        comments: ts.comments,
+        commentsAfter: ts.commentsAfter,
+        commentsBefore: ts.commentsBefore
       };
       // 添加属性
       ts.fields.forEach((field: any) => {
@@ -98,7 +105,14 @@ export function parser(
 
     // typedef
     if (ts.type === SyntaxType.TypedefDefinition) {
-      const aTypeDef: TypeDefEntity = { type: '', alias: '' };
+      const aTypeDef: TypeDefEntity = {
+        type: '',
+        alias: '',
+        comments: ts.comments,
+        commentsAfter: ts.commentsAfter,
+        commentsBefore: ts.commentsBefore,
+        loc: ts.loc
+      };
       aTypeDef.alias = ts.name.value;
       aTypeDef.type = getFieldTypeString(ts.definitionType);
       rtn.typeDefs.push(aTypeDef);
@@ -108,7 +122,11 @@ export function parser(
     if (ts.type === SyntaxType.ServiceDefinition) {
       const aService: ServiceEntity = {
         name: ts.name.value,
-        interfaces: {}
+        interfaces: {},
+        comments: ts.comments,
+        commentsAfter: ts.commentsAfter,
+        commentsBefore: ts.commentsBefore,
+        loc: ts.loc
       };
       ts.functions.forEach(func => {
         aService.interfaces[func.name.value] = handleFunction(func, options);
@@ -183,20 +201,6 @@ function getFieldTypeString(fieldType: FunctionType): string {
   return ThriftType2JavascriptType[fieldType.type];
 }
 
-function handleComments(comments: Comment[]): string {
-  // TODO: comment parser的逻辑和正则的逻辑不能对齐，需要重新设计comnent的生成逻辑
-  return '';
-  return comments
-    .map(c => {
-      if (c.type === SyntaxType.CommentLine) {
-        return c.value;
-      } else {
-        return c.value.join('\n');
-      }
-    })
-    .join('\n');
-}
-
 interface IhandleField {
   entity: InterfacePropertyEntity;
   name: string;
@@ -207,7 +211,7 @@ function handleField(
   options: Partial<CMDOptions> = {}
 ): IhandleField {
   let name = field.name.value;
-  let comment = handleComments(field.comments);
+  const commentsBefore = field.commentsBefore || [];
   // 需要处理typedef
   const type = getFieldTypeString(field.fieldType);
   const index = field.fieldID ? field.fieldID.value : 0;
@@ -247,12 +251,13 @@ function handleField(
       Array.isArray(field.annotations.annotations) &&
       (Array.isArray(fieldComment) || fieldKey)
     ) {
+      let comment = '';
       field.annotations.annotations.forEach(annotation => {
         if (Array.isArray(fieldComment)) {
           if (fieldComment.indexOf(annotation.name.value) > -1) {
-            comment += `\t\t${annotation.name.value}:${
+            comment += `${annotation.name.value}:${
               annotation!.value!.value
-            }`;
+            }    `;
           }
         }
         if (fieldKey) {
@@ -260,6 +265,11 @@ function handleField(
             name = annotation!.value!.value;
           }
         }
+      });
+      commentsBefore.push({
+        type: SyntaxType.CommentLine,
+        value: comment,
+        loc: field.loc
       });
     }
   }
@@ -269,8 +279,11 @@ function handleField(
       type,
       index,
       optional,
-      comment,
-      defaultValue
+      defaultValue,
+      comments: field.comments,
+      commentsBefore,
+      commentsAfter: field.commentsAfter,
+      loc: field.loc
     },
     name
   };
@@ -298,7 +311,7 @@ function handleFunction(
       name
     };
   });
-  let comment = handleComments(func.comments);
+  let comment = '';
   if (options && options.annotationConfig) {
     // 根据annotation生成config
     const { functionMethod, functionUri } = options.annotationConfig;
@@ -307,22 +320,33 @@ function handleFunction(
         func.annotations.annotations.forEach(annotation => {
           if (functionMethod) {
             if (annotation.name.value === functionMethod) {
-              comment += `\t\t@method: ${annotation!.value!.value}`;
+              comment += `@method: ${annotation!.value!.value}    `;
             }
           }
           if (functionUri) {
             if (annotation.name.value === functionUri) {
-              comment += `\t\t@uri: ${annotation!.value!.value}`;
+              comment += `@uri: ${annotation!.value!.value}    `;
             }
           }
         });
       }
     }
   }
+  const commentsBefore = func.commentsBefore || [];
+  if (comment) {
+    commentsBefore.push({
+      loc: func.loc,
+      value: comment,
+      type: SyntaxType.CommentLine
+    });
+  }
   return {
     returnType,
     inputParams,
-    comment
+    comments: [],
+    loc: func.loc,
+    commentsBefore,
+    commentsAfter: func.commentsAfter
   };
 }
 
@@ -350,11 +374,18 @@ function handleEnum(e: EnumDefinition, options?: CMDOptions): EnumEntity {
     }
     properties[member.name.value] = {
       value,
-      comment: handleComments(member.comments)
+      loc: member.loc,
+      comments: member.comments,
+      commentsBefore: member.commentsBefore,
+      commentsAfter: member.commentsAfter
     };
   });
   return {
     name,
-    properties
+    properties,
+    loc: e.loc,
+    comments: e.comments,
+    commentsBefore: e.commentsBefore,
+    commentsAfter: e.commentsAfter
   };
 }

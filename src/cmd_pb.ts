@@ -79,9 +79,7 @@ if (commander.new) {
     .then(async () => {
       combine(options);
       console.log(
-        `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${
-          options.tsRoot
-        }\u001b[39m.`
+        `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${options.tsRoot}\u001b[39m.`
       );
     });
 }

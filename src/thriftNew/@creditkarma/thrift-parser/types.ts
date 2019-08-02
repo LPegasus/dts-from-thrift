@@ -91,6 +91,8 @@ export interface Annotation extends SyntaxNode {
 
 export interface PrimarySyntax extends SyntaxNode {
     comments: Array<Comment>
+    commentsBefore?: Array<Comment>
+    commentsAfter?: Array<Comment>
 }
 
 export type FieldType = BaseType | ContainerType | Identifier
