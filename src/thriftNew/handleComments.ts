@@ -1,3 +1,7 @@
+/**
+ * @author nameliuqi@outlook.com
+ * @description 重构@creditkarma/thrift-parser得到的ast，重新分配PrimarySyntax的comments
+ */
 import {
   ThriftDocument,
   SyntaxType,

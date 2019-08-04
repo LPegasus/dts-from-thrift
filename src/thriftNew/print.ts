@@ -183,6 +183,8 @@ function attachComment(
   comment: string,
   defaultValue?: string
 ): string {
+  // TODO: 支持defaultValue
+  defaultValue = '';
   let c = comment;
   if (defaultValue) {
     if (!c) {

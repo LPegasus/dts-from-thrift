@@ -23,7 +23,6 @@ import {
 } from './interfaces';
 import { handleComments } from './handleComments';
 import * as fs from 'fs-extra';
-import { throws } from 'assert';
 
 export async function readCode(
   filefullname: string,

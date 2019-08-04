@@ -95,6 +95,7 @@ const thriftFiles = glob
   .sync('**/*.thrift', { cwd: options.root })
   .map(d => path.resolve(options.root, d));
 
+// 在不同的模式下includeEntity是不相互兼容的，所以使用any
 const includeMap: { [key: string]: any } = {};
 const tasks = thriftFiles.map(async filename => {
   let entity: any = null;
