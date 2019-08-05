@@ -570,4 +570,41 @@ describe('thrift - read code file', () => {
       res.services[0].interfaces['Collect'].commentsBefore![0].value
     ).to.eq('@method: GET    @uri: /api/collect    ');
   });
+
+  it('support default value', async () => {
+    const thirftCode = `
+      struct Collection {
+        1: optional Collection collection = Collection,
+        2: optional i32 i32_val = 32,
+        3: optional bool bool_val = false,
+        4: optional double double_val = 3.15926,
+        5: optional string string_val = 'hello world',
+        6: optional map<string, string> map_val = {'hello': 'world'},
+        7: optional list<i64> list_val = [1,2,3,4],
+    }
+      `;
+    const res = await parser('', thirftCode);
+    const collectionObj = res.interfaces[0].properties;
+    expect(collectionObj.collection.commentsBefore![0].value).to.eq(
+      '@default: Collection'
+    );
+    expect(collectionObj.i32_val.commentsBefore![0].value).to.eq(
+      '@default: 32'
+    );
+    expect(collectionObj.bool_val.commentsBefore![0].value).to.eq(
+      '@default: false'
+    );
+    expect(collectionObj.double_val.commentsBefore![0].value).to.eq(
+      '@default: 3.15926'
+    );
+    expect(collectionObj.string_val.commentsBefore![0].value).to.eq(
+      '@default: hello world'
+    );
+    expect(collectionObj.map_val.commentsBefore![0].value).to.eq(
+      '@default: Map'
+    );
+    expect(collectionObj.list_val.commentsBefore![0].value).to.eq(
+      '@default: List'
+    );
+  });
 });

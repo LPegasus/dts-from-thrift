@@ -217,7 +217,36 @@ function handleField(
   const optional = options.useStrictMode
     ? field.requiredness !== 'required'
     : !(field.requiredness !== 'optional');
-  // TODO 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
+  // 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
+  let defaultValue: string = '';
+  if (field.defaultValue) {
+    switch (field.defaultValue.type) {
+      case SyntaxType.StringLiteral:
+        defaultValue = field.defaultValue.value;
+        break;
+      case SyntaxType.IntConstant:
+        defaultValue = field.defaultValue.value.value;
+        break;
+      case SyntaxType.DoubleConstant:
+        defaultValue = field.defaultValue.value.value;
+        break;
+      case SyntaxType.BooleanLiteral:
+        defaultValue = String(field.defaultValue.value);
+        break;
+      case SyntaxType.ConstMap:
+        // 简单的处理
+        defaultValue = `Map`;
+        break;
+      case SyntaxType.ConstList:
+        // 简单的处理2
+        defaultValue = 'List';
+        break;
+      case SyntaxType.Identifier:
+        defaultValue = field.defaultValue.value;
+        break;
+    }
+  }
+
   if (options.useTag) {
     const annotations = field.annotations;
     const tagValueReg = /json:\"([\w_\d]+).*\"/;
@@ -272,7 +301,13 @@ function handleField(
       });
     }
   }
-  const defaultValue = '';
+  if (defaultValue) {
+    commentsBefore.push({
+      type: SyntaxType.CommentLine,
+      value: `@default: ${defaultValue}`,
+      loc: field.loc
+    });
+  }
   return {
     entity: {
       type,

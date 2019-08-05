@@ -132,12 +132,7 @@ export function printInterfaces(entity: Pick<RpcEntity, 'interfaces'>): string {
         const temp = `${cb}${key}${property.optional ? '?' : ''}: ${
           property.type
         };`;
-        return attachComment(
-          temp,
-          ca,
-          // TODO: 需要测试
-          property.defaultValue
-        );
+        return attachComment(temp, ca);
       })
       .join('\n    ')}
   }    ${printComments(datum.commentsAfter, datum.loc)}
@@ -178,21 +173,8 @@ export function printTypeDefs(entity: RpcEntity): string {
  * @param {string} comment
  * @returns {string}
  */
-function attachComment(
-  str: string,
-  comment: string,
-  defaultValue?: string
-): string {
-  // TODO: 支持defaultValue
-  defaultValue = '';
+function attachComment(str: string, comment: string): string {
   let c = comment;
-  if (defaultValue) {
-    if (!c) {
-      c = `(default: ${defaultValue})`;
-    } else {
-      c += ` (default: ${defaultValue})`;
-    }
-  }
 
   if (!c) {
     return str;
