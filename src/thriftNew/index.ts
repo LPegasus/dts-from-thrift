@@ -23,6 +23,7 @@ import {
 } from './interfaces';
 import { handleComments } from './handleComments';
 import * as fs from 'fs-extra';
+import { isUndefined } from '../tools/utils';
 
 export async function readCode(
   filefullname: string,
@@ -66,14 +67,14 @@ export function parser(
     services: []
   };
 
+  const namespaces: { [key: string]: string } = {};
+
   ast.body.forEach((ts: ThriftStatement) => {
     // namespace
     if (ts.type === SyntaxType.NamespaceDefinition) {
       // namespace 的处理逻辑，抓一个就来了
       // TODO 优先考虑js的namespace，之后是go，再之后随便抓一个
-      if (ts.scope.value === 'go' || ts.scope.value === 'js') {
-        rtn.ns = ts.name.value;
-      }
+      namespaces[ts.scope.value] = ts.name.value;
     }
     // includes
     if (ts.type === SyntaxType.IncludeDefinition) {
@@ -143,6 +144,12 @@ export function parser(
       //
     }
   });
+
+  const namespacesValues = Object.values(namespaces);
+  rtn.ns = namespaces.js || namespaces.go;
+  if (!rtn.ns && namespacesValues.length) {
+    rtn.ns = namespacesValues[0];
+  }
 
   /* istanbul ignore if */
   if (includeMap) {
@@ -214,12 +221,12 @@ function handleField(
   // 需要处理typedef
   const type = getFieldTypeString(field.fieldType);
   const index = field.fieldID ? field.fieldID.value : 0;
-  const optional = options.useStrictMode
+  let optional = options.useStrictMode
     ? field.requiredness !== 'required'
     : !(field.requiredness !== 'optional');
   // 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
-  let defaultValue: string = '';
-  if (field.defaultValue) {
+  let defaultValue: string | undefined;
+  if (field.defaultValue !== null) {
     switch (field.defaultValue.type) {
       case SyntaxType.StringLiteral:
         defaultValue = field.defaultValue.value;
@@ -283,7 +290,7 @@ function handleField(
       field.annotations.annotations.forEach(annotation => {
         if (Array.isArray(fieldComment)) {
           if (fieldComment.indexOf(annotation.name.value) > -1) {
-            comment += `${annotation.name.value}:${
+            comment += `@${annotation.name.value}:${
               annotation!.value!.value
             }    `;
           }
@@ -301,13 +308,24 @@ function handleField(
       });
     }
   }
-  if (defaultValue) {
+
+  if (!isUndefined(defaultValue)) {
+    // 如果有默认值，不需要指定 optional
+    optional = true;
+
+    let value = defaultValue;
+    if (defaultValue === '') {
+      value = '""';
+    }
     commentsBefore.push({
       type: SyntaxType.CommentLine,
-      value: `@default: ${defaultValue}`,
+      value: `@default: ${value}`,
       loc: field.loc
     });
+  } else {
+    defaultValue = '';
   }
+
   return {
     entity: {
       type,

@@ -564,7 +564,7 @@ describe('thrift - read code file', () => {
     // 正确的处理额外的注释
     expect(
       res.interfaces[0].properties['bizType'].commentsBefore![0].value
-    ).to.eq('source:query    ');
+    ).to.eq('@source:query    ');
     // 正确的处理method uri, 末尾的空格在prettier中处理
     expect(
       res.services[0].interfaces['Collect'].commentsBefore![0].value
@@ -606,5 +606,39 @@ describe('thrift - read code file', () => {
     expect(collectionObj.list_val.commentsBefore![0].value).to.eq(
       '@default: List'
     );
+  });
+
+  it('parse namespace', async () => {
+    const thirftCodeJS = `
+      namespace js xx
+      namespace go zz
+      namespace python yy
+      `;
+    const thirftCodeJSSecond = `
+      namespace go zz
+      namespace js xx
+      namespace python yy
+      `;
+    const thirftCodeGo = `
+      namespace go zz
+      namespace python yy
+      `;
+    const thirftCodePy = `
+      namespace python yy
+      `;
+    const thirftCodeNull = `
+    include "hello.thrift"
+      `;
+    const res1 = await parser('', thirftCodeJS);
+    const res2 = await parser('', thirftCodeJSSecond);
+    const res3 = await parser('', thirftCodeGo);
+    const res4 = await parser('', thirftCodePy);
+    const res5 = await parser('', thirftCodeNull);
+
+    expect(res1.ns).to.eq('xx');
+    expect(res2.ns).to.eq('xx');
+    expect(res3.ns).to.eq('zz');
+    expect(res4.ns).to.eq('yy');
+    expect(res5.ns).to.eq(undefined);
   });
 });

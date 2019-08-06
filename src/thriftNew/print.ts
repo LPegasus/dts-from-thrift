@@ -23,7 +23,6 @@ export async function print(
     // 过滤掉没有 namespace 的
     return;
   }
-  fs.writeJSONSync('debug.json', entity);
   const ns = options.autoNamespace
     ? printNamespace(entity, options.root)
     : entity.ns;
