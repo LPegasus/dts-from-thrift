@@ -4,8 +4,8 @@
   "description": "typescript,thrift,protobuf",
   "main": "lib/index.js",
   "scripts": {
-    "test": "nyc -e=.ts --require ts-node/register mocha ./test/**/*.test.ts",
-    "testThriftNew": "nyc -e=.ts --require ts-node/register mocha ./test/thriftNew/*.test.ts",
+    "test_old": "nyc -e=.ts --require ts-node/register mocha ./test/**/*.test.ts",
+    "test": "nyc -e=.ts --require ts-node/register mocha ./test/thriftNew/*.test.ts",
     "cov": "nyc --reporter=text-lcov report > coverage.lcov && codecov",
     "build": "rm -rf lib/&&npx tsc -p tsconfig.build.json",
     "prepare": "npm run lint&&npm run build",
