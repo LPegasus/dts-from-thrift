@@ -3,8 +3,7 @@ import commander from 'commander';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import glob from 'glob';
-import { RpcEntity as RpcEntityOld, CMDOptions } from './interfaces';
-import { RpcEntity as RpcEntityNew } from './thriftNew/interfaces';
+import { CMDOptions } from './interfaces';
 import { readCode as readCodeOld } from './thrift/readCode';
 import { readCode as readCodeNew } from './thriftNew';
 import {
@@ -80,10 +79,9 @@ const options: CMDOptions = {
   rpcNamespace: commander.rpcNamespace,
   lint: false,
   i64_as_number: false,
-  annotationConfigPath: path.resolve(
-    process.cwd(),
-    commander.annotationConfig || ''
-  )
+  annotationConfigPath: commander.annotationConfig
+    ? path.resolve(process.cwd(), commander.annotationConfig || '')
+    : undefined
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
@@ -170,6 +168,8 @@ ${allServices.map(d => `${d.name}: WrapperService<${d.name}>;`).join('\n  ')}
 Promise.all(rTasks).then(async () => {
   combine(options);
   console.log(
-    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${options.tsRoot}\u001b[39m.`
+    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${
+      options.tsRoot
+    }\u001b[39m.`
   );
 });

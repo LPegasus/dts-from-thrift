@@ -1,6 +1,6 @@
 {
   "name": "dts-from-thrift",
-  "version": "1.0.0-rc.3",
+  "version": "1.0.0-rc.4",
   "description": "typescript,thrift,protobuf",
   "main": "lib/index.js",
   "scripts": {
@@ -8,7 +8,8 @@
     "testThriftNew": "nyc -e=.ts --require ts-node/register mocha ./test/thriftNew/*.test.ts",
     "cov": "nyc --reporter=text-lcov report > coverage.lcov && codecov",
     "build": "rm -rf lib/&&npx tsc -p tsconfig.build.json",
-    "prepare": "npm run build"
+    "prepare": "npm run lint&&npm run build",
+    "lint": "eslint ./src/**/*.ts --fix"
   },
   "repository": {
     "type": "git",
@@ -23,8 +24,11 @@
     "@types/glob": "^5.0.35",
     "@types/mocha": "^5.2.5",
     "@types/prettier": "^1.13.2",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
     "chai": "^4.1.2",
     "codecov": "^3.1.0",
+    "eslint": "^6.1.0",
     "mocha": "^5.2.0",
     "nyc": "^13.1.0",
     "ts-node": "^7.0.1",

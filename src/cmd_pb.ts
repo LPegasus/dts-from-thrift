@@ -33,13 +33,13 @@ commander.parse(process.argv);
 
 const options: Partial<CMDOptions> &
   Required<Pick<CMDOptions, 'root' | 'tsRoot' | 'entryName'>> = {
-  root: path.resolve(process.cwd(), commander.project),
-  tsRoot: path.resolve(process.cwd(), commander.out),
-  entryName: path.resolve(process.cwd(), commander.out, commander.entry),
-  rpcNamespace: '',
-  lint: !!commander.lint,
-  i64_as_number: !!commander.i64_as_number
-};
+    root: path.resolve(process.cwd(), commander.project),
+    tsRoot: path.resolve(process.cwd(), commander.out),
+    entryName: path.resolve(process.cwd(), commander.out, commander.entry),
+    rpcNamespace: '',
+    lint: !!commander.lint,
+    i64_as_number: !!commander.i64_as_number
+  };
 
 if (commander.new) {
   console.log('protobuf => d.ts using protobuf.js...');

@@ -4,7 +4,6 @@ import {
   ThriftErrors,
   SyntaxType,
   ThriftStatement,
-  Comment,
   FunctionType,
   FieldDefinition,
   FunctionDefinition,
@@ -242,7 +241,7 @@ function handleField(
         break;
       case SyntaxType.ConstMap:
         // 简单的处理
-        defaultValue = `Map`;
+        defaultValue = 'Map';
         break;
       case SyntaxType.ConstList:
         // 简单的处理2
@@ -256,7 +255,7 @@ function handleField(
 
   if (options.useTag) {
     const annotations = field.annotations;
-    const tagValueReg = /json:\"([\w_\d]+).*\"/;
+    const tagValueReg = /json:"([\w_\d]+).*"/;
     const tagNameReg = /(\w+).tag/;
     if (annotations) {
       const nameTag = annotations.annotations.find(

@@ -16,6 +16,12 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
+## 1.0.0-rc.4 - 2019.8.9
+
+### Added
+
+- dts-from-thrift 保留注释和注解
+
 ## 1.0.0-rc.3 - 2019.7.12
 
 ### Fixed

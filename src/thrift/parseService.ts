@@ -101,7 +101,7 @@ export function formatServiceFirstLine(lines: string[]) {
   // }
 }
 
-const trapInterfaceRegExp = /^([^\s#\/]+)\s+([^\s\/]+)\s*\(([^\)]*)\)(?:\s+throws\(.+\))?[\s,;]?\s*(?:(?:#|\/\/)(.+))?$/;
+const trapInterfaceRegExp = /^([^\s#/]+)\s+([^\s/]+)\s*\(([^)]*)\)(?:\s+throws\(.+\))?[\s,;]?\s*(?:(?:#|\/\/)(.+))?$/;
 export function parseServiceInterface(
   interfaces: ServiceEntity['interfaces'],
   code: string
@@ -116,7 +116,7 @@ export function parseServiceInterface(
     .map(d => d.trim())
     .filter(d => !!d)
     .forEach(d => {
-      const _mc = d.match(/(\d+)\s*\:\s*(?:(?:([^\s]+)\s+)|([^\s]+>))(.+)$/);
+      const _mc = d.match(/(\d+)\s*:\s*(?:(?:([^\s]+)\s+)|([^\s]+>))(.+)$/);
       if (_mc) {
         inputParams.push({
           index: Number(_mc[1]),

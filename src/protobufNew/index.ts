@@ -118,7 +118,7 @@ export async function loadPb(options: Partial<CMDOptions>) {
   // 当所有 namespace 下的类型收集完毕，可以开始写文件了
   // 先按照 filename 聚合一下
   const filenameNodeMap = new Map<string, PbNodeEntity[]>([]);
-  for (const [ns, datumList] of nodeMap) {
+  for (const [, datumList] of nodeMap) {
     for (const datum of datumList) {
       if (!filenameNodeMap.has(datum.filename)) {
         // 如果 filename 没有，创建一下

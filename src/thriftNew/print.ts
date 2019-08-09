@@ -225,7 +225,7 @@ export function fixIncludeNamespace(
   // return result.replace(new RegExp(`__SEGMENT__`, 'g'), '');
   return (
     '// prettier-ignore\n' +
-    prettier(result.replace(new RegExp(`__SEGMENT__`, 'g'), ''))
+    prettier(result.replace(new RegExp('__SEGMENT__', 'g'), ''))
   );
 }
 
