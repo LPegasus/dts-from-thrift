@@ -1,4 +1,21 @@
 import * as pb from 'protobufjs';
+import { SyntaxType, TextLocation, Comment } from '@creditkarma/thrift-parser';
+
+// 支持comment，开发时间就一丢丢所以复用一下print，理想情况是直接用@creditkarma/thrift-parser的ast打印
+// 现在输出的版本comments表达能力大于原始的版本，但是缺失
+export interface Node {
+  syntaxType: SyntaxType;
+}
+
+export interface SyntaxNode {
+  loc: TextLocation;
+}
+
+export interface PrimarySyntax extends SyntaxNode {
+  comments: Array<Comment>;
+  commentsBefore?: Array<Comment>;
+  commentsAfter?: Array<Comment>;
+}
 
 export type IHit = { hit: false; mc: null } | { hit: true; mc: string };
 
@@ -13,58 +30,53 @@ export interface RpcEntity {
   services: ServiceEntity[];
 }
 
-export interface EnumEntity {
+export interface EnumEntity extends PrimarySyntax {
   name: string;
   properties: {
     [key: string]: EnumEntityMember;
   };
 }
 
-export interface EnumEntityMember {
+export interface EnumEntityMember extends PrimarySyntax {
   value: number;
-  comment: string;
 }
 
 export type Unpack<T> = T extends Array<infer U> ? U : T;
 
-export interface InterfaceEntity {
+export interface InterfaceEntity extends PrimarySyntax {
   name: string;
   properties: {
     [key: string]: InterfacePropertyEntity;
   };
-  childrenInterfaces: InterfaceEntity[];
-  childrenEnums: EnumEntity[];
 }
 
-export interface InterfacePropertyEntity {
+export interface InterfacePropertyEntity extends PrimarySyntax {
   type: string;
   index: number;
   optional: boolean;
-  comment: string;
   defaultValue: string;
   required?: boolean;
 }
 
-export interface TypeDefEntity {
+export interface TypeDefEntity extends PrimarySyntax {
   alias: string;
   type: string;
 }
 
-export interface ServiceEntity {
+export interface ServiceEntity extends PrimarySyntax {
   name: string;
   interfaces: {
     [key: string]: FunctionEntity;
   };
 }
 
-export interface FunctionEntity {
+export interface FunctionEntity extends PrimarySyntax {
   returnType: string;
   inputParams: Array<{
     type: string;
     index: number;
     name: string;
   }>;
-  comment: string;
 }
 
 export interface IAnnotationConfig {

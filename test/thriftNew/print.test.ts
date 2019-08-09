@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as path from 'path';
-import { RpcEntity } from '../../src/interfaces';
+import { RpcEntity } from '../../src/thriftNew/interfaces';
 import {
   printEnums,
   printInterfaces,
@@ -8,10 +8,51 @@ import {
   fixIncludeNamespace,
   printServices,
   printCollectionRpc
-} from '../../src/thrift/print';
+} from '../../src/thriftNew/print';
+import {
+  TextLocation,
+  SyntaxType,
+  CommentLine,
+  CommentBlock,
+  Comment
+} from '../../src/thriftNew/@creditkarma/thrift-parser/types';
 import { readCode } from '../../src/thriftNew';
 
 describe('thrift - print', () => {
+  // mock location
+  const loc: TextLocation = {
+    start: {
+      line: 0,
+      column: 0,
+      index: 0
+    },
+    end: {
+      line: 0,
+      column: 0,
+      index: 0
+    }
+  };
+  // mock comments
+  const comments: Comment[] = [];
+
+  const buildCommentLine = (val: string): CommentLine => ({
+    type: SyntaxType.CommentLine,
+    value: val,
+    loc: {
+      start: { line: 7, column: 18, index: 145 },
+      end: { line: 7, column: 22, index: 149 }
+    }
+  });
+
+  const buildCommentBlock = (val: string[]): CommentBlock => ({
+    type: SyntaxType.CommentBlock,
+    value: val,
+    loc: {
+      start: { line: 25, column: 1, index: 520 },
+      end: { line: 38, column: 4, index: 751 }
+    }
+  });
+
   const entity: RpcEntity = {
     services: [],
     ns: '',
@@ -22,115 +63,155 @@ describe('thrift - print', () => {
         properties: {
           ALL: {
             value: 0,
-            comment: '所有'
+            comments: [],
+            commentsBefore: [],
+            commentsAfter: [buildCommentLine('所有')],
+            loc
           },
           SKU: {
             value: 1,
-            comment: 'SKU'
+            comments: [],
+            commentsAfter: [buildCommentLine('SKU')],
+            loc
           }
-        }
+        },
+        loc,
+        comments
       },
       {
         name: 'Gender',
         properties: {
           F: {
             value: 0,
-            comment: 'female'
+            comments,
+            commentsAfter: [buildCommentLine('female')],
+            loc
           },
           M: {
             value: 1,
-            comment: 'male'
+            comments: [],
+            commentsAfter: [buildCommentLine('male')],
+            loc
           },
           UN: {
             value: 3,
-            comment: 'UNKNOWN'
+            comments: [],
+            commentsAfter: [buildCommentLine('UNKNOWN')],
+            loc
           },
           H: {
             value: 4,
-            comment: 'half'
+            comments: [],
+            commentsAfter: [buildCommentLine('half')],
+            loc
           }
-        }
+        },
+        comments,
+        loc
       }
     ],
     typeDefs: [
       {
         alias: 'CollectionResponse',
-        type: 'Collection'
+        type: 'Collection',
+        loc,
+        comments
       },
       {
         alias: 'CollectionRequest',
-        type: 'Collection'
+        type: 'Collection',
+        loc,
+        comments
       }
     ],
     includes: [],
     interfaces: [
       {
-        childrenInterfaces: [],
-        childrenEnums: [],
         name: 'BizRequest',
         properties: {
           biz_type: {
             type: 'BizType',
-            comment: '',
+            comments: [],
+            commentsAfter: [buildCommentLine('(default: 3)')],
             index: 0,
             optional: false,
-            defaultValue: '3'
+            defaultValue: '3',
+            loc
           },
           biz_id: {
             type: 'string',
-            comment: 'biz id',
+            comments: [],
+            commentsAfter: [buildCommentLine('biz id')],
             index: 1,
             optional: false,
-            defaultValue: '"3"'
+            defaultValue: '"3"',
+            loc
           },
           biz_ext: {
             type: 'any',
-            comment: '66666',
+            comments: [],
+            commentsBefore: [buildCommentLine('66666')],
             index: 2,
             optional: true,
-            defaultValue: ''
+            defaultValue: '',
+            loc
           }
-        }
+        },
+        loc,
+        comments,
+        commentsBefore: [buildCommentBlock(['@method: post', '@uri: /example'])]
       }
     ]
   };
   it('enum print success', () => {
+    // 编排格式的事情交给prettier
     expect(printEnums(entity)).to.deep.eq(
       `  export const enum BizType {
-    ALL = 0,    // 所有
-    SKU = 1     // SKU
-  }
+    ALL = 0,     // 所有
+
+    SKU = 1      // SKU
+
+  }    
 
   export const enum Gender {
-    F = 0,      // female
-    M = 1,      // male
-    UN = 3,     // UNKNOWN
-    H = 4       // half
-  }
+    F = 0,       // female
+
+    M = 1,       // male
+
+    UN = 3,      // UNKNOWN
+
+    H = 4        // half
+
+  }    
 
 `
     );
   });
 
   it('interface print success', () => {
-    expect(printInterfaces(entity)).to.deep.eq(
-      `  export interface BizRequest {
-    biz_type: BizType;      // (default: 3)
-    biz_id: string;         // biz id (default: "3")
-    biz_ext?: any;          // 66666
-  }
+    const rtn = printInterfaces(entity);
+    expect(rtn).to.deep.eq(`/*
+* @method: post
+* @uri: /example
+*/
+  export interface BizRequest {
+    biz_type: BizType;       // (default: 3)
 
-`
-    );
+    biz_id: string;          // biz id
+
+    // 66666
+biz_ext?: any;
+  }    
+
+`);
   });
 
   it('typedef print success', () => {
-    expect(printTypeDefs(entity)).to.deep.eq(
-      `  export type CollectionResponse = Collection;
+    expect(printTypeDefs(entity)).to.deep
+      .eq(`  export type CollectionResponse = Collection;
   export type CollectionRequest = Collection;
 
-`
-    );
+`);
   });
 
   it('fixIncludeNamespace success', () => {
@@ -162,7 +243,7 @@ describe('thrift - print', () => {
         }
       )
     ).to.eq(
-      `interface interface1 {\n  data: list<life.api_feed.feedData[]>;\n}\n`
+      `// prettier-ignore\ninterface interface1 {\n  data: list<life.api_feed.feedData[]>;\n}\n`
     );
   });
 
@@ -209,59 +290,68 @@ describe('thrift - print', () => {
   });
 
   it('printService success', () => {
-    expect(
-      printServices(
-        {
-          ns: 'test',
-          includes: [],
-          enums: [],
-          typeDefs: [],
-          fileName: '',
-          interfaces: [
-            {
-              name: 'Input1',
-              properties: {},
-              childrenInterfaces: [],
-              childrenEnums: []
-            }
-          ],
-          services: [
-            {
-              name: 'RpcService1',
-              interfaces: {
-                a: {
-                  inputParams: [
-                    { type: 'Input1', name: 'req1', index: 1 },
-                    { type: 'Input2', name: 'req2', index: 2 }
-                  ],
-                  returnType: 'Output1',
-                  comment: 'comment1'
-                }
+    const rtn = printServices(
+      {
+        ns: 'test',
+        includes: [],
+        enums: [],
+        typeDefs: [],
+        fileName: '',
+        interfaces: [
+          {
+            name: 'Input1',
+            properties: {},
+            comments,
+            loc
+          }
+        ],
+        services: [
+          {
+            name: 'RpcService1',
+            interfaces: {
+              a: {
+                inputParams: [
+                  { type: 'Input1', name: 'req1', index: 1 },
+                  { type: 'Input2', name: 'req2', index: 2 }
+                ],
+                returnType: 'Output1',
+                comments: [],
+                commentsAfter: [buildCommentLine('comment1')],
+                loc
               }
             },
-            {
-              name: 'RpcService2',
-              interfaces: {
-                a: {
-                  inputParams: [{ type: 'Input2', name: 'req2', index: 1 }],
-                  returnType: 'Output2',
-                  comment: ''
-                }
+            loc,
+            comments
+          },
+          {
+            name: 'RpcService2',
+            interfaces: {
+              a: {
+                inputParams: [{ type: 'Input2', name: 'req2', index: 1 }],
+                returnType: 'Output2',
+                comments: [],
+                loc
               }
-            }
-          ]
-        },
-        true
-      )
-    ).to.eq(`  export interface RpcService1 {
-    a(req1: test.Input1, req2: Input2): Promise<Output1>;   // comment1
+            },
+            comments,
+            loc
+          }
+        ]
+      },
+      true
+    );
+    expect(rtn).to.eq(
+      `  export interface RpcService1 {
+    a(req1: test.Input1, req2: Input2): Promise<Output1>;    // comment1
+
   }
 
   export interface RpcService2 {
     a(req2: Input2): Promise<Output2>;
   }
 
-`);
+`
+    );
   });
 
   it('printCollectionRpc success', () => {
@@ -272,13 +362,17 @@ describe('thrift - print', () => {
         typeDefs: [
           {
             alias: 'Input1',
-            type: '_Input1'
+            type: '_Input1',
+            loc,
+            comments
           }
         ],
         enums: [
           {
             name: 'Input2',
-            properties: {}
+            properties: {},
+            loc,
+            comments
           }
         ],
         fileName: '/life/client',
@@ -290,9 +384,13 @@ describe('thrift - print', () => {
               a: {
                 inputParams: [{ type: 'Input1', name: 'req', index: 1 }],
                 returnType: 'common.Output1',
-                comment: 'comment1'
+                comments: [],
+                commentsAfter: [buildCommentLine('comment1')],
+                loc
               }
-            }
+            },
+            loc,
+            comments
           },
           {
             name: 'RpcService2',
@@ -300,9 +398,12 @@ describe('thrift - print', () => {
               a: {
                 inputParams: [{ type: 'Input2', name: 'req', index: 2 }],
                 returnType: 'common.Output2',
-                comment: ''
+                comments: [],
+                loc
               }
-            }
+            },
+            comments,
+            loc
           }
         ]
       },
@@ -312,15 +413,17 @@ describe('thrift - print', () => {
         }
       }
     );
-    expect(rtn).to.be.eq(`  export interface RpcService1 {
-    a(req: l6.Input1): Promise<life.common.Output1>; // comment1
-  }
+    expect(rtn).to.be.eq(
+      `// prettier-ignore
+export interface RpcService1 {
+  a(req: l6.Input1): Promise<life.common.Output1>; // comment1
+}
 
-  export interface RpcService2 {
-    a(req: l6.Input2): Promise<life.common.Output2>;
-  }
-
-`);
+export interface RpcService2 {
+  a(req: l6.Input2): Promise<life.common.Output2>;
+}
+`
+    );
   });
 
   it('print empty service param interface', async () => {

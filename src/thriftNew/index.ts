@@ -9,7 +9,7 @@ import {
   FieldDefinition,
   FunctionDefinition,
   EnumDefinition
-} from '@creditkarma/thrift-parser';
+} from './@creditkarma/thrift-parser';
 import {
   RpcEntity,
   CMDOptions,
@@ -20,8 +20,10 @@ import {
   FunctionEntity,
   EnumEntity,
   EnumEntityMember
-} from '../interfaces';
+} from './interfaces';
+import { handleComments } from './handleComments';
 import * as fs from 'fs-extra';
+import { isUndefined } from '../tools/utils';
 
 export async function readCode(
   filefullname: string,
@@ -42,6 +44,18 @@ export function parser(
   if (!isThritDocument(ast)) {
     throw new Error('thrift parser error:' + filefullname);
   }
+  handleComments(ast);
+  if (options && options.annotationConfigPath) {
+    if (fs.existsSync(options.annotationConfigPath)) {
+      try {
+        options.annotationConfig = JSON.parse(
+          fs.readFileSync(options.annotationConfigPath).toString()
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
 
   const rtn: RpcEntity = {
     ns: '',
@@ -53,12 +67,14 @@ export function parser(
     services: []
   };
 
+  const namespaces: { [key: string]: string } = {};
+
   ast.body.forEach((ts: ThriftStatement) => {
     // namespace
     if (ts.type === SyntaxType.NamespaceDefinition) {
       // namespace 的处理逻辑，抓一个就来了
       // TODO 优先考虑js的namespace，之后是go，再之后随便抓一个
-      rtn.ns = ts.name.value;
+      namespaces[ts.scope.value] = ts.name.value;
     }
     // includes
     if (ts.type === SyntaxType.IncludeDefinition) {
@@ -74,8 +90,10 @@ export function parser(
       const aInterface: InterfaceEntity = {
         name,
         properties: {},
-        childrenEnums: [],
-        childrenInterfaces: []
+        loc: ts.loc,
+        comments: ts.comments,
+        commentsAfter: ts.commentsAfter,
+        commentsBefore: ts.commentsBefore
       };
       // 添加属性
       ts.fields.forEach((field: any) => {
@@ -87,7 +105,14 @@ export function parser(
 
     // typedef
     if (ts.type === SyntaxType.TypedefDefinition) {
-      const aTypeDef: TypeDefEntity = { type: '', alias: '' };
+      const aTypeDef: TypeDefEntity = {
+        type: '',
+        alias: '',
+        comments: ts.comments,
+        commentsAfter: ts.commentsAfter,
+        commentsBefore: ts.commentsBefore,
+        loc: ts.loc
+      };
       aTypeDef.alias = ts.name.value;
       aTypeDef.type = getFieldTypeString(ts.definitionType);
       rtn.typeDefs.push(aTypeDef);
@@ -97,7 +122,11 @@ export function parser(
     if (ts.type === SyntaxType.ServiceDefinition) {
       const aService: ServiceEntity = {
         name: ts.name.value,
-        interfaces: {}
+        interfaces: {},
+        comments: ts.comments,
+        commentsAfter: ts.commentsAfter,
+        commentsBefore: ts.commentsBefore,
+        loc: ts.loc
       };
       ts.functions.forEach(func => {
         aService.interfaces[func.name.value] = handleFunction(func, options);
@@ -115,6 +144,12 @@ export function parser(
       //
     }
   });
+
+  const namespacesValues = Object.values(namespaces);
+  rtn.ns = namespaces.js || namespaces.go;
+  if (!rtn.ns && namespacesValues.length) {
+    rtn.ns = namespacesValues[0];
+  }
 
   /* istanbul ignore if */
   if (includeMap) {
@@ -172,20 +207,6 @@ function getFieldTypeString(fieldType: FunctionType): string {
   return ThriftType2JavascriptType[fieldType.type];
 }
 
-function handleComments(comments: Comment[]): string {
-  // TODO: comment parser的逻辑和正则的逻辑不能对齐，需要重新设计comnent的生成逻辑
-  return '';
-  return comments
-    .map(c => {
-      if (c.type === SyntaxType.CommentLine) {
-        return c.value;
-      } else {
-        return c.value.join('\n');
-      }
-    })
-    .join('\n');
-}
-
 interface IhandleField {
   entity: InterfacePropertyEntity;
   name: string;
@@ -196,14 +217,43 @@ function handleField(
   options: Partial<CMDOptions> = {}
 ): IhandleField {
   let name = field.name.value;
-  const comment = handleComments(field.comments);
+  const commentsBefore = field.commentsBefore || [];
   // 需要处理typedef
   const type = getFieldTypeString(field.fieldType);
   const index = field.fieldID ? field.fieldID.value : 0;
-  const optional = options.useStrictMode
+  let optional = options.useStrictMode
     ? field.requiredness !== 'required'
     : !(field.requiredness !== 'optional');
-  // TODO 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
+  // 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
+  let defaultValue: string | undefined;
+  if (field.defaultValue !== null) {
+    switch (field.defaultValue.type) {
+      case SyntaxType.StringLiteral:
+        defaultValue = field.defaultValue.value;
+        break;
+      case SyntaxType.IntConstant:
+        defaultValue = field.defaultValue.value.value;
+        break;
+      case SyntaxType.DoubleConstant:
+        defaultValue = field.defaultValue.value.value;
+        break;
+      case SyntaxType.BooleanLiteral:
+        defaultValue = String(field.defaultValue.value);
+        break;
+      case SyntaxType.ConstMap:
+        // 简单的处理
+        defaultValue = `Map`;
+        break;
+      case SyntaxType.ConstList:
+        // 简单的处理2
+        defaultValue = 'List';
+        break;
+      case SyntaxType.Identifier:
+        defaultValue = field.defaultValue.value;
+        break;
+    }
+  }
+
   if (options.useTag) {
     const annotations = field.annotations;
     const tagValueReg = /json:\"([\w_\d]+).*\"/;
@@ -228,14 +278,64 @@ function handleField(
       }
     }
   }
-  const defaultValue = '';
+  // annotation config 优先级高于useTag
+  if (options && options.annotationConfig) {
+    const { fieldComment, fieldKey } = options.annotationConfig;
+    if (
+      field.annotations &&
+      Array.isArray(field.annotations.annotations) &&
+      (Array.isArray(fieldComment) || fieldKey)
+    ) {
+      let comment = '';
+      field.annotations.annotations.forEach(annotation => {
+        if (Array.isArray(fieldComment)) {
+          if (fieldComment.indexOf(annotation.name.value) > -1) {
+            comment += `@${annotation.name.value}:${
+              annotation!.value!.value
+            }    `;
+          }
+        }
+        if (fieldKey) {
+          if (annotation.name.value === fieldKey) {
+            name = annotation!.value!.value;
+          }
+        }
+      });
+      commentsBefore.push({
+        type: SyntaxType.CommentLine,
+        value: comment,
+        loc: field.loc
+      });
+    }
+  }
+
+  if (!isUndefined(defaultValue)) {
+    // 如果有默认值，不需要指定 optional
+    optional = true;
+
+    let value = defaultValue;
+    if (defaultValue === '') {
+      value = '""';
+    }
+    commentsBefore.push({
+      type: SyntaxType.CommentLine,
+      value: `@default: ${value}`,
+      loc: field.loc
+    });
+  } else {
+    defaultValue = '';
+  }
+
   return {
     entity: {
       type,
       index,
       optional,
-      comment,
-      defaultValue
+      defaultValue,
+      comments: field.comments,
+      commentsBefore,
+      commentsAfter: field.commentsAfter,
+      loc: field.loc
     },
     name
   };
@@ -263,11 +363,42 @@ function handleFunction(
       name
     };
   });
-  const comment = handleComments(func.comments);
+  let comment = '';
+  if (options && options.annotationConfig) {
+    // 根据annotation生成config
+    const { functionMethod, functionUri } = options.annotationConfig;
+    if (functionMethod || functionUri) {
+      if (func.annotations && Array.isArray(func.annotations.annotations)) {
+        func.annotations.annotations.forEach(annotation => {
+          if (functionMethod) {
+            if (annotation.name.value === functionMethod) {
+              comment += `@method: ${annotation!.value!.value}    `;
+            }
+          }
+          if (functionUri) {
+            if (annotation.name.value === functionUri) {
+              comment += `@uri: ${annotation!.value!.value}    `;
+            }
+          }
+        });
+      }
+    }
+  }
+  const commentsBefore = func.commentsBefore || [];
+  if (comment) {
+    commentsBefore.push({
+      loc: func.loc,
+      value: comment,
+      type: SyntaxType.CommentLine
+    });
+  }
   return {
     returnType,
     inputParams,
-    comment
+    comments: [],
+    loc: func.loc,
+    commentsBefore,
+    commentsAfter: func.commentsAfter
   };
 }
 
@@ -295,11 +426,18 @@ function handleEnum(e: EnumDefinition, options?: CMDOptions): EnumEntity {
     }
     properties[member.name.value] = {
       value,
-      comment: handleComments(member.comments)
+      loc: member.loc,
+      comments: member.comments,
+      commentsBefore: member.commentsBefore,
+      commentsAfter: member.commentsAfter
     };
   });
   return {
     name,
-    properties
+    properties,
+    loc: e.loc,
+    comments: e.comments,
+    commentsBefore: e.commentsBefore,
+    commentsAfter: e.commentsAfter
   };
 }

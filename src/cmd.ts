@@ -3,10 +3,18 @@ import commander from 'commander';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import glob from 'glob';
-import { RpcEntity, CMDOptions } from './interfaces';
-import { readCode as readCodeNew } from './thriftNew/index';
-import { readCode } from './thrift/readCode';
-import { print, printCollectionRpc } from './thrift/print';
+import { RpcEntity as RpcEntityOld, CMDOptions } from './interfaces';
+import { RpcEntity as RpcEntityNew } from './thriftNew/interfaces';
+import { readCode as readCodeOld } from './thrift/readCode';
+import { readCode as readCodeNew } from './thriftNew';
+import {
+  print as printOld,
+  printCollectionRpc as printCollectionRpcOld
+} from './thrift/print';
+import {
+  print as printNew,
+  printCollectionRpc as printCollectionRpcNew
+} from './thriftNew/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
 import { ServiceEntity } from './interfaces';
@@ -23,6 +31,10 @@ commander
   .option('-p, --project [dir]', 'thrift 根目录，默认为当前目录', process.cwd())
   .option('-an, --auto-namespace', '是否使用文件夹路径作为 namespace')
   .option('-s --strict', '如果字段没有指定 required 视为 optional')
+  .option(
+    '-ac --annotation-config <annotationConfig>',
+    '额外的json配置文件，用来读取annotation配置'
+  )
   .option('--timestamp', '在头部加上生成时间')
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--use-tag <tagName>', '使用 tag 名称替换 field 名称')
@@ -41,6 +53,21 @@ commander
 
 commander.parse(process.argv);
 
+let print: typeof printNew | typeof printOld,
+  printCollectionRpc:
+    | typeof printCollectionRpcNew
+    | typeof printCollectionRpcOld,
+  readCode: typeof readCodeOld | typeof readCodeNew;
+if (commander.new) {
+  print = printNew;
+  printCollectionRpc = printCollectionRpcNew;
+  readCode = readCodeNew;
+} else {
+  print = printOld;
+  printCollectionRpc = printCollectionRpcOld;
+  readCode = readCodeOld;
+}
+
 const options: CMDOptions = {
   root: path.resolve(process.cwd(), commander.project),
   tsRoot: path.resolve(process.cwd(), commander.out),
@@ -52,7 +79,11 @@ const options: CMDOptions = {
   usePrettier: commander.prettier,
   rpcNamespace: commander.rpcNamespace,
   lint: false,
-  i64_as_number: false
+  i64_as_number: false,
+  annotationConfigPath: path.resolve(
+    process.cwd(),
+    commander.annotationConfig || ''
+  )
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
@@ -64,15 +95,12 @@ const thriftFiles = glob
   .sync('**/*.thrift', { cwd: options.root })
   .map(d => path.resolve(options.root, d));
 
-const includeMap: { [key: string]: RpcEntity } = {};
+// 在不同的模式下includeEntity是不相互兼容的，所以使用any
+const includeMap: { [key: string]: any } = {};
 const tasks = thriftFiles.map(async filename => {
-  let entity: RpcEntity | null = null;
+  let entity: any = null;
   try {
-    entity = await (commander.new ? readCodeNew : readCode)(
-      filename,
-      options,
-      includeMap
-    );
+    entity = await readCode(filename, options, includeMap);
   } catch (e) {
     console.error(e);
     console.error(`read file fail.(${filename})`);
@@ -142,8 +170,6 @@ ${allServices.map(d => `${d.name}: WrapperService<${d.name}>;`).join('\n  ')}
 Promise.all(rTasks).then(async () => {
   combine(options);
   console.log(
-    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${
-      options.tsRoot
-    }\u001b[39m.`
+    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${options.tsRoot}\u001b[39m.`
   );
 });
