@@ -16,6 +16,26 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
+## 1.0.0-rc.6 - 2019.8.19
+
+### Added
+
+- 新增 `--strict-response` 传参
+
+  指定后如果 struct 名称包含 Response（例如：`ListResponse`），那么它的字段如果有 defaultValue 词缀，则此字段不会有 optional 标识
+
+  ```ts
+  /*
+  struct CreateResponse {
+      255: optional i32 err_no (defaultValue=0);
+  }
+  */
+  
+  interface CreateResponse {
+    err_no: number; // 不指定的时候是 err_no?: number;
+  }
+  ```
+
 ## 1.0.0-rc.5 - 2019.8.9
 
 ### Added

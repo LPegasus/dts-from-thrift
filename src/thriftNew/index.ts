@@ -48,7 +48,7 @@ export function parser(
     if (fs.existsSync(options.annotationConfigPath)) {
       try {
         options.annotationConfig = JSON.parse(
-          fs.readFileSync(options.annotationConfigPath).toString()
+          fs.readFileSync(options.annotationConfigPath, 'utf8')
         );
       } catch (e) {
         console.error(e);

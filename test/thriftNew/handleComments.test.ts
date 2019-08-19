@@ -24,7 +24,7 @@ service CollectService {
 
   it('hanle comments', async () => {
     const ast = parse(thriftFile);
-    const astWithNewComments = handleComments(<ThriftDocument>ast);
+    const astWithNewComments = handleComments(ast as ThriftDocument);
     const astBody = astWithNewComments.body;
 
     // 最后的comment分配到手动添加的const语法变量上
