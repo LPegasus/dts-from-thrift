@@ -641,4 +641,28 @@ describe('thrift - read code file', () => {
     expect(res4.ns).to.eq('yy');
     expect(res5.ns).to.eq(undefined);
   });
+
+  it('support strict response', async () => {
+    const thirftCodeJS = `
+      struct CollectionResponse {
+        1: required i64 collection = 1,
+        1: i64 collection1 = 1,
+        1: optional i64 collection2 = 1,
+      }
+      struct CollectionRequest {
+        1: i64 collection = 1,
+        1: optional i64 collection1 = 1,
+        1: required i64 collection2 = 1,
+      }
+      `;
+    const res1 = await parser('', thirftCodeJS, { strictRes: true });
+    const collectionResponse = res1.interfaces[0].properties;
+    const collectionRequest = res1.interfaces[1].properties;
+    expect(collectionResponse.collection.optional).to.eq(false);
+    expect(collectionResponse.collection1.optional).to.eq(false);
+    expect(collectionResponse.collection2.optional).to.eq(true);
+    expect(collectionRequest.collection.optional).to.eq(true);
+    expect(collectionRequest.collection1.optional).to.eq(true);
+    expect(collectionRequest.collection2.optional).to.eq(false);
+  });
 });

@@ -31,6 +31,10 @@ commander
   .option('-an, --auto-namespace', '是否使用文件夹路径作为 namespace')
   .option('-s --strict', '如果字段没有指定 required 视为 optional')
   .option(
+    '--strict-response',
+    '在名称包含 Response 的Struct中具有default value的字段不为optional'
+  )
+  .option(
     '-ac --annotation-config <annotationConfig>',
     '额外的json配置文件，用来读取annotation配置'
   )
@@ -81,7 +85,8 @@ const options: CMDOptions = {
   i64_as_number: false,
   annotationConfigPath: commander.annotationConfig
     ? path.resolve(process.cwd(), commander.annotationConfig || '')
-    : undefined
+    : undefined,
+  strictRes: commander.strictResponse
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(

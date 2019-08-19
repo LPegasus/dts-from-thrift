@@ -96,7 +96,11 @@ export function parser(
       };
       // 添加属性
       ts.fields.forEach((field: any) => {
-        const { entity: temp, name } = handleField(field, options);
+        const { entity: temp, name } = handleField(
+          field,
+          options,
+          ts.name.value
+        );
         aInterface.properties[name] = temp;
       });
       rtn.interfaces.push(aInterface);
@@ -213,16 +217,14 @@ interface IhandleField {
 
 function handleField(
   field: FieldDefinition,
-  options: Partial<CMDOptions> = {}
+  options: Partial<CMDOptions> = {},
+  structName = ''
 ): IhandleField {
   let name = field.name.value;
   const commentsBefore = field.commentsBefore || [];
   // 需要处理typedef
   const type = getFieldTypeString(field.fieldType);
   const index = field.fieldID ? field.fieldID.value : 0;
-  let optional = options.useStrictMode
-    ? field.requiredness !== 'required'
-    : !(field.requiredness !== 'optional');
   // 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
   let defaultValue: string | undefined;
   if (field.defaultValue !== null) {
@@ -308,14 +310,29 @@ function handleField(
     }
   }
 
+  let optional = options.useStrictMode
+    ? field.requiredness !== 'required'
+    : !(field.requiredness !== 'optional');
+
   if (!isUndefined(defaultValue)) {
-    // 如果有默认值，不需要指定 optional
-    optional = true;
+    if (field.requiredness === 'required') {
+      optional = false;
+    } else if (
+      options.strictRes &&
+      /response/i.test(structName) &&
+      field.requiredness !== 'optional'
+    ) {
+      optional = false;
+    } else {
+      // 如果有默认值或指定 optional
+      optional = true;
+    }
 
     let value = defaultValue;
     if (defaultValue === '') {
       value = '""';
     }
+
     commentsBefore.push({
       type: SyntaxType.CommentLine,
       value: `@default: ${value}`,

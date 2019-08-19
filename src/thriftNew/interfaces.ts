@@ -100,6 +100,7 @@ export interface CMDOptions {
   i64_as_number: boolean;
   annotationConfigPath?: string;
   annotationConfig?: IAnnotationConfig;
+  strictRes?: boolean;
 }
 
 export type PbNodeEntity = (
