@@ -399,6 +399,22 @@ function handleFunction(
         });
       }
     }
+    const { fieldComment } = options.annotationConfig;
+    if (
+      func.annotations &&
+      Array.isArray(func.annotations.annotations) &&
+      Array.isArray(fieldComment)
+    ) {
+      func.annotations.annotations.forEach(annotation => {
+        if (Array.isArray(fieldComment)) {
+          if (fieldComment.indexOf(annotation.name.value) > -1) {
+            comment += `@${annotation.name.value}: ${
+              annotation!.value!.value
+            }    `;
+          }
+        }
+      });
+    }
   }
   const commentsBefore = func.commentsBefore || [];
   if (comment) {
