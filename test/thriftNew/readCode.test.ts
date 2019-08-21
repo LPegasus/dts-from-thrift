@@ -543,18 +543,19 @@ describe('thrift - read code file', () => {
 
   it('support annotation config', async () => {
     const thirftCode = `
-      struct Collection {
-        1: optional BizType biz_type (source = 'query',   key = 'bizType'),
-        3: optional pack_goods.ExtensiveGoodsItem sku_collection,
+    struct Collection {
+      1: optional BizType biz_type (source = 'query',   key = 'bizType'),
+      3: optional pack_goods.ExtensiveGoodsItem sku_collection,
     }
     service CollectService {
       Collection Collect(1:i32 req)  (method = 'GET',  uri = '/api/collect'),
-  }
+      Collection Collect2(1:i32 req)  (api.get = '/api/collect2'),
+    }
       `;
     const res = await parser('', thirftCode, {
       annotationConfig: {
         fieldKey: 'key',
-        fieldComment: ['source'],
+        fieldComment: ['source', 'api.get', 'api.post'],
         functionMethod: 'method',
         functionUri: 'uri'
       }
@@ -569,6 +570,9 @@ describe('thrift - read code file', () => {
     expect(
       res.services[0].interfaces['Collect'].commentsBefore![0].value
     ).to.eq('@method: GET    @uri: /api/collect    ');
+    expect(
+      res.services[0].interfaces['Collect2'].commentsBefore![0].value
+    ).to.eq('@api.get: /api/collect2    ');
   });
 
   it('support default value', async () => {
