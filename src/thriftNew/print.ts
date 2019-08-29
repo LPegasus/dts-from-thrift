@@ -354,3 +354,25 @@ export function printComments(
   });
   return res;
 }
+
+/**
+ * @description 获取includeMap中的enum值
+ */
+export function printEnumsObject(includeMap: {
+  [key: string]: RpcEntity;
+}): { [key: string]: number } {
+  const res: { [key: string]: number } = {};
+  Object.keys(includeMap).forEach(key => {
+    const rtn = includeMap[key];
+    if (rtn.ns) {
+      const namespace = rtn.ns;
+      const enums = rtn.enums;
+      enums.forEach(e => {
+        Object.keys(e.properties).forEach(eKey => {
+          res[`${namespace}.${e.name}.${eKey}`] = e.properties[eKey].value;
+        });
+      });
+    }
+  });
+  return res;
+}

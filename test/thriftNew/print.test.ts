@@ -7,7 +7,8 @@ import {
   printTypeDefs,
   fixIncludeNamespace,
   printServices,
-  printCollectionRpc
+  printCollectionRpc,
+  printEnumsObject
 } from '../../src/thriftNew/print';
 import {
   TextLocation,
@@ -431,5 +432,12 @@ export interface RpcService2 {
       path.join(__dirname, 'examples', 'service.thrift')
     );
     expect(printServices(rtn).indexOf('WebFake()') !== -1).to.eq(true);
+  });
+
+  it('parse enum json success', async () => {
+    const fileName = path.join(__dirname, 'examples', 'client.thrift');
+    const rtn = await readCode(fileName);
+    const enums = printEnumsObject({ [fileName]: rtn });
+    expect(enums['life.api_favorite.BizType.GOODS']).to.eq(1);
   });
 });
