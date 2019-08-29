@@ -12,7 +12,8 @@ import {
 } from './thrift/print';
 import {
   print as printNew,
-  printCollectionRpc as printCollectionRpcNew
+  printCollectionRpc as printCollectionRpcNew,
+  printEnumsObject
 } from './thriftNew/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
@@ -48,6 +49,7 @@ commander
     '指定一个独立的 namespace 存放所有 service',
     ''
   )
+  .option('--enum-json [filename]', '以json的形式输出所有的enum到输出目录', '')
   .option(
     '-o, --out [out dir]',
     '输出 d.ts 文件根目录',
@@ -86,7 +88,8 @@ const options: CMDOptions = {
   annotationConfigPath: commander.annotationConfig
     ? path.resolve(process.cwd(), commander.annotationConfig || '')
     : undefined,
-  strictRes: commander.strictResponse
+  strictRes: commander.strictResponse,
+  enumJson: commander.enumJson
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
@@ -116,6 +119,11 @@ const tasks = thriftFiles.map(async filename => {
 const rTasks: Array<Promise<any>> = [];
 rTasks.push(
   Promise.all(tasks).then(entityList => {
+    if (options.enumJson) {
+      const tarFile = path.join(options.tsRoot, options.enumJson);
+      fs.writeJSON(tarFile, printEnumsObject(includeMap), { spaces: 4 });
+    }
+
     return Promise.all(
       entityList.map(async entity => {
         try {
@@ -173,8 +181,6 @@ ${allServices.map(d => `${d.name}: WrapperService<${d.name}>;`).join('\n  ')}
 Promise.all(rTasks).then(async () => {
   combine(options);
   console.log(
-    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${
-      options.tsRoot
-    }\u001b[39m.`
+    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${options.tsRoot}\u001b[39m.`
   );
 });

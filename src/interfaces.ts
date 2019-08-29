@@ -89,6 +89,7 @@ export interface CMDOptions {
   annotationConfigPath?: string;
   annotationConfig?: IAnnotationConfig;
   strictRes?: boolean;
+  enumJson?: string;
 }
 
 export type PbNodeEntity = (
