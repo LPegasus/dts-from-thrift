@@ -89,7 +89,7 @@ const options: CMDOptions = {
     ? path.resolve(process.cwd(), commander.annotationConfig || '')
     : undefined,
   strictRes: commander.strictResponse,
-  enumJson: commander.enumJson
+  enumJson: commander.enumJson || 'enums.json'
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
@@ -118,10 +118,11 @@ const tasks = thriftFiles.map(async filename => {
 
 const rTasks: Array<Promise<any>> = [];
 rTasks.push(
-  Promise.all(tasks).then(entityList => {
+  Promise.all(tasks).then(async entityList => {
     if (options.enumJson) {
       const tarFile = path.join(options.tsRoot, options.enumJson);
-      fs.writeJSON(tarFile, printEnumsObject(includeMap), { spaces: 4 });
+      await fs.ensureFile(tarFile);
+      await fs.writeJSON(tarFile, printEnumsObject(includeMap), { spaces: 4 });
     }
 
     return Promise.all(
