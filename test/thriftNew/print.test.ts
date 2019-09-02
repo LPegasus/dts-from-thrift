@@ -435,9 +435,17 @@ export interface RpcService2 {
   });
 
   it('parse enum json success', async () => {
-    const fileName = path.join(__dirname, 'examples', 'client.thrift');
+    const fileName = path.join(__dirname, 'examples', 'enumJson.thrift');
     const rtn = await readCode(fileName);
     const enums = printEnumsObject({ [fileName]: rtn });
-    expect(enums['life.api_favorite.BizType.GOODS']).to.eq(1);
+    const enumObj = {
+      'life.api_favorite.AizType.ALL': 0,
+      'life.api_favorite.AizType.GOODS': 1,
+      'life.api_favorite.BizType.ALL': 0,
+      'life.api_favorite.BizType.GOODS': 1,
+      'life.api_favorite.ZizType.ALL': 0,
+      'life.api_favorite.ZizType.GOODS': 1
+    };
+    expect(JSON.stringify(enums)).to.eq(JSON.stringify(enumObj));
   });
 });
