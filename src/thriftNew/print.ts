@@ -374,5 +374,14 @@ export function printEnumsObject(includeMap: {
       });
     }
   });
-  return res;
+  const sortedRes = Object.keys(res)
+    .sort()
+    .reduce(
+      (pre, cur) => {
+        pre[cur] = res[cur];
+        return pre;
+      },
+      {} as typeof res
+    );
+  return sortedRes;
 }
