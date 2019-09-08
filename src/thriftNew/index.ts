@@ -317,12 +317,6 @@ function handleField(
   if (!isUndefined(defaultValue)) {
     if (field.requiredness === 'required') {
       optional = false;
-    } else if (
-      options.strictRes &&
-      /response/i.test(structName) &&
-      field.requiredness !== 'optional'
-    ) {
-      optional = false;
     } else {
       // 如果有默认值或指定 optional
       optional = true;
@@ -340,6 +334,14 @@ function handleField(
     });
   } else {
     defaultValue = '';
+  }
+
+  if (
+    options.strictReq &&
+    /request/i.test(structName) &&
+    field.requiredness !== 'required'
+  ) {
+    optional = true;
   }
 
   return {
