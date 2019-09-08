@@ -664,6 +664,14 @@ describe('thrift - read code file', () => {
         1: i64 collectionD1 = 1,
         1: optional i64 collectionD2 = 1,
       }
+      struct Collection {
+        1: required i64 collection,
+        1: i64 collection1,
+        1: optional i64 collection2,
+        1: required i64 collectionD = 1,
+        1: i64 collectionD1 = 1,
+        1: optional i64 collectionD2 = 1,
+      }
       `;
     /**
      * 影响optional的元素
@@ -676,11 +684,12 @@ describe('thrift - read code file', () => {
     });
     const collectionResponse = res1.interfaces[0].properties;
     const collectionRequest = res1.interfaces[1].properties;
+    const collection = res1.interfaces[2].properties;
     expect(collectionResponse.collection.optional).to.eq(false);
     expect(collectionResponse.collection1.optional).to.eq(false);
     expect(collectionResponse.collection2.optional).to.eq(true);
     expect(collectionResponse.collectionD.optional).to.eq(false);
-    expect(collectionResponse.collectionD1.optional).to.eq(true);
+    expect(collectionResponse.collectionD1.optional).to.eq(false);
     expect(collectionResponse.collectionD2.optional).to.eq(true);
     expect(collectionRequest.collection.optional).to.eq(false);
     expect(collectionRequest.collection1.optional).to.eq(true);
@@ -688,5 +697,11 @@ describe('thrift - read code file', () => {
     expect(collectionRequest.collectionD.optional).to.eq(false);
     expect(collectionRequest.collectionD1.optional).to.eq(true);
     expect(collectionRequest.collectionD2.optional).to.eq(true);
+    expect(collection.collection.optional).to.eq(false);
+    expect(collection.collection1.optional).to.eq(false);
+    expect(collection.collection2.optional).to.eq(true);
+    expect(collection.collectionD.optional).to.eq(false);
+    expect(collection.collectionD1.optional).to.eq(true);
+    expect(collection.collectionD2.optional).to.eq(true);
   });
 });

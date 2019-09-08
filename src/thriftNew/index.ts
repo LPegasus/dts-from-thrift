@@ -310,18 +310,33 @@ function handleField(
     }
   }
 
-  let optional = options.useStrictMode
-    ? field.requiredness !== 'required'
-    : !(field.requiredness !== 'optional');
+  let optional = false;
+  if (field.requiredness === 'required') {
+    optional = false;
+  } else if (field.requiredness === 'optional') {
+    optional = true;
+  } else {
+    const isRes = /response/i.test(structName);
+    const isReq = /request/i.test(structName);
+    const useStrict = options.useStrictMode;
+    const useStrictReq = options.strictReq;
+    const hasDefault = !isUndefined(defaultValue);
 
-  if (!isUndefined(defaultValue)) {
-    if (field.requiredness === 'required') {
-      optional = false;
-    } else {
-      // 如果有默认值或指定 optional
+    if (useStrict) {
       optional = true;
     }
+    if (isReq && useStrictReq) {
+      optional = true;
+    }
+    if (isReq && hasDefault) {
+      optional = true;
+    }
+    if (!isRes && !isReq && hasDefault) {
+      optional = true;
+    }
+  }
 
+  if (!isUndefined(defaultValue)) {
     let value = defaultValue;
     if (defaultValue === '') {
       value = '""';
@@ -334,14 +349,6 @@ function handleField(
     });
   } else {
     defaultValue = '';
-  }
-
-  if (
-    options.strictReq &&
-    /request/i.test(structName) &&
-    field.requiredness !== 'required'
-  ) {
-    optional = true;
   }
 
   return {

@@ -16,6 +16,22 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 # 变更历史（ChangeLog)
 
+## 1.0.0-rc.10 - 2019.9.8
+
+针对struct中的field是否是optional进行了梳理，详见`test/thriftNew/readCode.test.ts` line649 和下表，主要是针对`/\w+Response/i`和`/\w+Request/i`做了特殊处理，以符合实际的idl语义
+
+| 是否可选                             | requeird | 无（默认）           | optional |
+| ------------------------------------ | -------- | ------------ | -------- |
+| *response                            | false    | false        | true     |
+| *response & defualt value            | False    | false        | true     |
+| *request                             | false    | false\|true* | true     |
+| *request & default value             | false    | true         | true     |
+| Use-strict                           | false    | true         | true     |
+| No-use-strict                        | false    | false        | true     |
+| [^request\|response] & Default value | false    | true         | true     |
+
+"*"表示需要标记`strict-request`开启，表示是业务定制
+
 ## 1.0.0-rc.6 - 2019.8.19
 
 ### Added
