@@ -28,8 +28,24 @@ export interface RpcEntity {
   interfaces: InterfaceEntity[];
   typeDefs: TypeDefEntity[];
   services: ServiceEntity[];
+  consts: ConstantEntity[];
 }
 
+// https://thrift.apache.org/docs/idl#constant-values 实际上可以是int，double，字符串字面量，const list，const map，先快速支持int和double
+export type ConstantEntityType =
+  | SyntaxType.ByteKeyword
+  | SyntaxType.DoubleKeyword
+  | SyntaxType.I8Keyword
+  | SyntaxType.I16Keyword
+  | SyntaxType.I32Keyword
+  | SyntaxType.I64Keyword
+  | SyntaxType.StringKeyword;
+export interface ConstantEntity extends PrimarySyntax {
+  name: string;
+  type: ConstantEntityType;
+  value: string;
+  typeString: string;
+}
 export interface EnumEntity extends PrimarySyntax {
   name: string;
   properties: {
@@ -102,6 +118,7 @@ export interface CMDOptions {
   annotationConfig?: IAnnotationConfig;
   strictReq?: boolean;
   enumJson?: string;
+  i64Type?: string;
 }
 
 export type PbNodeEntity = (

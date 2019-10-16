@@ -32,7 +32,9 @@ export async function print(
 declare namespace ${ns} {
 ${printEnums(entity)}
 ${printInterfaces(entity)}
-${printTypeDefs(entity)}${printServices(entity)}
+${printTypeDefs(entity)}
+${printServices(entity)}
+${printConsts(entity)}
 }
 `;
   const relativePath: path.ParsedPath = path.parse(
@@ -103,6 +105,34 @@ export function printEnums(entity: RpcEntity): string {
   }    ${printComments(datum.commentsAfter, datum.loc)}
 
 `;
+  });
+  return rtn;
+}
+
+/**
+ * 输出 consts
+ *
+ * @export
+ * @param {RpcEntity} entity thrift entity
+ * @returns {string}
+ */
+export function printConsts(entity: RpcEntity): string {
+  /* istanbul ignore if */
+  if (!entity.consts || entity.consts.length === 0) {
+    return '';
+  }
+
+  let rtn: string = '';
+  entity.consts.forEach((datum, _i) => {
+    rtn += printComments(datum.commentsBefore);
+    if (
+      datum.type === SyntaxType.I64Keyword ||
+      datum.type === SyntaxType.StringKeyword
+    ) {
+      rtn += `  export const ${datum.name} = '${datum.value}'\n`;
+    } else {
+      rtn += `  export const ${datum.name} = ${datum.value}\n`;
+    }
   });
   return rtn;
 }
@@ -360,17 +390,34 @@ export function printComments(
  */
 export function printEnumsObject(includeMap: {
   [key: string]: RpcEntity;
-}): { [key: string]: number } {
-  const res: { [key: string]: number } = {};
+}): { [key: string]: number | string } {
+  const res: { [key: string]: number | string } = {};
   Object.keys(includeMap).forEach(key => {
     const rtn = includeMap[key];
     if (rtn.ns) {
       const namespace = rtn.ns;
       const enums = rtn.enums;
+      const consts = rtn.consts;
       enums.forEach(e => {
         Object.keys(e.properties).forEach(eKey => {
           res[`${namespace}.${e.name}.${eKey}`] = e.properties[eKey].value;
         });
+      });
+      consts.forEach(c => {
+        let parsedValue: number | string;
+        if (
+          c.type === SyntaxType.ByteKeyword ||
+          c.type === SyntaxType.I8Keyword ||
+          c.type === SyntaxType.I16Keyword ||
+          c.type === SyntaxType.I32Keyword
+        ) {
+          parsedValue = parseInt(c.value);
+        } else if (c.type === SyntaxType.DoubleKeyword) {
+          parsedValue = parseFloat(c.value);
+        } else {
+          parsedValue = c.value;
+        }
+        res[`${namespace}.${c.name}`] = parsedValue;
       });
     }
   });

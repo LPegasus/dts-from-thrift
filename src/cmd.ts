@@ -32,6 +32,10 @@ commander
   .option('-an, --auto-namespace', '是否使用文件夹路径作为 namespace')
   .option('-s --strict', '如果字段没有指定 required 视为 optional')
   .option(
+    '-i64 --i64 [i64Type]',
+    '设置 i64 的转化类型。默认为“Int64”，可选string'
+  )
+  .option(
     '--strict-request',
     '在名称包含 Request 的 Struct 中如果字段没有指定 required 视为 optional'
   )
@@ -89,7 +93,8 @@ const options: CMDOptions = {
     ? path.resolve(process.cwd(), commander.annotationConfig || '')
     : undefined,
   strictReq: commander.strictRequest,
-  enumJson: commander.enumJson || 'enums.json'
+  enumJson: commander.enumJson || 'enums.json',
+  i64Type: commander.i64 === 'string' ? 'string' : 'Int64'
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(

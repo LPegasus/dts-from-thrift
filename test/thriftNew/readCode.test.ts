@@ -704,4 +704,48 @@ describe('thrift - read code file', () => {
     expect(collection.collectionD1.optional).to.eq(true);
     expect(collection.collectionD2.optional).to.eq(true);
   });
+
+  it('support i64 as string', async () => {
+    const thirftCodeJS = `
+      namespace js xx
+      struct X {
+        1: optional list<i64> myList,
+        1: optional i64 myI64,
+        1: optional map<i64, i64> myMap,
+        1: optional set<i64> mySet,
+        1: optional i32 myI32,
+      }
+      `;
+
+    const res = await parser('', thirftCodeJS, { i64Type: 'string' });
+    const struct = res.interfaces[0].properties;
+
+    expect(struct.myList.type).to.eq('string[]');
+    expect(struct.myI64.type).to.eq('string');
+    expect(struct.myMap.type).to.eq('Map<string, string>');
+    expect(struct.mySet.type).to.eq('Set<string>');
+    expect(struct.myI32.type).to.eq('number');
+  });
+
+  it('support numerical constant and string constant', async () => {
+    const thirftCodeJS = `
+      namespace js xx
+      const i32 C32 = 1234;
+      const i64 C64 = 12345678;
+      const double CDouble = 1e3;
+      const string CString = '123123';
+      const map<string,string> CMap = {"hello": "world", "goodnight": "moon"};
+      const list<string> CList = ['hello', 'world'];
+      `;
+
+    const res = await parser('', thirftCodeJS, { i64Type: 'string' });
+    const consts = res.consts;
+
+    expect(consts.length).to.equal(4);
+    expect(consts[0].value).to.equal('1234');
+    expect(consts[0].name).to.equal('C32');
+    expect(consts[1].value).to.equal('12345678');
+    expect(consts[2].value).to.equal('1e3');
+    expect(consts[3].value).to.equal('123123');
+  });
 });

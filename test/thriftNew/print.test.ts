@@ -8,7 +8,8 @@ import {
   fixIncludeNamespace,
   printServices,
   printCollectionRpc,
-  printEnumsObject
+  printEnumsObject,
+  printConsts
 } from '../../src/thriftNew/print';
 import {
   TextLocation,
@@ -58,6 +59,7 @@ describe('thrift - print', () => {
     services: [],
     ns: '',
     fileName: '',
+    consts: [],
     enums: [
       {
         name: 'BizType',
@@ -294,6 +296,7 @@ biz_ext?: any;
     const rtn = printServices(
       {
         ns: 'test',
+        consts: [],
         includes: [],
         enums: [],
         typeDefs: [],
@@ -360,6 +363,7 @@ biz_ext?: any;
       {
         ns: 'l6',
         interfaces: [],
+        consts: [],
         typeDefs: [
           {
             alias: 'Input1',
@@ -434,7 +438,7 @@ export interface RpcService2 {
     expect(printServices(rtn).indexOf('WebFake()') !== -1).to.eq(true);
   });
 
-  it('parse enum json success', async () => {
+  it('print enum json success', async () => {
     const fileName = path.join(__dirname, 'examples', 'enumJson.thrift');
     const rtn = await readCode(fileName);
     const enums = printEnumsObject({ [fileName]: rtn });
@@ -443,9 +447,25 @@ export interface RpcService2 {
       'life.api_favorite.AizType.GOODS': 1,
       'life.api_favorite.BizType.ALL': 0,
       'life.api_favorite.BizType.GOODS': 1,
+      'life.api_favorite.C32': 1234,
+      'life.api_favorite.C64': '12345678',
+      'life.api_favorite.CDouble': 1000,
+      'life.api_favorite.CString': '123123',
       'life.api_favorite.ZizType.ALL': 0,
       'life.api_favorite.ZizType.GOODS': 1
     };
     expect(JSON.stringify(enums)).to.eq(JSON.stringify(enumObj));
+  });
+
+  it('print const success', async () => {
+    const fileName = path.join(__dirname, 'examples', 'enumJson.thrift');
+    const rtn = await readCode(fileName);
+    const consts = printConsts(rtn);
+    console.log(consts);
+    expect(consts).to.eq(`  export const C32 = 1234
+  export const C64 = '12345678'
+  export const CDouble = 1e3
+  export const CString = '123123'
+`);
   });
 });

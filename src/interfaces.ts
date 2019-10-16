@@ -90,6 +90,7 @@ export interface CMDOptions {
   annotationConfig?: IAnnotationConfig;
   strictReq?: boolean;
   enumJson?: string;
+  i64Type?: string;
 }
 
 export type PbNodeEntity = (
