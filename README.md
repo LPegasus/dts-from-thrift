@@ -4,33 +4,51 @@
 
 thrift RPC 定义文件转 d.ts 工具
 
-__安装(install)：__ `npm install dts-from-thrift -g`
+**安装(install)：** `npm install dts-from-thrift -g`
 
-__运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-ts-repo/typings`
+**运行(exec)：**`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-ts-repo/typings`
 
 由于实现全靠正则，特殊 case 无法避免，可以提 issue 或者 PR。
 
 (The tool use RegExp to generate d.ts file. If some special statement cases causes bugs, an issue or a PR is welcome.)
 
-
-
 # 变更历史（ChangeLog)
+
+## 1.0.0-rc.11 - 2019.10.16
+
+支持在 thrift 中把 i64 转换成 string 或者内置的 Int64 对象，在`--new`的同时通过`--i64`设置，默认生成 int64 类型。例如 i64 生成 string 类型
+
+```shell
+node ./bin/dts-from-thrift -p ./test/thriftNew/examples/ \
+-o ./test/thriftNew/out/ \
+--new --i64 string
+```
+
+支持把 thrift idl 中的 const 输出到 d.ts 和 enum.json 中，用于类型提示或者自定义 babel 插件。注意：d.ts 中的 const 在编译过程中并不会被转换。效果可以运行根目录下的 run.sh 来查看。
+
+支持 thrift idl 中的 `map<typea, typeb>` 输出到 `Record<string, typeb>`。注意：Record 对于 key 的支持只有 number,string,symbol，所以`typea`强制为`string`。栗子：
+
+```shell
+node ./bin/dts-from-thrift -p ./test/thriftNew/examples/ \
+-o ./test/thriftNew/out/ \
+--new --i64 string --map Record
+```
 
 ## 1.0.0-rc.10 - 2019.9.8
 
-针对struct中的field是否是optional进行了梳理，详见`test/thriftNew/readCode.test.ts` line649 和下表，主要是针对`/\w+Response/i`和`/\w+Request/i`做了特殊处理，以符合实际的idl语义
+针对 struct 中的 field 是否是 optional 进行了梳理，详见`test/thriftNew/readCode.test.ts` line649 和下表，主要是针对`/\w+Response/i`和`/\w+Request/i`做了特殊处理，以符合实际的 idl 语义
 
-| 是否可选                             | requeird | 无（默认）           | optional |
-| ------------------------------------ | -------- | ------------ | -------- |
-| *response                            | false    | false        | true     |
-| *response & defualt value            | False    | false        | true     |
-| *request                             | false    | false\|true* | true     |
-| *request & default value             | false    | true         | true     |
-| Use-strict                           | false    | true         | true     |
-| No-use-strict                        | false    | false        | true     |
-| [^request\|response] & Default value | false    | true         | true     |
+| 是否可选                             | requeird | 无（默认）    | optional |
+| ------------------------------------ | -------- | ------------- | -------- |
+| \*response                           | false    | false         | true     |
+| \*response & defualt value           | False    | false         | true     |
+| \*request                            | false    | false\|true\* | true     |
+| \*request & default value            | false    | true          | true     |
+| Use-strict                           | false    | true          | true     |
+| No-use-strict                        | false    | false         | true     |
+| [^request\|response] & Default value | false    | true          | true     |
 
-"*"表示需要标记`strict-request`开启，表示是业务定制
+"\*"表示需要标记`strict-request`开启，表示是业务定制
 
 ## 1.0.0-rc.6 - 2019.8.19
 
@@ -46,7 +64,7 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
       255: optional i32 err_no (defaultValue=0);
   }
   */
-  
+
   interface CreateResponse {
     err_no: number; // 不指定的时候是 err_no?: number;
   }
@@ -117,7 +135,6 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
   typedef generic type fix
 
-
 ## 0.8 - 2018.11.26
 
 ### Added
@@ -141,7 +158,7 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
   	// 生成的 rpc 定义文件 (the rpc definition file name)
   ```
 
-  使用 \_Summary_ 继承 rpc 接口 (use \_Summary_ to extends)
+  使用 \_Summary* 继承 rpc 接口 (use \_Summary* to extends)
 
   ```typescript
   interface MyRPCContainer extends demo.rpc._Summary_ {}
@@ -166,24 +183,22 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
   service RpcService {
       ResponseType interface1 (1: RequestType req);
   }
-  
+
   // generate code
   export interface RpcService {
       interface1(req: RequestType): Promise<ResponseType>;
   }
   ```
 
-
-
 ## 0.5
 
 ### Added
 
-  - dts-from-protobuf 支持
+- dts-from-protobuf 支持
 
-     (add dts-from-protobuf CLI, support protobuf)
+  (add dts-from-protobuf CLI, support protobuf)
 
-     `dts-from-protobuf -p <protobuf_idl_dir> -o <output_dir>`
+  `dts-from-protobuf -p <protobuf_idl_dir> -o <output_dir>`
 
 ## 0.4
 
@@ -197,12 +212,12 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
   struct Foo {
     1: list<string> comments (go.tag="json:\\"list,omitempty\\""),
   }
-  
+
   // before 0.4.0
   interface Foo {
     comments: string[];
   }
-  
+
   // after 0.4.0 with [--use-tag go]
   interface Foo {
     list: string[];
@@ -214,4 +229,4 @@ __运行(exec)：__`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-t
 
 - codestyle: 生成文件增加 `// prettier-ignore` 避免 format 导致的 git 提交
 
-   (add `// prettier-ignore` at head of d.ts file to prevent useless git commit)
+  (add `// prettier-ignore` at head of d.ts file to prevent useless git commit)

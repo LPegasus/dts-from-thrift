@@ -36,6 +36,10 @@ commander
     '设置 i64 的转化类型。默认为“Int64”，可选string'
   )
   .option(
+    '-map --map [mapType]',
+    '设置 map 的转化类型。默认为“Map”，可选Record'
+  )
+  .option(
     '--strict-request',
     '在名称包含 Request 的 Struct 中如果字段没有指定 required 视为 optional'
   )
@@ -94,7 +98,8 @@ const options: CMDOptions = {
     : undefined,
   strictReq: commander.strictRequest,
   enumJson: commander.enumJson || 'enums.json',
-  i64Type: commander.i64 === 'string' ? 'string' : 'Int64'
+  i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
+  mapType: commander.map === 'Record' ? 'Record' : 'Map'
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(

@@ -748,4 +748,20 @@ describe('thrift - read code file', () => {
     expect(consts[2].value).to.equal('1e3');
     expect(consts[3].value).to.equal('123123');
   });
+
+  it('support map as record', async () => {
+    const thirftCodeJS = `
+      namespace js xx
+      struct X {
+        1: optional map<i64, i64> myMap,
+      }
+      `;
+
+    const res = await parser('', thirftCodeJS, {
+      mapType: 'Record'
+    });
+    const struct = res.interfaces[0].properties;
+
+    expect(struct.myMap.type).to.eq('Record<string, Int64>');
+  });
 });

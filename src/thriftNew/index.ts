@@ -191,6 +191,7 @@ function getFieldTypeString(
   options: Partial<CMDOptions> = {}
 ): string {
   const { i64Type = 'Int64' } = options;
+  const { mapType = 'Map' } = options;
   const ThriftType2JavascriptType: { [key: string]: string } = {
     [SyntaxType.BoolKeyword]: 'boolean',
     [SyntaxType.ByteKeyword]: 'number',
@@ -218,7 +219,13 @@ function getFieldTypeString(
     return `${getFieldTypeString(fieldType.valueType, options)}[]`;
   }
   if (fieldType.type === SyntaxType.MapType) {
-    return `Map<${getFieldTypeString(
+    if (mapType === 'Record') {
+      return `${mapType}<string, ${getFieldTypeString(
+        fieldType.valueType,
+        options
+      )}>`;
+    }
+    return `${mapType}<${getFieldTypeString(
       fieldType.keyType,
       options
     )}, ${getFieldTypeString(fieldType.valueType, options)}>`;

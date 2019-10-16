@@ -91,6 +91,7 @@ export interface CMDOptions {
   strictReq?: boolean;
   enumJson?: string;
   i64Type?: string;
+  mapType?: string;
 }
 
 export type PbNodeEntity = (
