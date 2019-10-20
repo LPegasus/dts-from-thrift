@@ -1,6 +1,6 @@
 {
   "name": "dts-from-thrift",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0",
   "description": "typescript,thrift,protobuf",
   "main": "lib/index.js",
   "scripts": {
@@ -23,9 +23,9 @@
     "@types/fs-extra": "^5.0.4",
     "@types/glob": "^5.0.35",
     "@types/mocha": "^5.2.5",
-    "@types/prettier": "^1.13.2",
-    "@typescript-eslint/eslint-plugin": "^1.13.0",
-    "@typescript-eslint/parser": "^1.13.0",
+    "@types/prettier": "^1.18.3",
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
     "chai": "^4.1.2",
     "codecov": "^3.1.0",
     "eslint": "^6.1.0",
@@ -40,7 +40,7 @@
     "debug": "^3.1.0",
     "fs-extra": "^7.0.0",
     "glob": "^7.1.2",
-    "prettier": "^1.15.1",
+    "prettier": "^1.18.2",
     "protobufjs": "^6.8.8",
     "tslib": "^1.9.3"
   },

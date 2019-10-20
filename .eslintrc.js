@@ -35,20 +35,14 @@ module.exports = {
         "@typescript-eslint"
       ],
       "rules": {
+        "no-useless-escape": "off",
         "default-case": "off",
         "no-dupe-class-members": "off",
-        "@typescript-eslint/no-angle-bracket-type-assertion": "warn",
         "no-array-constructor": "off",
         "@typescript-eslint/no-array-constructor": "warn",
         "@typescript-eslint/no-namespace": "error",
         "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": [
-          "warn",
-          {
-            "args": "none",
-            "ignoreRestSiblings": true,
-          },
-        ],
+        "@typescript-eslint/no-unused-vars": "off",
         "no-useless-constructor": "off",
         "@typescript-eslint/no-useless-constructor": "warn",
       },
