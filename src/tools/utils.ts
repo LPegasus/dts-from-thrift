@@ -16,7 +16,7 @@ declare type ReqNumber = number | string | Int64;
 declare type RespNumber = Int64;
 declare type WrapperReqNumber<T> = Int64 extends T ? ReqNumber : T extends number[] ? ReqNumber[] : T;
 declare type WrapperRespNumber<T> = T extends number ? RespNumber : T extends number[] ? RespNumber[] : T;`;
-  const newStr = `declare type Int64 = string
+  const newStr = `declare type Int64 = string;
 declare type ReqNumber = number | string | Int64;
 declare type RespNumber = Int64;
 declare type WrapperReqNumber<T> = T;
