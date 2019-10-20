@@ -28,7 +28,7 @@ thrift RPC 定义文件转 d.ts 工具
   --new --i64 string
   ```
 
-- 新增 `--enumJson` 参数
+- 新增 `--enum-json` 参数
 
   把 thrift idl 中的 const 输出到 d.ts 和 enum.json 中，用于类型提示或者自定义 babel 插件（for byted-react-scripts）
 
