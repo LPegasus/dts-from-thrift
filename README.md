@@ -14,25 +14,41 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
-## 1.0.0-rc.11 - 2019.10.16
+## 1.0.0 - 2019.10.20
 
-支持在 thrift 中把 i64 转换成 string 或者内置的 Int64 对象，在`--new`的同时通过`--i64`设置，默认生成 int64 类型。例如 i64 生成 string 类型
+### Added
 
-```shell
-node ./bin/dts-from-thrift -p ./test/thriftNew/examples/ \
--o ./test/thriftNew/out/ \
---new --i64 string
-```
+- 新增 `--i64` 参数
 
-支持把 thrift idl 中的 const 输出到 d.ts 和 enum.json 中，用于类型提示或者自定义 babel 插件。注意：d.ts 中的 const 在编译过程中并不会被转换。效果可以运行根目录下的 run.sh 来查看。
+  i64 转换成 string 或 Int64 对象**（需要加 --new 参数）**
 
-支持 thrift idl 中的 `map<typea, typeb>` 输出到 `Record<string, typeb>`。注意：Record 对于 key 的支持只有 number,string,symbol，所以`typea`强制为`string`。栗子：
+  ```shell
+  node ./bin/dts-from-[thrift|protobuf] -p ./test/idl/ \
+  -o ./test/idl/out/ \
+  --new --i64 string
+  ```
 
-```shell
-node ./bin/dts-from-thrift -p ./test/thriftNew/examples/ \
--o ./test/thriftNew/out/ \
---new --i64 string --map Record
-```
+- 新增 `--enumJson` 参数
+
+  把 thrift idl 中的 const 输出到 d.ts 和 enum.json 中，用于类型提示或者自定义 babel 插件（for byted-react-scripts）
+
+  默认输出在 enums.json 文件中
+
+  > 注意：d.ts 中的 const 在编译过程中并不会被转换。效果可以运行根目录下的 run.sh 来查看。
+
+- 新增 `--map` 参数
+
+  支持 thrift idl 中的 `map<type_a, type_b>` 输出到 `Record<string, type_b>`
+
+  > 注意：Record 对于 key 的支持只有 number,string,symbol，所以 `type_a` 强制为 `string`。
+
+  栗子：
+
+  ```shell
+  node ./bin/dts-from-[thrift|protobuf] -p ./test/idl/ \
+  -o ./test/idl/out/ \
+  --new --i64 string --map
+  ```
 
 ## 1.0.0-rc.10 - 2019.9.8
 

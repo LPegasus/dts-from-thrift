@@ -9,6 +9,7 @@ import { print } from './protobuf/print';
 import combine from './tools/combine';
 import { loadPb } from './protobufNew/index';
 import { updateNotify } from './tools/updateNotify';
+import { replaceTsHelperInt64 } from './tools/utils';
 
 const packageJSON = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8')
@@ -23,6 +24,16 @@ commander
   .option('--lint', '检查 pb 文件是否规范，不输出内容')
   .option('--new', '使用新版')
   .option('--i64_as_number', '将 i64 类型设置为 number')
+  .option('--enum-json [filename]', '以json的形式输出所有的enum到输出目录', '')
+  .option(
+    '-i64 --i64 [i64Type]',
+    '设置 i64 的转化类型。默认为“Int64”，可选string'
+  )
+  .option(
+    '--map [mapType]',
+    '设置 map 的转化类型。默认为“Map”，可选Record',
+    false
+  )
   .option(
     '-o, --out [out dir]',
     '输出 d.ts 文件根目录',
@@ -33,23 +44,45 @@ commander.parse(process.argv);
 
 const options: Partial<CMDOptions> &
   Required<Pick<CMDOptions, 'root' | 'tsRoot' | 'entryName'>> = {
-    root: path.resolve(process.cwd(), commander.project),
-    tsRoot: path.resolve(process.cwd(), commander.out),
-    entryName: path.resolve(process.cwd(), commander.out, commander.entry),
-    rpcNamespace: '',
-    lint: !!commander.lint,
-    i64_as_number: !!commander.i64_as_number
-  };
+  root: path.resolve(process.cwd(), commander.project),
+  tsRoot: path.resolve(process.cwd(), commander.out),
+  entryName: path.resolve(process.cwd(), commander.out, commander.entry),
+  rpcNamespace: '',
+  lint: !!commander.lint,
+  enumJson: commander.enumJson || 'enums.json',
+  i64_as_number: !!commander.i64_as_number,
+  i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
+  mapType:
+    commander.map === true || commander.map === 'Record' ? 'Record' : 'Map'
+};
+
+fs.ensureDirSync(options.tsRoot);
+fs.copyFileSync(
+  path.join(__dirname, 'tools/tsHelper.d.ts'),
+  path.join(options.tsRoot, 'tsHelper.d.ts')
+);
+if (options.i64Type === 'string') {
+  replaceTsHelperInt64(path.join(options.tsRoot, 'tsHelper.d.ts'));
+}
+
+const includeMap: { [key: string]: RpcEntity } = {};
 
 if (commander.new) {
   console.log('protobuf => d.ts using protobuf.js...');
-  loadPb(options);
+  const outConstMap = Object.create(null);
+  (async () => {
+    await loadPb(options, outConstMap);
+    if (options.enumJson) {
+      const tar = path.resolve(options.root, options.enumJson);
+      await fs.ensureFile(path.resolve(options.root, options.enumJson));
+      await fs.writeFile(tar, JSON.stringify(outConstMap, null, '  '), 'utf8');
+    }
+  })();
 } else {
   const protofiles = glob
     .sync('**/*.proto', { cwd: options.root })
     .map(d => path.resolve(options.root, d));
 
-  const includeMap: { [key: string]: RpcEntity } = {};
   const tasks = protofiles.map(async filename => {
     let entity: RpcEntity | null = null;
     try {
@@ -64,7 +97,7 @@ if (commander.new) {
   });
 
   Promise.all(tasks)
-    .then(entityList => {
+    .then(async entityList => {
       return Promise.all(
         entityList.map(async entity => {
           try {

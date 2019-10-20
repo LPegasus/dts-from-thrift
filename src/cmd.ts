@@ -37,8 +37,9 @@ commander
     '设置 i64 的转化类型。默认为“Int64”，可选string'
   )
   .option(
-    '-map --map [mapType]',
-    '设置 map 的转化类型。默认为“Map”，可选Record'
+    '--map [mapType]',
+    '设置 map 的转化类型。默认为“Map”，可选Record',
+    false
   )
   .option(
     '--strict-request',
@@ -98,9 +99,10 @@ const options: CMDOptions = {
     ? path.resolve(process.cwd(), commander.annotationConfig || '')
     : undefined,
   strictReq: commander.strictRequest,
-  enumJson: commander.enumJson || 'enums.json',
+  enumJson: commander.enum_json || 'enums.json',
   i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
-  mapType: commander.map === 'Record' ? 'Record' : 'Map'
+  mapType:
+    commander.map === true || commander.map === 'Record' ? 'Record' : 'Map'
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(

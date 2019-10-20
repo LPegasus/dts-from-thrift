@@ -1,28 +1,33 @@
-import * as path from 'path';
+import chalk from 'chalk';
 import * as fs from 'fs-extra';
-import * as pb from 'protobufjs';
 import glob from 'glob';
 import * as os from 'os';
+import * as path from 'path';
+import * as pb from 'protobufjs';
+
 import {
   CMDOptions,
-  FunctionEntity,
-  PbNodeEntity,
-  InterfaceEntity,
   EnumEntity,
   EnumEntityMember,
+  FunctionEntity,
+  InterfaceEntity,
   InterfacePropertyEntity,
+  PbNodeEntity,
   ServiceEntity
 } from '../interfaces';
-import { typeMapping } from '../protobuf/typeMapping';
 import {
+  attachComment,
   printEnums,
-  printInternalInterfacesAndEnums,
-  attachComment
+  printInternalInterfacesAndEnums
 } from '../protobuf/print';
-import { prettier } from '../tools/format';
+import { typeMapping } from '../protobuf/typeMapping';
 import combine from '../tools/combine';
+import { prettier } from '../tools/format';
 
-export async function loadPb(options: Partial<CMDOptions>) {
+export async function loadPb(
+  options: Partial<CMDOptions>,
+  outConstMap: { [key: string]: number }
+) {
   const rootDir = (options && options.root) || process.cwd();
   const files = glob
     .sync('**/*.proto', { cwd: rootDir })
@@ -131,7 +136,7 @@ export async function loadPb(options: Partial<CMDOptions>) {
 
   // 收集完所有文件的 nodeMap，就可以去处理 import 进来的 namespace 的类型，转成 namespace.type
   astList.forEach(ast => {
-    crawlAstAndAttachNamespace(ast, nodeMap);
+    crawlAstAndAttachNamespace(ast, nodeMap, outConstMap);
   });
 
   // 按照 filename 写文件
@@ -167,17 +172,19 @@ export async function loadPb(options: Partial<CMDOptions>) {
         printEnums(
           data
             .filter(d => d.type === 'enum')
-            .map(d => convertToEnumEntity(<pb.Enum>d.meta))
+            .map(d => convertToEnumEntity(d.meta as pb.Enum))
         ),
         printInterfaces(
           data
             .filter(d => d.type === 'message')
-            .map(d => convertMessageToInterfaceEntity(<pb.Type>d.meta, options))
+            .map(d =>
+              convertMessageToInterfaceEntity(d.meta as pb.Type, options)
+            )
         ),
         printServices(
           data
             .filter(d => d.type === 'service')
-            .map(d => convertServiceToServiceEntity(<pb.Service>d.meta))
+            .map(d => convertServiceToServiceEntity(d.meta as pb.Service))
         ),
         '}'
       ];
@@ -253,9 +260,9 @@ function crawlAST(
   }
 }
 
-function isNamespace(v: pb.ReflectionObject): v is pb.Namespace {
-  return v instanceof pb.Namespace;
-}
+// function isNamespace(v: pb.ReflectionObject): v is pb.Namespace {
+//   return v instanceof pb.Namespace;
+// }
 
 function isMessage(v: pb.ReflectionObject): v is pb.Type {
   return v instanceof pb.Type;
@@ -336,20 +343,26 @@ export function convertToEnumEntity(node: pb.Enum): EnumEntity {
         };
         return rtn;
       },
-      <{ [key: string]: EnumEntityMember }>{}
+      {} as { [key: string]: EnumEntityMember }
     )
   };
 }
 
 export function convertFieldToInterfacePropertyEntity(
   d: pb.Field,
-  options: { i64_as_number?: boolean }
+  options: { i64_as_number?: boolean; mapType?: string }
 ): InterfacePropertyEntity {
   return {
     comment: d.comment || '',
     defaultValue: '',
     index: d.id,
-    type: typeMapping(d.type, d.repeated, !!options.i64_as_number),
+    type: typeMapping(
+      d.type,
+      d.repeated,
+      !!options.i64_as_number,
+      options.mapType,
+      d.map ? ((d as any) as pb.MapField).keyType : ''
+    ),
     optional: d.optional,
     required: d.required
   };
@@ -427,7 +440,8 @@ export function isField(v: any): v is pb.Field {
 
 export function crawlAstAndAttachNamespace(
   ast: pb.IParserResult,
-  nodeMap: Map<string, PbNodeEntity[]>
+  nodeMap: Map<string, PbNodeEntity[]>,
+  outConstMap: { [key: string]: number | string } = {}
 ) {
   (ast.package
     ? (ast.root.lookup(ast.package) as pb.Namespace)
@@ -447,7 +461,8 @@ export function crawlAstAndAttachNamespace(
           [(ast as any)._ns + '.' + field.type, field.type].some(fieldType => {
             const ff =
               fieldType.indexOf('.') !== -1 ? fieldType : `.${fieldType}`;
-            for (const [ns, node] of nodeMap) {
+            for (const tmp of nodeMap) {
+              const [ns, node] = tmp as [string, PbNodeEntity[]];
               if (ns.indexOf(ff) === -1) {
                 continue;
               }
@@ -458,14 +473,36 @@ export function crawlAstAndAttachNamespace(
                   (d.type === 'enum' && d.meta.name === field.type) ||
                   (d.type === 'message' && d.meta.name === field.type)
               );
+
               if (!filteredData.length) {
                 continue;
               }
               const absName = (filteredData[0].meta.root as any)._hasPackage
                 ? filteredData[0].meta.fullName.replace(/^\./, '')
                 : ns;
-              console.log(`${field.type} => ${absName}`);
+              // console.log(`${field.type} => ${absName}`);
               field.type = absName;
+
+              // 处理 enum.json 问题
+              node.forEach(d => {
+                if (d.type === 'enum') {
+                  Object.keys(d.meta.values).forEach(dd => {
+                    const v = d.meta.values[dd];
+                    const k = `${absName}.${dd}`;
+                    if (
+                      Object.prototype.hasOwnProperty.call(outConstMap, k) &&
+                      outConstMap[k] !== v
+                    ) {
+                      console.warn(
+                        '--enum-json received duplicated value with the same key. It may cause critical error. Please check ' +
+                          chalk.red(absName)
+                      );
+                    }
+                    outConstMap[k] = v;
+                  });
+                }
+              });
+
               return;
             }
           });

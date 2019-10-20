@@ -7,6 +7,7 @@
     "declaration": true
   },
   "exclude": [
-    "test"
+    "test",
+    "lib"
   ]
 }
