@@ -717,13 +717,13 @@ describe('thrift - read code file', () => {
       }
       `;
 
-    const res = await parser('', thirftCodeJS, { i64Type: 'string' });
+    const res = await parser('', thirftCodeJS, { i64Type: 'Int64' });
     const struct = res.interfaces[0].properties;
 
-    expect(struct.myList.type).to.eq('string[]');
-    expect(struct.myI64.type).to.eq('string');
-    expect(struct.myMap.type).to.eq('Map<string, string>');
-    expect(struct.mySet.type).to.eq('Set<string>');
+    expect(struct.myList.type).to.eq('Int64[]');
+    expect(struct.myI64.type).to.eq('Int64');
+    expect(struct.myMap.type).to.eq('Map<Int64, Int64>');
+    expect(struct.mySet.type).to.eq('Set<Int64>');
     expect(struct.myI32.type).to.eq('number');
   });
 
