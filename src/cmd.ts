@@ -17,6 +17,7 @@ import {
 } from './thriftNew/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
+import { replaceTsHelperInt64 } from './tools/utils';
 import { ServiceEntity } from './interfaces';
 import { prettier } from './tools/format';
 
@@ -106,6 +107,9 @@ fs.copyFileSync(
   path.join(__dirname, 'tools/tsHelper.d.ts'),
   path.join(options.tsRoot, 'tsHelper.d.ts')
 );
+if (options.i64Type === 'string') {
+  replaceTsHelperInt64(path.join(options.tsRoot, 'tsHelper.d.ts'));
+}
 
 const thriftFiles = glob
   .sync('**/*.thrift', { cwd: options.root })

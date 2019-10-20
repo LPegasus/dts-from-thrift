@@ -190,7 +190,7 @@ function getFieldTypeString(
   fieldType: FunctionType,
   options: Partial<CMDOptions> = {}
 ): string {
-  const { i64Type = 'Int64' } = options;
+  const i64Type = 'Int64';
   const { mapType = 'Map' } = options;
   const ThriftType2JavascriptType: { [key: string]: string } = {
     [SyntaxType.BoolKeyword]: 'boolean',
