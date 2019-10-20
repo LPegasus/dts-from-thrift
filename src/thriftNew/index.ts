@@ -7,7 +7,11 @@ import {
   FunctionType,
   FieldDefinition,
   FunctionDefinition,
-  EnumDefinition
+  EnumDefinition,
+  ConstDefinition,
+  DoubleConstant,
+  IntConstant,
+  StringLiteral
 } from './@creditkarma/thrift-parser';
 import {
   RpcEntity,
@@ -18,7 +22,9 @@ import {
   ServiceEntity,
   FunctionEntity,
   EnumEntity,
-  EnumEntityMember
+  EnumEntityMember,
+  ConstantEntity,
+  ConstantEntityType
 } from './interfaces';
 import { handleComments } from './handleComments';
 import * as fs from 'fs-extra';
@@ -63,7 +69,8 @@ export function parser(
     interfaces: [],
     enums: [],
     typeDefs: [],
-    services: []
+    services: [],
+    consts: []
   };
 
   const namespaces: { [key: string]: string } = {};
@@ -117,7 +124,7 @@ export function parser(
         loc: ts.loc
       };
       aTypeDef.alias = ts.name.value;
-      aTypeDef.type = getFieldTypeString(ts.definitionType);
+      aTypeDef.type = getFieldTypeString(ts.definitionType, options);
       rtn.typeDefs.push(aTypeDef);
     }
 
@@ -144,7 +151,10 @@ export function parser(
 
     // const 考虑支持
     if (ts.type === SyntaxType.ConstDefinition) {
-      //
+      const temp = handleConst(ts);
+      if (temp !== false) {
+        rtn.consts.push(temp);
+      }
     }
   });
 
@@ -176,13 +186,18 @@ export function transformAst(ast: ThriftDocument): RpcEntity {
   return {} as any;
 }
 
-function getFieldTypeString(fieldType: FunctionType): string {
+function getFieldTypeString(
+  fieldType: FunctionType,
+  options: Partial<CMDOptions> = {}
+): string {
+  const i64Type = 'Int64';
+  const { mapType = 'Map' } = options;
   const ThriftType2JavascriptType: { [key: string]: string } = {
     [SyntaxType.BoolKeyword]: 'boolean',
     [SyntaxType.ByteKeyword]: 'number',
     [SyntaxType.I16Keyword]: 'number',
     [SyntaxType.I32Keyword]: 'number',
-    [SyntaxType.I64Keyword]: 'Int64',
+    [SyntaxType.I64Keyword]: i64Type,
     [SyntaxType.DoubleKeyword]: 'number',
     [SyntaxType.StringKeyword]: 'string',
     [SyntaxType.BinaryKeyword]: 'any',
@@ -193,19 +208,27 @@ function getFieldTypeString(fieldType: FunctionType): string {
     [SyntaxType.VoidKeyword]: 'void'
   };
 
-  if (fieldType.type === SyntaxType.Identifier) {
-    return fieldType.value;
-  }
+  if (options)
+    if (fieldType.type === SyntaxType.Identifier) {
+      return fieldType.value;
+    }
   if (fieldType.type === SyntaxType.SetType) {
-    return `Set<${getFieldTypeString(fieldType.valueType)}>`;
+    return `Set<${getFieldTypeString(fieldType.valueType, options)}>`;
   }
   if (fieldType.type === SyntaxType.ListType) {
-    return `${getFieldTypeString(fieldType.valueType)}[]`;
+    return `${getFieldTypeString(fieldType.valueType, options)}[]`;
   }
   if (fieldType.type === SyntaxType.MapType) {
-    return `Map<${getFieldTypeString(fieldType.keyType)}, ${getFieldTypeString(
-      fieldType.valueType
-    )}>`;
+    if (mapType === 'Record') {
+      return `${mapType}<string, ${getFieldTypeString(
+        fieldType.valueType,
+        options
+      )}>`;
+    }
+    return `${mapType}<${getFieldTypeString(
+      fieldType.keyType,
+      options
+    )}, ${getFieldTypeString(fieldType.valueType, options)}>`;
   }
   return ThriftType2JavascriptType[fieldType.type];
 }
@@ -223,7 +246,7 @@ function handleField(
   let name = field.name.value;
   const commentsBefore = field.commentsBefore || [];
   // 需要处理typedef
-  const type = getFieldTypeString(field.fieldType);
+  const type = getFieldTypeString(field.fieldType, options);
   const index = field.fieldID ? field.fieldID.value : 0;
   // 考虑多种type数据的default value StringLiteral | IntConstant | DoubleConstant | BooleanLiteral | ConstMap | ConstList | Identifier
   let defaultValue: string | undefined;
@@ -379,7 +402,7 @@ function handleFunction(
   func: FunctionDefinition,
   options?: Partial<CMDOptions> | undefined
 ): FunctionEntity {
-  const returnType = getFieldTypeString(func.returnType);
+  const returnType = getFieldTypeString(func.returnType, options);
   const inputParams = func.fields.map((field: any) => {
     const { entity: temp, name } = handleField(field, options);
     return {
@@ -440,6 +463,51 @@ function handleFunction(
     loc: func.loc,
     commentsBefore,
     commentsAfter: func.commentsAfter
+  };
+}
+
+function handleConst(
+  c: ConstDefinition,
+  options?: CMDOptions
+): ConstantEntity | false {
+  let cType;
+  let value;
+  const constType = c.fieldType.type;
+  if (
+    c.name.value === 'liuqi' &&
+    (c.initializer as IntConstant).value.value === '1995'
+  ) {
+    return false;
+  }
+  if (
+    constType === SyntaxType.DoubleKeyword ||
+    constType === SyntaxType.I8Keyword ||
+    constType === SyntaxType.I16Keyword ||
+    constType === SyntaxType.I32Keyword ||
+    constType === SyntaxType.I64Keyword ||
+    constType === SyntaxType.ByteKeyword
+  ) {
+    cType = constType;
+    value = (c.initializer as IntConstant | DoubleConstant).value.value;
+  } else if (constType === SyntaxType.StringKeyword) {
+    cType = constType;
+    value = (c.initializer as StringLiteral).value;
+  } else {
+    return false;
+  }
+  let typeString = getFieldTypeString(c.fieldType, options);
+  if (typeString === 'Int64') {
+    typeString = 'string';
+  }
+
+  const name = c.name.value;
+  return {
+    type: cType as ConstantEntityType,
+    value,
+    name,
+    comments: c.comments,
+    loc: c.loc,
+    typeString
   };
 }
 

@@ -17,6 +17,7 @@ import {
 } from './thriftNew/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
+import { replaceTsHelperInt64 } from './tools/utils';
 import { ServiceEntity } from './interfaces';
 import { prettier } from './tools/format';
 
@@ -31,6 +32,14 @@ commander
   .option('-p, --project [dir]', 'thrift 根目录，默认为当前目录', process.cwd())
   .option('-an, --auto-namespace', '是否使用文件夹路径作为 namespace')
   .option('-s --strict', '如果字段没有指定 required 视为 optional')
+  .option(
+    '-i64 --i64 [i64Type]',
+    '设置 i64 的转化类型。默认为“Int64”，可选string'
+  )
+  .option(
+    '-map --map [mapType]',
+    '设置 map 的转化类型。默认为“Map”，可选Record'
+  )
   .option(
     '--strict-request',
     '在名称包含 Request 的 Struct 中如果字段没有指定 required 视为 optional'
@@ -89,13 +98,18 @@ const options: CMDOptions = {
     ? path.resolve(process.cwd(), commander.annotationConfig || '')
     : undefined,
   strictReq: commander.strictRequest,
-  enumJson: commander.enumJson || 'enums.json'
+  enumJson: commander.enumJson || 'enums.json',
+  i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
+  mapType: commander.map === 'Record' ? 'Record' : 'Map'
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
   path.join(__dirname, 'tools/tsHelper.d.ts'),
   path.join(options.tsRoot, 'tsHelper.d.ts')
 );
+if (options.i64Type === 'string') {
+  replaceTsHelperInt64(path.join(options.tsRoot, 'tsHelper.d.ts'));
+}
 
 const thriftFiles = glob
   .sync('**/*.thrift', { cwd: options.root })

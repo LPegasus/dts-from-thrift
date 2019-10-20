@@ -67,3 +67,9 @@ struct CollectRequest
 
 typedef Collection CollectResponse
 
+const i32 C32 = 1234
+const i64 C64 = 12345678
+const double CDouble = 1e3
+const string CString = '123123'
+const map<string,string> CMap = {"hello": "world", "goodnight": "moon"}
+const list<string> CList = ['hello', 'world']
