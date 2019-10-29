@@ -14,6 +14,12 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
+## 1.0.2 - 2019.10.29
+
+### Bugfix
+
+- 老的 protobuf 转换类型逻辑受 1.0.0 功能影响，回滚老的代码逻辑
+
 ## 1.0.0 - 2019.10.20
 
 ### Added
@@ -119,7 +125,7 @@ thrift RPC 定义文件转 d.ts 工具
 
 ## 0.9.0-beta.1 - 2019.1.7
 
-### bugfix
+### Bugfix
 
 - `thrift` `Struct` 字段如果定义了 `defaultValue`，生成的 dts 字段将带 `?`
 
@@ -133,7 +139,7 @@ thrift RPC 定义文件转 d.ts 工具
 
 ## 0.8.8 - 2018.12.28
 
-## bugfix
+### Bugfix
 
 - 正确解析有多个形参的 service
 
@@ -141,7 +147,7 @@ thrift RPC 定义文件转 d.ts 工具
 
 ## 0.8.6 - 2018.12.27
 
-### bugfix
+### Bugfix
 
 - 正确解析单行 service 声明
 
@@ -180,7 +186,7 @@ thrift RPC 定义文件转 d.ts 工具
   interface MyRPCContainer extends demo.rpc._Summary_ {}
   ```
 
-### Fix
+### Bugfix
 
 - 修复 service 无形参接口的报错问题
 

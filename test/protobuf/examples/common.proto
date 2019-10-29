@@ -12,6 +12,7 @@ message StatusInfo {
 message GeneralResponse {
     int32 status_code = 1;
     repeated StatusInfo status_info = 2;
+    map<string, int32> obtain_num_map = 3;
 }
 
 enum FooEnum {

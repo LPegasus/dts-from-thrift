@@ -20,7 +20,7 @@ import {
   printEnums,
   printInternalInterfacesAndEnums
 } from '../protobuf/print';
-import { typeMapping } from '../protobuf/typeMapping';
+import { typeMapping } from './typeMapping';
 import combine from '../tools/combine';
 import { prettier } from '../tools/format';
 

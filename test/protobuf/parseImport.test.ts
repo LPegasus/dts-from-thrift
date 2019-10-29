@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as path from 'path';
 import { parseImport } from '../../src/protobuf/parseImport';
 
 describe('protobuf - parse include statement', () => {
@@ -7,6 +6,6 @@ describe('protobuf - parse include statement', () => {
     expect(parseImport('import "common.proto";')).to.deep.eq({
       hit: true,
       mc: 'common.proto'
-    })
+    });
   });
 });

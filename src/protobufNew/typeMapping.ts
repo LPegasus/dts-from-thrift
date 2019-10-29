@@ -1,38 +1,44 @@
 const Int64 = 'Int64';
-const pb2JavascriptType: { [key: string]: string } = {
-  double: 'number',
-  float: 'number',
-  int32: 'number',
-  int64: Int64,
-  uint32: 'number',
-  uint64: Int64,
-  sint32: 'number',
-  sint64: Int64,
-  fixed32: 'number',
-  fixed64: 'number',
-  sfixed32: 'number',
-  sfixed64: 'number',
-  bool: 'boolean',
-  bytes: 'Buffer | number[] | Uint8Array',
-  string: 'string',
-  list: 'Array',
-  map: 'Map'
-};
 
-const typeReplaceRegexp = new RegExp(
-  `[\\W\\D]?(${Object.keys(pb2JavascriptType).join('|')})[\\W\\D]?`,
-  'g'
-);
+// const typeReplaceRegexp = new RegExp(
+//   `[\\W\\D]?(${Object.keys(pb2JavascriptType).join('|')})[\\W\\D]?`,
+//   'g'
+// );
 
 export function typeMapping(
   s: string,
   isRepeated: boolean = false,
-  i64_as_number: boolean = false
+  i64_as_number: boolean = false,
+  mapType: string = '',
+  keyType: string = '' // pb.MapField 中的 key 类型，如果为空字符串则表示不是 map
 ) {
+  const pb2JavascriptType: { [key: string]: string } = {
+    double: 'number',
+    float: 'number',
+    int32: 'number',
+    int64: Int64,
+    uint32: 'number',
+    uint64: Int64,
+    sint32: 'number',
+    sint64: Int64,
+    fixed32: 'number',
+    fixed64: 'number',
+    sfixed32: 'number',
+    sfixed64: 'number',
+    bool: 'boolean',
+    bytes: 'Buffer | number[] | Uint8Array',
+    string: 'string',
+    list: 'Array',
+    map: mapType
+  };
+
   let str = s;
   // 如果标记了 repeated，则给类型套一个 list 让后续程序处理成 array
   if (isRepeated) {
     str = `list<${s}>`;
+  }
+  if (keyType) {
+    str = `${pb2JavascriptType.map}<${keyType}, ${s}>`;
   }
   const tokens: string[] = [];
   let ch: string;
