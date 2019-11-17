@@ -397,7 +397,8 @@ export function printEnumsObject(includeMap: {
     if (rtn.ns) {
       const namespace = rtn.ns;
       const enums = rtn.enums;
-      const consts = rtn.consts;
+      // 在非--new的模式下，const为undefined
+      const consts = rtn.consts || [];
       enums.forEach(e => {
         Object.keys(e.properties).forEach(eKey => {
           res[`${namespace}.${e.name}.${eKey}`] = e.properties[eKey].value;
