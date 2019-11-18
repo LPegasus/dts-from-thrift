@@ -14,6 +14,12 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
+## 1.0.3 - 2019.11.18
+
+### Bugfix
+
+- 修复 const enum 为空的报错 [commit](https://github.com/LPegasus/dts-from-thrift/pull/19)
+
 ## 1.0.2 - 2019.10.29
 
 ### Bugfix
