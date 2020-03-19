@@ -99,7 +99,7 @@ export function printEnums(entity: RpcEntity): string {
         const temp = `${cb}${key} = ${property.value}${
           arr.length - 1 === i ? '' : ','
         }`;
-        return attachComment(temp, ca);
+        return attachCommentAfterToAbovePosition(temp, ca);
       })
       .join('\n    ')}
   }    ${printComments(datum.commentsAfter, datum.loc)}
@@ -161,7 +161,7 @@ export function printInterfaces(entity: Pick<RpcEntity, 'interfaces'>): string {
         const temp = `${cb}${key}${property.optional ? '?' : ''}: ${
           property.type
         };`;
-        return attachComment(temp, ca);
+        return attachCommentAfterToAbovePosition(temp, ca);
       })
       .join('\n    ')}
   }    ${printComments(datum.commentsAfter, datum.loc)}
@@ -211,6 +211,13 @@ function attachComment(str: string, comment: string): string {
   const len = str.length + 1;
   const len2 = Math.ceil(len / 12) * 12;
   return `${str.padEnd(len2, ' ')} ${c}`;
+}
+
+function attachCommentAfterToAbovePosition(
+  str: string,
+  comment: string
+): string {
+  return comment.trim() + '\n    ' + str;
 }
 
 /**
@@ -301,8 +308,15 @@ ${Object.keys(cur.interfaces)
         : i.returnType;
     const cb = printComments(i.commentsBefore); // comments before
     const ca = printComments(i.commentsAfter, i.loc); // comments after
-    const temp = `${cb}    ${key}(${inputParamsStr}): Promise<${returnType}>;`;
-    return attachComment(temp, ca);
+    let rtn = '';
+    if (cb.trim()) {
+      rtn += `    ${cb.trim()}\n`;
+    }
+    if (ca.trim()) {
+      rtn += `    ${ca.trim()}\n`;
+    }
+    rtn += `    ${key}(${inputParamsStr}): Promise<${returnType}>;`;
+    return rtn;
   })
   .join('\n')}
   }
@@ -330,7 +344,7 @@ export function printCommentLine(comment: CommentLine): string {
   if (!comment.value) {
     return '';
   }
-  return `// ${comment.value}`;
+  return `/** ${comment.value} */\n`;
 }
 
 export function printCommentBlock(comment: CommentBlock): string {
@@ -360,7 +374,7 @@ export function printComments(
     const lastOne = idx === comments.length - 1;
     if (sameLine) {
       if (comment.type === SyntaxType.CommentLine) {
-        res += printCommentLine(comment);
+        res = printCommentLine(comment) + '\n' + res;
         if (!lastOne) {
           res += '    ';
         }
@@ -373,7 +387,7 @@ export function printComments(
       }
     } else {
       if (comment.type === SyntaxType.CommentLine) {
-        res += printCommentLine(comment);
+        res = printCommentLine(comment) + '\n' + res;
         res += '\n';
       }
       if (comment.type === SyntaxType.CommentBlock) {

@@ -6,10 +6,12 @@
     "composite": true,
     "importHelpers": true,
     "strict": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "rootDirs": [
-      "src/", "test/"
+      "src/",
+      "test/"
     ]
   },
   "exclude": [

@@ -11,7 +11,7 @@ import {
 } from '../../src/thrift/print';
 import { readCode } from '../../src/thrift/readCode';
 
-describe('thrift - print', () => {
+describe.skip('thrift - print', () => {
   const entity: RpcEntity = {
     services: [],
     ns: '',

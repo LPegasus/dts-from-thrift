@@ -20,7 +20,7 @@ import {
 } from '../../src/thriftNew/@creditkarma/thrift-parser/types';
 import { readCode } from '../../src/thriftNew';
 
-describe('thrift - print', () => {
+describe('thriftNew - print', () => {
   // mock location
   const loc: TextLocation = {
     start: {
@@ -170,21 +170,21 @@ describe('thrift - print', () => {
     // 编排格式的事情交给prettier
     expect(printEnums(entity)).to.deep.eq(
       `  export const enum BizType {
-    ALL = 0,     // 所有
-
-    SKU = 1      // SKU
-
+    /** 所有 */
+    ALL = 0,
+    /** SKU */
+    SKU = 1
   }    
 
   export const enum Gender {
-    F = 0,       // female
-
-    M = 1,       // male
-
-    UN = 3,      // UNKNOWN
-
-    H = 4        // half
-
+    /** female */
+    F = 0,
+    /** male */
+    M = 1,
+    /** UNKNOWN */
+    UN = 3,
+    /** half */
+    H = 4
   }    
 
 `
@@ -198,11 +198,14 @@ describe('thrift - print', () => {
 * @uri: /example
 */
   export interface BizRequest {
-    biz_type: BizType;       // (default: 3)
+    /** (default: 3) */
+    biz_type: BizType;
+    /** biz id */
+    biz_id: string;
+    
+    /** 66666 */
 
-    biz_id: string;          // biz id
 
-    // 66666
 biz_ext?: any;
   }    
 
@@ -346,8 +349,8 @@ biz_ext?: any;
     );
     expect(rtn).to.eq(
       `  export interface RpcService1 {
-    a(req1: test.Input1, req2: Input2): Promise<Output1>;    // comment1
-
+    /** comment1 */
+    a(req1: test.Input1, req2: Input2): Promise<Output1>;
   }
 
   export interface RpcService2 {
@@ -421,7 +424,8 @@ biz_ext?: any;
     expect(rtn).to.be.eq(
       `// prettier-ignore
 export interface RpcService1 {
-  a(req: l6.Input1): Promise<life.common.Output1>; // comment1
+  /** comment1 */
+  a(req: l6.Input1): Promise<life.common.Output1>;
 }
 
 export interface RpcService2 {

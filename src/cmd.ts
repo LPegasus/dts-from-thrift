@@ -4,12 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import glob from 'glob';
 import { CMDOptions } from './interfaces';
-import { readCode as readCodeOld } from './thrift/readCode';
 import { readCode as readCodeNew } from './thriftNew';
-import {
-  print as printOld,
-  printCollectionRpc as printCollectionRpcOld
-} from './thrift/print';
 import {
   print as printNew,
   printCollectionRpc as printCollectionRpcNew,
@@ -53,7 +48,6 @@ commander
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--use-tag <tagName>', '使用 tag 名称替换 field 名称')
   .option('--prettier', '输出时使用 prettier 格式化', false)
-  .option('--new', '使用新版 AST 解析')
   .option(
     '--rpc-namespace <rpc-namespace>',
     '指定一个独立的 namespace 存放所有 service',
@@ -68,20 +62,9 @@ commander
 
 commander.parse(process.argv);
 
-let print: typeof printNew | typeof printOld,
-  printCollectionRpc:
-    | typeof printCollectionRpcNew
-    | typeof printCollectionRpcOld,
-  readCode: typeof readCodeOld | typeof readCodeNew;
-if (commander.new) {
-  print = printNew;
-  printCollectionRpc = printCollectionRpcNew;
-  readCode = readCodeNew;
-} else {
-  print = printOld;
-  printCollectionRpc = printCollectionRpcOld;
-  readCode = readCodeOld;
-}
+const print = printNew;
+const printCollectionRpc = printCollectionRpcNew;
+const readCode = readCodeNew;
 
 const options: CMDOptions = {
   root: path.resolve(process.cwd(), commander.project),

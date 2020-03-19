@@ -14,6 +14,16 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
+## 1.1.0 - 2020.03.19
+
+### Breaking Change
+
+- 删除 `--new` 传参，只保留 ast 解析
+
+### Changed
+
+- 将行尾注释放到该行上面，使用 `/** */` 标注，以使得 vscode 可提示注释内容
+
 ## 1.0.3 - 2019.11.18
 
 ### Bugfix

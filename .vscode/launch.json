@@ -39,7 +39,7 @@
         "--timeout",
         "999999",
         "--colors",
-        "${workspaceFolder}/test/**/*.ts"
+        "${workspaceFolder}/test/**/print.test.ts"
       ],
       "internalConsoleOptions": "openOnSessionStart"
     },
