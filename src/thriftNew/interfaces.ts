@@ -1,5 +1,10 @@
 import * as pb from 'protobufjs';
-import { SyntaxType, TextLocation, Comment } from '@creditkarma/thrift-parser';
+
+import {
+  SyntaxType,
+  TextLocation,
+  Comment
+} from './@creditkarma/thrift-parser';
 
 // 支持comment，开发时间就一丢丢所以复用一下print，理想情况是直接用@creditkarma/thrift-parser的ast打印
 // 现在输出的版本comments表达能力大于原始的版本，但是缺失
@@ -138,4 +143,5 @@ export type PbNodeEntity = (
   | {
       type: 'enum';
       meta: pb.Enum;
-    }) & { filename: string };
+    }
+) & { filename: string };
