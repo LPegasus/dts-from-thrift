@@ -14,7 +14,7 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
-## 1.1.2 - 2020.03.29
+## 1.1.3 - 2020.03.29
 
 ### Breaking Change
 
