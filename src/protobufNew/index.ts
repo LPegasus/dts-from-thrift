@@ -363,7 +363,7 @@ export function convertFieldToInterfacePropertyEntity(
       options.mapType,
       d.map ? ((d as any) as pb.MapField).keyType : ''
     ),
-    optional: d.optional,
+    optional: false,
     required: d.required
   };
 }

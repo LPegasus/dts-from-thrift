@@ -14,6 +14,12 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
+## 1.1.1 - 2020.03.29
+
+### Breaking Change
+
+- protobuf 所有字段均为 optional，与 pb3 一致
+
 ## 1.1.0 - 2020.03.19
 
 ### Breaking Change
