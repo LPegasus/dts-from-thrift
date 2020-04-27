@@ -195,6 +195,7 @@ function getFieldTypeString(
   const ThriftType2JavascriptType: { [key: string]: string } = {
     [SyntaxType.BoolKeyword]: 'boolean',
     [SyntaxType.ByteKeyword]: 'number',
+    [SyntaxType.I8Keyword]: 'number',
     [SyntaxType.I16Keyword]: 'number',
     [SyntaxType.I32Keyword]: 'number',
     [SyntaxType.I64Keyword]: i64Type,
