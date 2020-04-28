@@ -9,14 +9,14 @@ import {
   printServices,
   printCollectionRpc,
   printEnumsObject,
-  printConsts
+  printConsts,
 } from '../../src/thriftNew/print';
 import {
   TextLocation,
   SyntaxType,
   CommentLine,
   CommentBlock,
-  Comment
+  Comment,
 } from '../../src/thriftNew/@creditkarma/thrift-parser/types';
 import { readCode } from '../../src/thriftNew';
 
@@ -26,13 +26,13 @@ describe('thriftNew - print', () => {
     start: {
       line: 0,
       column: 0,
-      index: 0
+      index: 0,
     },
     end: {
       line: 0,
       column: 0,
-      index: 0
-    }
+      index: 0,
+    },
   };
   // mock comments
   const comments: Comment[] = [];
@@ -42,8 +42,8 @@ describe('thriftNew - print', () => {
     value: val,
     loc: {
       start: { line: 7, column: 18, index: 145 },
-      end: { line: 7, column: 22, index: 149 }
-    }
+      end: { line: 7, column: 22, index: 149 },
+    },
   });
 
   const buildCommentBlock = (val: string[]): CommentBlock => ({
@@ -51,8 +51,8 @@ describe('thriftNew - print', () => {
     value: val,
     loc: {
       start: { line: 25, column: 1, index: 520 },
-      end: { line: 38, column: 4, index: 751 }
-    }
+      end: { line: 38, column: 4, index: 751 },
+    },
   });
 
   const entity: RpcEntity = {
@@ -69,17 +69,17 @@ describe('thriftNew - print', () => {
             comments: [],
             commentsBefore: [],
             commentsAfter: [buildCommentLine('所有')],
-            loc
+            loc,
           },
           SKU: {
             value: 1,
             comments: [],
             commentsAfter: [buildCommentLine('SKU')],
-            loc
-          }
+            loc,
+          },
         },
         loc,
-        comments
+        comments,
       },
       {
         name: 'Gender',
@@ -88,44 +88,44 @@ describe('thriftNew - print', () => {
             value: 0,
             comments,
             commentsAfter: [buildCommentLine('female')],
-            loc
+            loc,
           },
           M: {
             value: 1,
             comments: [],
             commentsAfter: [buildCommentLine('male')],
-            loc
+            loc,
           },
           UN: {
             value: 3,
             comments: [],
             commentsAfter: [buildCommentLine('UNKNOWN')],
-            loc
+            loc,
           },
           H: {
             value: 4,
             comments: [],
             commentsAfter: [buildCommentLine('half')],
-            loc
-          }
+            loc,
+          },
         },
         comments,
-        loc
-      }
+        loc,
+      },
     ],
     typeDefs: [
       {
         alias: 'CollectionResponse',
         type: 'Collection',
         loc,
-        comments
+        comments,
       },
       {
         alias: 'CollectionRequest',
         type: 'Collection',
         loc,
-        comments
-      }
+        comments,
+      },
     ],
     includes: [],
     interfaces: [
@@ -139,7 +139,7 @@ describe('thriftNew - print', () => {
             index: 0,
             optional: false,
             defaultValue: '3',
-            loc
+            loc,
           },
           biz_id: {
             type: 'string',
@@ -148,7 +148,7 @@ describe('thriftNew - print', () => {
             index: 1,
             optional: false,
             defaultValue: '"3"',
-            loc
+            loc,
           },
           biz_ext: {
             type: 'any',
@@ -157,14 +157,16 @@ describe('thriftNew - print', () => {
             index: 2,
             optional: true,
             defaultValue: '',
-            loc
-          }
+            loc,
+          },
         },
         loc,
         comments,
-        commentsBefore: [buildCommentBlock(['@method: post', '@uri: /example'])]
-      }
-    ]
+        commentsBefore: [
+          buildCommentBlock(['@method: post', '@uri: /example']),
+        ],
+      },
+    ],
   };
   it('enum print success', () => {
     // 编排格式的事情交给prettier
@@ -199,13 +201,10 @@ describe('thriftNew - print', () => {
 */
   export interface BizRequest {
     /** (default: 3) */
-    biz_type: BizType;
-    /** biz id */
-    biz_id: string;
-    
-    /** 66666 */
-
-
+biz_type: BizType;
+/** biz id */
+biz_id: string;
+/** 66666 */
 biz_ext?: any;
   }    
 
@@ -234,7 +233,7 @@ biz_ext?: any;
           ns: 'life.demo',
           interfaces: [],
           typeDefs: [],
-          services: []
+          services: [],
         },
         {
           '/test/root/feed.thrift': {
@@ -244,8 +243,8 @@ biz_ext?: any;
             includes: [],
             ns: 'life.api_feed',
             interfaces: [],
-            typeDefs: []
-          }
+            typeDefs: [],
+          },
         }
       )
     ).to.eq(
@@ -266,7 +265,7 @@ biz_ext?: any;
         ns: 'life.demo',
         interfaces: [],
         typeDefs: [],
-        services: []
+        services: [],
       },
       {
         '/test/root/detail.thrift': {
@@ -276,7 +275,7 @@ biz_ext?: any;
           includes: [],
           ns: 'life.item.detail',
           interfaces: [],
-          typeDefs: []
+          typeDefs: [],
         },
         '/test/root/item.thrift': {
           enums: [],
@@ -285,8 +284,8 @@ biz_ext?: any;
           includes: [],
           ns: 'life.demo.item',
           interfaces: [],
-          typeDefs: []
-        }
+          typeDefs: [],
+        },
       }
     );
     expect(res).not.eq(`interface interface1 {
@@ -309,8 +308,8 @@ biz_ext?: any;
             name: 'Input1',
             properties: {},
             comments,
-            loc
-          }
+            loc,
+          },
         ],
         services: [
           {
@@ -319,16 +318,16 @@ biz_ext?: any;
               a: {
                 inputParams: [
                   { type: 'Input1', name: 'req1', index: 1 },
-                  { type: 'Input2', name: 'req2', index: 2 }
+                  { type: 'Input2', name: 'req2', index: 2 },
                 ],
                 returnType: 'Output1',
                 comments: [],
                 commentsAfter: [buildCommentLine('comment1')],
-                loc
-              }
+                loc,
+              },
             },
             loc,
-            comments
+            comments,
           },
           {
             name: 'RpcService2',
@@ -337,13 +336,13 @@ biz_ext?: any;
                 inputParams: [{ type: 'Input2', name: 'req2', index: 1 }],
                 returnType: 'Output2',
                 comments: [],
-                loc
-              }
+                loc,
+              },
             },
             comments,
-            loc
-          }
-        ]
+            loc,
+          },
+        ],
       },
       true
     );
@@ -372,16 +371,16 @@ biz_ext?: any;
             alias: 'Input1',
             type: '_Input1',
             loc,
-            comments
-          }
+            comments,
+          },
         ],
         enums: [
           {
             name: 'Input2',
             properties: {},
             loc,
-            comments
-          }
+            comments,
+          },
         ],
         fileName: '/life/client',
         includes: ['/life/common'],
@@ -394,11 +393,11 @@ biz_ext?: any;
                 returnType: 'common.Output1',
                 comments: [],
                 commentsAfter: [buildCommentLine('comment1')],
-                loc
-              }
+                loc,
+              },
             },
             loc,
-            comments
+            comments,
           },
           {
             name: 'RpcService2',
@@ -407,18 +406,18 @@ biz_ext?: any;
                 inputParams: [{ type: 'Input2', name: 'req', index: 2 }],
                 returnType: 'common.Output2',
                 comments: [],
-                loc
-              }
+                loc,
+              },
             },
             comments,
-            loc
-          }
-        ]
+            loc,
+          },
+        ],
       },
       {
         '/life/common': {
-          ns: 'life.common'
-        }
+          ns: 'life.common',
+        },
       }
     );
     expect(rtn).to.be.eq(
@@ -456,7 +455,7 @@ export interface RpcService2 {
       'life.api_favorite.CDouble': 1000,
       'life.api_favorite.CString': '123123',
       'life.api_favorite.ZizType.ALL': 0,
-      'life.api_favorite.ZizType.GOODS': 1
+      'life.api_favorite.ZizType.GOODS': 1,
     };
     expect(JSON.stringify(enums)).to.eq(JSON.stringify(enumObj));
   });
