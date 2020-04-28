@@ -14,6 +14,12 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
+## 1.1.4 - 2020.04.28
+
+### Changed
+
+- 优化 thrift 文件生成的代码格式 ([@mehwww](https://github.com/mehwww) in [#22](https://github.com/LPegasus/dts-from-thrift/pull/22))
+
 ## 1.1.3 - 2020.03.29
 
 ### Breaking Change
