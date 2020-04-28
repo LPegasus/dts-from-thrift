@@ -163,7 +163,8 @@ export function printInterfaces(entity: Pick<RpcEntity, 'interfaces'>): string {
         };`;
         return attachCommentAfterToAbovePosition(temp, ca);
       })
-      .join('\n    ')}
+      .join('\n    ')
+      .replace(/(\n\s+)+/g, '\n')}
   }    ${printComments(datum.commentsAfter, datum.loc)}
 
 `;
