@@ -48,6 +48,7 @@ commander
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--use-tag <tagName>', '使用 tag 名称替换 field 名称')
   .option('--prettier', '输出时使用 prettier 格式化', false)
+  .option('--module', '输出为module格式', false)
   .option(
     '--rpc-namespace <rpc-namespace>',
     '指定一个独立的 namespace 存放所有 service',
@@ -75,6 +76,7 @@ const options: CMDOptions = {
   useTimestamp: commander.timestamp,
   useTag: commander.useTag,
   usePrettier: commander.prettier,
+  useModule: commander.module,
   rpcNamespace: commander.rpcNamespace,
   lint: false,
   i64_as_number: false,

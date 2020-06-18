@@ -25,7 +25,10 @@ export default function combine(options: Partial<CMDOptions> = {}) {
 
   const lines = files.map(f => {
     const relativePath = path.relative(options.tsRoot || process.cwd(), f);
-    return `/// <reference path="${relativePath}" />`;
+    if (options.useModule)
+      return `export * from "${relativePath}";`;
+    else 
+      return `/// <reference path="${relativePath}" />`;
   });
 
   fs.writeFileSync(

@@ -83,6 +83,7 @@ export interface CMDOptions {
   entryName: string;
   useTag: string;
   usePrettier: boolean;
+  useModule: boolean;
   rpcNamespace: string;
   lint: boolean;
   i64_as_number: boolean;
