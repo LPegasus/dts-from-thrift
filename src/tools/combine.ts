@@ -26,7 +26,7 @@ export default function combine(options: Partial<CMDOptions> = {}) {
   const lines = files.map(f => {
     const relativePath = path.relative(options.tsRoot || process.cwd(), f);
     if (options.useModule)
-      return `export * from "${relativePath}";`;
+      return `export * from "./${relativePath.replace(/\.d\.ts$/, '')}";`;
     else 
       return `/// <reference path="${relativePath}" />`;
   });
