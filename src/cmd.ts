@@ -158,13 +158,23 @@ if (options.rpcNamespace) {
         options.tsRoot,
         options.rpcNamespace + '-rpc.d.ts'
       );
+      const tempMap: Record<string, boolean> = {};
+
       fs.writeFile(
         tarPath,
         prettier(`/// <reference path="./tsHelper.d.ts" />';
 
 declare namespace ${options.rpcNamespace} {\n${rtn}
   export interface _Summary_ {
-${allServices.map(d => `${d.name}: WrapperService<${d.name}>;`).join('\n  ')}
+${allServices.map(d => {
+  let rtn = `${d.name}: WrapperService<${d.name}>;`; 
+  if (tempMap[d.name] === true) {
+    rtn = ''
+    console.warn(`\u001b[43;30mduplicate service name "${d.name}" when build _Summary_\u001b[0m`)
+  }
+  tempMap[d.name] = true;
+  return rtn
+}).filter(Boolean).join('\n  ')}
   }
 }`),
         'utf8',

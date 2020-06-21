@@ -101,7 +101,7 @@ export interface FunctionEntity extends PrimarySyntax {
 }
 
 export interface IAnnotationConfig {
-  fieldKey?: string;
+  fieldKey?: string | string[];
   fieldComment?: string[];
   functionMethod?: string;
   functionUri?: string;

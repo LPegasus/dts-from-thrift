@@ -575,6 +575,31 @@ describe('thrift - read code file', () => {
     ).to.eq('@api.get: /api/collect2    ');
   });
 
+  it('support annotation config field key arr', async () => {
+    const thirftCode = `
+    struct Collection {
+      1: optional BizType biz_type (source = 'query',   key = 'bizType'),
+      3: optional pack_goods.ExtensiveGoodsItem sku_collection(source = 'query',   key2 = 'skuCollection'),
+    }
+    service CollectService {
+      Collection Collect(1:i32 req)  (method = 'GET',  uri = '/api/collect'),
+      Collection Collect2(1:i32 req)  (api.get = '/api/collect2'),
+    }
+      `;
+    const res = await parser('', thirftCode, {
+      annotationConfig: {
+        fieldKey: ['key', 'key2'],
+        fieldComment: ['source', 'api.get', 'api.post'],
+        functionMethod: 'method',
+        functionUri: 'uri'
+      }
+    });
+    // 正确的根据key修改变量命名
+    expect(res.interfaces[0].properties['bizType'].index).to.eq(1);
+    // 正确的根据key2修改变量命名
+    expect(res.interfaces[0].properties['skuCollection'].index).to.eq(3);
+  });
+
   it('support default value', async () => {
     const thirftCode = `
       struct Collection {
