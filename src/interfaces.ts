@@ -68,7 +68,7 @@ export interface FunctionEntity {
 }
 
 export interface IAnnotationConfig {
-  fieldKey?: string;
+  fieldKey?: string | string[];
   fieldComment?: string[];
   functionMethod?: string;
   functionUri?: string;

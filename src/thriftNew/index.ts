@@ -320,8 +320,16 @@ function handleField(
             }    `;
           }
         }
-        if (fieldKey) {
-          if (annotation.name.value === fieldKey) {
+        let fieldKeyArr: string[];
+        // 支持fieldKey是个数组
+        if (Array.isArray(fieldKey)) {
+          fieldKeyArr = fieldKey;
+        } else {
+          fieldKeyArr = [fieldKey || '___some_error_value___'];
+        }
+        // 如果存在多个annotation命中，后面的覆盖前面的
+        if (fieldKeyArr.length) {
+          if (fieldKeyArr.indexOf(annotation.name.value) > -1) {
             name = annotation!.value!.value;
           }
         }
