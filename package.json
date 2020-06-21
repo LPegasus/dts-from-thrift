@@ -1,6 +1,6 @@
 {
   "name": "dts-from-thrift",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "typescript,thrift,protobuf",
   "main": "lib/index.js",
   "scripts": {
@@ -15,7 +15,16 @@
     "type": "git",
     "url": "git@github.com:LPegasus/dts-from-thrift.git"
   },
-  "author": "pegusas1@hotmail.com",
+  "maintainers": [
+    {
+      "name": "nameliuqi",
+      "email": "nameliuqi@outlook.com"
+    },
+    {
+      "name": "lpegasus",
+      "email": "pegusas1@hotmail.com"
+    }
+  ],
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.1.4",
