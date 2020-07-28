@@ -1,24 +1,26 @@
 import { expect } from 'chai';
 import * as path from 'path';
+
+import { readCode } from '../../src/thriftNew';
+import {
+  Comment,
+  CommentBlock,
+  CommentLine,
+  SyntaxType,
+  TextLocation,
+} from '../../src/thriftNew/@creditkarma/thrift-parser/types';
 import { RpcEntity } from '../../src/thriftNew/interfaces';
 import {
-  printEnums,
-  printInterfaces,
-  printTypeDefs,
   fixIncludeNamespace,
-  printServices,
   printCollectionRpc,
-  printEnumsObject,
+  printCommentLine,
   printConsts,
+  printEnums,
+  printEnumsObject,
+  printInterfaces,
+  printServices,
+  printTypeDefs,
 } from '../../src/thriftNew/print';
-import {
-  TextLocation,
-  SyntaxType,
-  CommentLine,
-  CommentBlock,
-  Comment,
-} from '../../src/thriftNew/@creditkarma/thrift-parser/types';
-import { readCode } from '../../src/thriftNew';
 
 describe('thriftNew - print', () => {
   // mock location
@@ -196,18 +198,17 @@ describe('thriftNew - print', () => {
   it('interface print success', () => {
     const rtn = printInterfaces(entity);
     expect(rtn).to.deep.eq(`/*
-* @method: post
-* @uri: /example
-*/
-  export interface BizRequest {
-    /** (default: 3) */
-biz_type: BizType;
-/** biz id */
-biz_id: string;
-/** 66666 */
-biz_ext?: any;
-  }    
-
+ * @method: post
+ * @uri: /example
+ */
+export interface BizRequest {
+  /** (default: 3) */
+  biz_type: BizType;
+  /** biz id */
+  biz_id: string;
+  /** 66666 */
+  biz_ext?: any;
+}
 `);
   });
 
@@ -464,11 +465,30 @@ export interface RpcService2 {
     const fileName = path.join(__dirname, 'examples', 'enumJson.thrift');
     const rtn = await readCode(fileName);
     const consts = printConsts(rtn);
-    console.log(consts);
     expect(consts).to.eq(`  export const C32 = 1234
   export const C64 = '12345678'
   export const CDouble = 1e3
   export const CString = '123123'
 `);
+  });
+
+  it('add comment bugfix: single line comment with `*/` should be stripped', () => {
+    const result = printCommentLine({
+      loc: {
+        start: {
+          index: 0,
+          column: 0,
+          line: 0,
+        },
+        end: {
+          index: 0,
+          column: 0,
+          line: 0,
+        },
+      },
+      type: SyntaxType.CommentLine,
+      value: '***** 1****/**fasdf*///*/**',
+    });
+    expect(result).to.eq('/** ***** 1*****fasdf** */');
   });
 });
