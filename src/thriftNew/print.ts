@@ -3,7 +3,7 @@ import {
   Comment,
   CommentLine,
   CommentBlock,
-  TextLocation
+  TextLocation,
 } from './@creditkarma/thrift-parser';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -26,17 +26,24 @@ export async function print(
   const ns = options.autoNamespace
     ? printNamespace(entity, options.root)
     : entity.ns;
-  const content = `// generate${
-    options.useTimestamp ? ` at ${timeString}` : ''
-  } by dts-from-thrift
-declare namespace ${ns} {
+    
+  let content = `
 ${printEnums(entity)}
 ${printInterfaces(entity)}
 ${printTypeDefs(entity)}
 ${printServices(entity)}
 ${printConsts(entity)}
-}
 `;
+
+  if (!options.useModule) {
+    content = `declare namespace ${ns} {${content}}`;
+  }
+
+  content =
+    `// generate${
+      options.useTimestamp ? ` at ${timeString}` : ''
+    } by dts-from-thrift\n${content}`;
+
   const relativePath: path.ParsedPath = path.parse(
     path.relative(options.root, entity.fileName)
   );
@@ -186,7 +193,7 @@ export function printTypeDefs(entity: RpcEntity): string {
   }
 
   let rtn = '';
-  entity.typeDefs.forEach(datum => {
+  entity.typeDefs.forEach((datum) => {
     rtn += printComments(datum.commentsBefore);
     rtn += `  export type ${datum.alias} = ${datum.type};${printComments(
       datum.commentsAfter,
@@ -239,7 +246,7 @@ export function fixIncludeNamespace(
 ): string {
   let result = content;
   const currentFile = path.parse(entity.fileName);
-  entity.includes.forEach(include => {
+  entity.includes.forEach((include) => {
     // 获取所有 include 语句所对应的 entity
     const includeKey = path.resolve(currentFile.dir, include);
     const includeEntity = includeMap[includeKey];
@@ -281,21 +288,21 @@ export function printServices(
 ) {
   const serviceEntity = entity.services;
   const keyInNs = [
-    ...entity.enums.map(d => d.name),
-    ...entity.typeDefs.map(d => d.alias),
-    ...entity.interfaces.map(d => d.name)
+    ...entity.enums.map((d) => d.name),
+    ...entity.typeDefs.map((d) => d.alias),
+    ...entity.interfaces.map((d) => d.name),
   ];
   return serviceEntity.reduce((rtn, cur) => {
     rtn += printComments(cur.commentsBefore);
     rtn += `  export interface ${cur.name} {
 ${Object.keys(cur.interfaces)
-  .map(key => {
+  .map((key) => {
     const i = cur.interfaces[key];
     let sortTmp: any[] = [];
-    i.inputParams.forEach(d => (sortTmp[d.index] = d));
-    sortTmp = sortTmp.filter(d => !!d);
+    i.inputParams.forEach((d) => (sortTmp[d.index] = d));
+    sortTmp = sortTmp.filter((d) => !!d);
     const inputParamsStr = (sortTmp as (typeof i)['inputParams'])
-      .map(d => {
+      .map((d) => {
         const type =
           isGenerateRPC && keyInNs.indexOf(d.type) !== -1
             ? `${entity.ns}.${d.type}`
@@ -407,19 +414,19 @@ export function printEnumsObject(includeMap: {
   [key: string]: RpcEntity;
 }): { [key: string]: number | string } {
   const res: { [key: string]: number | string } = {};
-  Object.keys(includeMap).forEach(key => {
+  Object.keys(includeMap).forEach((key) => {
     const rtn = includeMap[key];
     if (rtn.ns) {
       const namespace = rtn.ns;
       const enums = rtn.enums;
       // 在非--new的模式下，const为undefined
       const consts = rtn.consts || [];
-      enums.forEach(e => {
-        Object.keys(e.properties).forEach(eKey => {
+      enums.forEach((e) => {
+        Object.keys(e.properties).forEach((eKey) => {
           res[`${namespace}.${e.name}.${eKey}`] = e.properties[eKey].value;
         });
       });
-      consts.forEach(c => {
+      consts.forEach((c) => {
         let parsedValue: number | string;
         if (
           c.type === SyntaxType.ByteKeyword ||
