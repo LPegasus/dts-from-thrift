@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 import commander from 'commander';
+import chalk from 'chalk';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import glob from 'glob';
@@ -8,7 +9,7 @@ import { readCode as readCodeNew } from './thriftNew';
 import {
   print as printNew,
   printCollectionRpc as printCollectionRpcNew,
-  printEnumsObject
+  printEnumsObject,
 } from './thriftNew/print';
 import combine from './tools/combine';
 import { updateNotify } from './tools/updateNotify';
@@ -48,7 +49,6 @@ commander
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--use-tag <tagName>', '使用 tag 名称替换 field 名称')
   .option('--prettier', '输出时使用 prettier 格式化', false)
-  .option('--module', '输出为module格式', false)
   .option(
     '--rpc-namespace <rpc-namespace>',
     '指定一个独立的 namespace 存放所有 service',
@@ -76,8 +76,8 @@ const options: CMDOptions = {
   useTimestamp: commander.timestamp,
   useTag: commander.useTag,
   usePrettier: commander.prettier,
-  useModule: commander.module,
   rpcNamespace: commander.rpcNamespace,
+  useModule: false,
   lint: false,
   i64_as_number: false,
   annotationConfigPath: commander.annotationConfig
@@ -87,7 +87,7 @@ const options: CMDOptions = {
   enumJson: commander.enum_json || 'enums.json',
   i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
   mapType:
-    commander.map === true || commander.map === 'Record' ? 'Record' : 'Map'
+    commander.map === true || commander.map === 'Record' ? 'Record' : 'Map',
 };
 fs.ensureDirSync(options.tsRoot);
 fs.copyFileSync(
@@ -100,11 +100,11 @@ if (options.i64Type === 'string') {
 
 const thriftFiles = glob
   .sync('**/*.thrift', { cwd: options.root })
-  .map(d => path.resolve(options.root, d));
+  .map((d) => path.resolve(options.root, d));
 
 // 在不同的模式下includeEntity是不相互兼容的，所以使用any
 const includeMap: { [key: string]: any } = {};
-const tasks = thriftFiles.map(async filename => {
+const tasks = thriftFiles.map(async (filename) => {
   let entity: any = null;
   try {
     entity = await readCode(filename, options, includeMap);
@@ -119,7 +119,7 @@ const tasks = thriftFiles.map(async filename => {
 
 const rTasks: Array<Promise<any>> = [];
 rTasks.push(
-  Promise.all(tasks).then(async entityList => {
+  Promise.all(tasks).then(async (entityList) => {
     if (options.enumJson) {
       const tarFile = path.join(options.tsRoot, options.enumJson);
       await fs.ensureFile(tarFile);
@@ -127,7 +127,7 @@ rTasks.push(
     }
 
     return Promise.all(
-      entityList.map(async entity => {
+      entityList.map(async (entity) => {
         try {
           return print(entity!, options, includeMap);
         } catch (e) {
@@ -142,7 +142,7 @@ rTasks.push(
 // summary RPC service
 if (options.rpcNamespace) {
   rTasks.push(
-    Promise.all(tasks).then(async entityList => {
+    Promise.all(tasks).then(async (entityList) => {
       const allServices: ServiceEntity[] = [];
       const rtn = entityList.reduce((rtn, entity) => {
         if (!entity || !entity.services.length) {
@@ -160,23 +160,13 @@ if (options.rpcNamespace) {
         options.tsRoot,
         options.rpcNamespace + '-rpc.d.ts'
       );
-      const tempMap: Record<string, boolean> = {};
-
       fs.writeFile(
         tarPath,
         prettier(`/// <reference path="./tsHelper.d.ts" />';
 
 declare namespace ${options.rpcNamespace} {\n${rtn}
   export interface _Summary_ {
-${allServices.map(d => {
-  let rtn = `${d.name}: WrapperService<${d.name}>;`; 
-  if (tempMap[d.name] === true) {
-    rtn = ''
-    console.warn(`\u001b[43;30mduplicate service name "${d.name}" when build _Summary_\u001b[0m`)
-  }
-  tempMap[d.name] = true;
-  return rtn
-}).filter(Boolean).join('\n  ')}
+${allServices.map((d) => `${d.name}: WrapperService<${d.name}>;`).join('\n  ')}
   }
 }`),
         'utf8',
@@ -193,6 +183,14 @@ ${allServices.map(d => {
 Promise.all(rTasks).then(async () => {
   combine(options);
   console.log(
-    `\u001b[32mFinished.\u001b[39m Please check the d.ts files in \u001b[97m${options.tsRoot}\u001b[39m.`
+    `${chalk.green('Finished.')} Please check the d.ts files in ${chalk.cyan(
+      options.tsRoot
+    )}.`
   );
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.log(chalk.red('dts-from-thrift exit with following errors:'));
+  console.log(chalk.dim('%o'), reason);
+  process.exit(1);
 });

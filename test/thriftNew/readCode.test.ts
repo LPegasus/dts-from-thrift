@@ -27,8 +27,8 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 11, column: 5, index: 177 },
-              end: { line: 11, column: 66, index: 238 }
-            }
+              end: { line: 11, column: 66, index: 238 },
+            },
           },
           biz_id: {
             type: 'string',
@@ -40,8 +40,8 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 12, column: 5, index: 243 },
-              end: { line: 12, column: 31, index: 269 }
-            }
+              end: { line: 12, column: 31, index: 269 },
+            },
           },
           sku_collection: {
             type: 'pack_goods.ExtensiveGoodsItem',
@@ -53,13 +53,13 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 13, column: 5, index: 274 },
-              end: { line: 13, column: 62, index: 331 }
-            }
-          }
+              end: { line: 13, column: 62, index: 331 },
+            },
+          },
         },
         loc: {
           start: { line: 10, column: 1, index: 153 },
-          end: { line: 14, column: 2, index: 333 }
+          end: { line: 14, column: 2, index: 333 },
         },
         comments: [
           {
@@ -67,12 +67,12 @@ describe('thrift - read code file', () => {
             value: '商品',
             loc: {
               start: { line: 7, column: 18, index: 145 },
-              end: { line: 7, column: 22, index: 149 }
-            }
-          }
+              end: { line: 7, column: 22, index: 149 },
+            },
+          },
         ],
         commentsAfter: [],
-        commentsBefore: []
+        commentsBefore: [],
       },
       {
         name: 'FetchFavoriteRequest',
@@ -87,8 +87,8 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 19, column: 5, index: 403 },
-              end: { line: 19, column: 34, index: 432 }
-            }
+              end: { line: 19, column: 34, index: 432 },
+            },
           },
           offset: {
             type: 'Int64',
@@ -100,8 +100,8 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 20, column: 5, index: 437 },
-              end: { line: 20, column: 28, index: 460 }
-            }
+              end: { line: 20, column: 28, index: 460 },
+            },
           },
           count: {
             type: 'Int64',
@@ -113,8 +113,8 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 21, column: 5, index: 465 },
-              end: { line: 21, column: 27, index: 487 }
-            }
+              end: { line: 21, column: 27, index: 487 },
+            },
           },
           user_id: {
             type: 'Int64',
@@ -126,13 +126,13 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 22, column: 5, index: 492 },
-              end: { line: 22, column: 29, index: 516 }
-            }
-          }
+              end: { line: 22, column: 29, index: 516 },
+            },
+          },
         },
         loc: {
           start: { line: 18, column: 1, index: 369 },
-          end: { line: 23, column: 2, index: 518 }
+          end: { line: 23, column: 2, index: 518 },
         },
         comments: [
           {
@@ -140,17 +140,17 @@ describe('thrift - read code file', () => {
             value: '@method: GET',
             loc: {
               start: { line: 16, column: 1, index: 335 },
-              end: { line: 16, column: 16, index: 350 }
-            }
+              end: { line: 16, column: 16, index: 350 },
+            },
           },
           {
             type: 'CommentLine',
             value: '@brief: 获取收藏清单',
             loc: {
               start: { line: 17, column: 1, index: 351 },
-              end: { line: 17, column: 18, index: 368 }
-            }
-          }
+              end: { line: 17, column: 18, index: 368 },
+            },
+          },
         ],
         commentsAfter: [],
         commentsBefore: [
@@ -159,18 +159,18 @@ describe('thrift - read code file', () => {
             value: '@method: GET',
             loc: {
               start: { line: 16, column: 1, index: 335 },
-              end: { line: 16, column: 16, index: 350 }
-            }
+              end: { line: 16, column: 16, index: 350 },
+            },
           },
           {
             type: 'CommentLine',
             value: '@brief: 获取收藏清单',
             loc: {
               start: { line: 17, column: 1, index: 351 },
-              end: { line: 17, column: 18, index: 368 }
-            }
-          }
-        ]
+              end: { line: 17, column: 18, index: 368 },
+            },
+          },
+        ],
       },
       {
         name: 'FetchFavoriteResponse',
@@ -188,14 +188,14 @@ describe('thrift - read code file', () => {
                 value: '是否种草',
                 loc: {
                   start: { line: 41, column: 45, index: 828 },
-                  end: { line: 41, column: 52, index: 835 }
-                }
-              }
+                  end: { line: 41, column: 52, index: 835 },
+                },
+              },
             ],
             loc: {
               start: { line: 41, column: 5, index: 788 },
-              end: { line: 41, column: 43, index: 826 }
-            }
+              end: { line: 41, column: 43, index: 826 },
+            },
           },
           has_more: {
             type: 'boolean',
@@ -208,16 +208,16 @@ describe('thrift - read code file', () => {
                 value: '是否种草',
                 loc: {
                   start: { line: 41, column: 45, index: 828 },
-                  end: { line: 41, column: 52, index: 835 }
-                }
-              }
+                  end: { line: 41, column: 52, index: 835 },
+                },
+              },
             ],
             commentsBefore: [],
             commentsAfter: [],
             loc: {
               start: { line: 42, column: 5, index: 840 },
-              end: { line: 42, column: 31, index: 866 }
-            }
+              end: { line: 42, column: 31, index: 866 },
+            },
           },
           offset: {
             type: 'Int64',
@@ -229,13 +229,13 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 43, column: 5, index: 871 },
-              end: { line: 43, column: 28, index: 894 }
-            }
-          }
+              end: { line: 43, column: 28, index: 894 },
+            },
+          },
         },
         loc: {
           start: { line: 40, column: 1, index: 753 },
-          end: { line: 44, column: 2, index: 896 }
+          end: { line: 44, column: 2, index: 896 },
         },
         comments: [
           {
@@ -252,13 +252,13 @@ describe('thrift - read code file', () => {
               ' CoverCard = 1 // 最多允许输入27个字符',
               ' FullScreenDescCard = 2 //全屏描述',
               ' BottomDescCard = 3 //底tab卡片描述',
-              '}'
+              '}',
             ],
             loc: {
               start: { line: 25, column: 1, index: 520 },
-              end: { line: 38, column: 4, index: 751 }
-            }
-          }
+              end: { line: 38, column: 4, index: 751 },
+            },
+          },
         ],
         commentsAfter: [],
         commentsBefore: [
@@ -276,14 +276,14 @@ describe('thrift - read code file', () => {
               ' CoverCard = 1 // 最多允许输入27个字符',
               ' FullScreenDescCard = 2 //全屏描述',
               ' BottomDescCard = 3 //底tab卡片描述',
-              '}'
+              '}',
             ],
             loc: {
               start: { line: 25, column: 1, index: 520 },
-              end: { line: 38, column: 4, index: 751 }
-            }
-          }
-        ]
+              end: { line: 38, column: 4, index: 751 },
+            },
+          },
+        ],
       },
       {
         name: 'CollectRequest',
@@ -298,8 +298,8 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 52, column: 5, index: 1001 },
-              end: { line: 52, column: 105, index: 1101 }
-            }
+              end: { line: 52, column: 105, index: 1101 },
+            },
           },
           biz_id: {
             type: 'string',
@@ -311,8 +311,8 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 53, column: 5, index: 1106 },
-              end: { line: 53, column: 31, index: 1132 }
-            }
+              end: { line: 53, column: 31, index: 1132 },
+            },
           },
           collect: {
             type: 'boolean',
@@ -324,13 +324,13 @@ describe('thrift - read code file', () => {
             commentsAfter: [],
             loc: {
               start: { line: 54, column: 5, index: 1137 },
-              end: { line: 54, column: 30, index: 1162 }
-            }
-          }
+              end: { line: 54, column: 30, index: 1162 },
+            },
+          },
         },
         loc: {
           start: { line: 50, column: 1, index: 973 },
-          end: { line: 55, column: 2, index: 1164 }
+          end: { line: 55, column: 2, index: 1164 },
         },
         comments: [
           {
@@ -338,25 +338,25 @@ describe('thrift - read code file', () => {
             value: '@url: life/client/favorite/collect',
             loc: {
               start: { line: 46, column: 1, index: 898 },
-              end: { line: 46, column: 38, index: 935 }
-            }
+              end: { line: 46, column: 38, index: 935 },
+            },
           },
           {
             type: 'CommentLine',
             value: '@method: POST',
             loc: {
               start: { line: 47, column: 1, index: 936 },
-              end: { line: 47, column: 17, index: 952 }
-            }
+              end: { line: 47, column: 17, index: 952 },
+            },
           },
           {
             type: 'CommentLine',
             value: '@brief: 新增/删除收藏',
             loc: {
               start: { line: 48, column: 1, index: 953 },
-              end: { line: 48, column: 19, index: 971 }
-            }
-          }
+              end: { line: 48, column: 19, index: 971 },
+            },
+          },
         ],
         commentsAfter: [],
         commentsBefore: [
@@ -365,27 +365,27 @@ describe('thrift - read code file', () => {
             value: '@url: life/client/favorite/collect',
             loc: {
               start: { line: 46, column: 1, index: 898 },
-              end: { line: 46, column: 38, index: 935 }
-            }
+              end: { line: 46, column: 38, index: 935 },
+            },
           },
           {
             type: 'CommentLine',
             value: '@method: POST',
             loc: {
               start: { line: 47, column: 1, index: 936 },
-              end: { line: 47, column: 17, index: 952 }
-            }
+              end: { line: 47, column: 17, index: 952 },
+            },
           },
           {
             type: 'CommentLine',
             value: '@brief: 新增/删除收藏',
             loc: {
               start: { line: 48, column: 1, index: 953 },
-              end: { line: 48, column: 19, index: 971 }
-            }
-          }
-        ]
-      }
+              end: { line: 48, column: 19, index: 971 },
+            },
+          },
+        ],
+      },
     ];
     expect(res.interfaces[0]).to.deep.eq(expectResult[0]);
     expect(res.interfaces[1]).to.deep.eq(expectResult[1]);
@@ -399,17 +399,17 @@ describe('thrift - read code file', () => {
             value: 0,
             loc: {
               start: { line: 6, column: 5, index: 119 },
-              end: { line: 6, column: 12, index: 126 }
+              end: { line: 6, column: 12, index: 126 },
             },
             comments: [],
             commentsBefore: [],
-            commentsAfter: []
+            commentsAfter: [],
           },
           GOODS: {
             value: 1,
             loc: {
               start: { line: 7, column: 5, index: 132 },
-              end: { line: 7, column: 14, index: 141 }
+              end: { line: 7, column: 14, index: 141 },
             },
             comments: [],
             commentsBefore: [],
@@ -419,20 +419,20 @@ describe('thrift - read code file', () => {
                 value: '商品',
                 loc: {
                   start: { line: 7, column: 18, index: 145 },
-                  end: { line: 7, column: 22, index: 149 }
-                }
-              }
-            ]
-          }
+                  end: { line: 7, column: 22, index: 149 },
+                },
+              },
+            ],
+          },
         },
         loc: {
           start: { line: 5, column: 1, index: 100 },
-          end: { line: 8, column: 2, index: 151 }
+          end: { line: 8, column: 2, index: 151 },
         },
         comments: [],
         commentsBefore: [],
-        commentsAfter: []
-      }
+        commentsAfter: [],
+      },
     ]);
     expect(res.typeDefs).to.deep.eq([
       {
@@ -443,9 +443,9 @@ describe('thrift - read code file', () => {
         commentsBefore: [],
         loc: {
           start: { line: 62, column: 1, index: 1337 },
-          end: { line: 62, column: 35, index: 1371 }
-        }
-      }
+          end: { line: 62, column: 35, index: 1371 },
+        },
+      },
     ]);
     expect(res.services).to.deep.eq([
       {
@@ -457,33 +457,33 @@ describe('thrift - read code file', () => {
             comments: [],
             loc: {
               start: { line: 57, column: 5, index: 1193 },
-              end: { line: 57, column: 68, index: 1256 }
+              end: { line: 57, column: 68, index: 1256 },
             },
             commentsBefore: [],
-            commentsAfter: []
+            commentsAfter: [],
           },
           GetTagIdByNames: {
             returnType: 'GetTagIdByNamesResponse',
             inputParams: [
-              { type: 'GetTagIdByNamesRequest', index: 1, name: 'req' }
+              { type: 'GetTagIdByNamesRequest', index: 1, name: 'req' },
             ],
             comments: [],
             loc: {
               start: { line: 58, column: 5, index: 1261 },
-              end: { line: 58, column: 76, index: 1332 }
+              end: { line: 58, column: 76, index: 1332 },
             },
             commentsBefore: [],
-            commentsAfter: []
-          }
+            commentsAfter: [],
+          },
         },
         comments: [],
         commentsAfter: [],
         commentsBefore: [],
         loc: {
           start: { line: 56, column: 1, index: 1165 },
-          end: { line: 59, column: 2, index: 1334 }
-        }
-      }
+          end: { line: 59, column: 2, index: 1334 },
+        },
+      },
     ] as RpcEntity['services']);
   });
 
@@ -499,7 +499,8 @@ describe('thrift - read code file', () => {
       const subjects = parser(
         'he',
         `struct PublishRequest {
-        1: required string name    // 包名称`
+        1: required string name    // 包名称
+        }`
       );
     } catch (e) {
       expect(e.toString()).contain('thrift parser error:he');
@@ -514,8 +515,8 @@ describe('thrift - read code file', () => {
       3: optional pack_goods.ExtensiveGoodsItem sku_collection,
   }
     `;
-    const res = await parser('', thirftCode, { useStrictMode: false });
-    const res2 = await parser('', thirftCode, { useStrictMode: true });
+    const res = parser('', thirftCode, { useStrictMode: false });
+    const res2 = parser('', thirftCode, { useStrictMode: true });
     expect(res.interfaces[0].properties.biz_type.optional).to.eq(true);
     expect(res.interfaces[0].properties.biz_id.optional).to.eq(false);
     expect(res2.interfaces[0].properties.biz_type.optional).to.eq(true);
@@ -527,14 +528,14 @@ describe('thrift - read code file', () => {
       path.resolve(__dirname, './examples/client.thrift'),
       {
         useTag: 'go',
-        annotationConfig: {}
+        annotationConfig: {},
       }
     );
     const res2 = await readCode(
       path.resolve(__dirname, './examples/client.thrift'),
       {
         useTag: 'js',
-        annotationConfig: {}
+        annotationConfig: {},
       }
     );
     expect(res.interfaces[0].properties.biz_type_go).not.eq(undefined);
@@ -552,13 +553,13 @@ describe('thrift - read code file', () => {
       Collection Collect2(1:i32 req)  (api.get = '/api/collect2'),
     }
       `;
-    const res = await parser('', thirftCode, {
+    const res = parser('', thirftCode, {
       annotationConfig: {
         fieldKey: 'key',
         fieldComment: ['source', 'api.get', 'api.post'],
         functionMethod: 'method',
-        functionUri: 'uri'
-      }
+        functionUri: 'uri',
+      },
     });
     // 正确的根据key修改变量命名
     expect(res.interfaces[0].properties['bizType'].index).to.eq(1);
@@ -575,31 +576,6 @@ describe('thrift - read code file', () => {
     ).to.eq('@api.get: /api/collect2    ');
   });
 
-  it('support annotation config field key arr', async () => {
-    const thirftCode = `
-    struct Collection {
-      1: optional BizType biz_type (source = 'query',   key = 'bizType'),
-      3: optional pack_goods.ExtensiveGoodsItem sku_collection(source = 'query',   key2 = 'skuCollection'),
-    }
-    service CollectService {
-      Collection Collect(1:i32 req)  (method = 'GET',  uri = '/api/collect'),
-      Collection Collect2(1:i32 req)  (api.get = '/api/collect2'),
-    }
-      `;
-    const res = await parser('', thirftCode, {
-      annotationConfig: {
-        fieldKey: ['key', 'key2'],
-        fieldComment: ['source', 'api.get', 'api.post'],
-        functionMethod: 'method',
-        functionUri: 'uri'
-      }
-    });
-    // 正确的根据key修改变量命名
-    expect(res.interfaces[0].properties['bizType'].index).to.eq(1);
-    // 正确的根据key2修改变量命名
-    expect(res.interfaces[0].properties['skuCollection'].index).to.eq(3);
-  });
-
   it('support default value', async () => {
     const thirftCode = `
       struct Collection {
@@ -612,7 +588,7 @@ describe('thrift - read code file', () => {
         7: optional list<i64> list_val = [1,2,3,4],
     }
       `;
-    const res = await parser('', thirftCode);
+    const res = parser('', thirftCode);
     const collectionObj = res.interfaces[0].properties;
     expect(collectionObj.collection.commentsBefore![0].value).to.eq(
       '@default: Collection'
@@ -658,11 +634,11 @@ describe('thrift - read code file', () => {
     const thirftCodeNull = `
     include "hello.thrift"
       `;
-    const res1 = await parser('', thirftCodeJS);
-    const res2 = await parser('', thirftCodeJSSecond);
-    const res3 = await parser('', thirftCodeGo);
-    const res4 = await parser('', thirftCodePy);
-    const res5 = await parser('', thirftCodeNull);
+    const res1 = parser('', thirftCodeJS);
+    const res2 = parser('', thirftCodeJSSecond);
+    const res3 = parser('', thirftCodeGo);
+    const res4 = parser('', thirftCodePy);
+    const res5 = parser('', thirftCodeNull);
 
     expect(res1.ns).to.eq('xx');
     expect(res2.ns).to.eq('xx');
@@ -704,8 +680,8 @@ describe('thrift - read code file', () => {
      * - default value
      * - 处于request/reponse的结构体中
      */
-    const res1 = await parser('', thirftCodeJS, {
-      strictReq: true
+    const res1 = parser('', thirftCodeJS, {
+      strictReq: true,
     });
     const collectionResponse = res1.interfaces[0].properties;
     const collectionRequest = res1.interfaces[1].properties;
@@ -742,7 +718,7 @@ describe('thrift - read code file', () => {
       }
       `;
 
-    const res = await parser('', thirftCodeJS, { i64Type: 'Int64' });
+    const res = parser('', thirftCodeJS, { i64Type: 'Int64' });
     const struct = res.interfaces[0].properties;
 
     expect(struct.myList.type).to.eq('Int64[]');
@@ -763,7 +739,7 @@ describe('thrift - read code file', () => {
       const list<string> CList = ['hello', 'world'];
       `;
 
-    const res = await parser('', thirftCodeJS, { i64Type: 'string' });
+    const res = parser('', thirftCodeJS, { i64Type: 'string' });
     const consts = res.consts;
 
     expect(consts.length).to.equal(4);
@@ -782,8 +758,8 @@ describe('thrift - read code file', () => {
       }
       `;
 
-    const res = await parser('', thirftCodeJS, {
-      mapType: 'Record'
+    const res = parser('', thirftCodeJS, {
+      mapType: 'Record',
     });
     const struct = res.interfaces[0].properties;
 

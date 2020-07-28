@@ -11,8 +11,9 @@ import { RpcEntity, CMDOptions } from './interfaces';
 import { prettier } from '../tools/format';
 
 const now = new Date();
-const timeString = `${now.getFullYear()}-${now.getMonth() +
-  1}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+const timeString = `${now.getFullYear()}-${
+  now.getMonth() + 1
+}-${now.getDate()} ${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 /* istanbul ignore next */
 export async function print(
   entity: RpcEntity | undefined,
@@ -26,24 +27,17 @@ export async function print(
   const ns = options.autoNamespace
     ? printNamespace(entity, options.root)
     : entity.ns;
-    
-  let content = `
+  const content = `// generate${
+    options.useTimestamp ? ` at ${timeString}` : ''
+  } by dts-from-thrift
+declare namespace ${ns} {
 ${printEnums(entity)}
 ${printInterfaces(entity)}
 ${printTypeDefs(entity)}
 ${printServices(entity)}
 ${printConsts(entity)}
+}
 `;
-
-  if (!options.useModule) {
-    content = `declare namespace ${ns} {${content}}`;
-  }
-
-  content =
-    `// generate${
-      options.useTimestamp ? ` at ${timeString}` : ''
-    } by dts-from-thrift\n${content}`;
-
   const relativePath: path.ParsedPath = path.parse(
     path.relative(options.root, entity.fileName)
   );
@@ -165,19 +159,22 @@ export function printInterfaces(entity: Pick<RpcEntity, 'interfaces'>): string {
         const property = datum.properties[key];
         const cb = printComments(property.commentsBefore); // comments before
         const ca = printComments(property.commentsAfter, property.loc); // comments after
-        const temp = `${cb}${key}${property.optional ? '?' : ''}: ${
-          property.type
-        };`;
-        return attachCommentAfterToAbovePosition(temp, ca);
+        let temp = `${key}${property.optional ? '?' : ''}: ${property.type};`;
+        if (ca) {
+          temp = attachCommentAfterToAbovePosition(temp, ca);
+        }
+        if (cb) {
+          temp = cb.trim() + '\n' + temp.trim();
+        }
+        return temp;
       })
-      .join('\n    ')
-      .replace(/(\n\s+)+/g, '\n')}
+      .join('\n    ')}
   }    ${printComments(datum.commentsAfter, datum.loc)}
 
 `;
   });
 
-  return rtn;
+  return prettier(rtn);
 }
 
 /**
@@ -301,7 +298,7 @@ ${Object.keys(cur.interfaces)
     let sortTmp: any[] = [];
     i.inputParams.forEach((d) => (sortTmp[d.index] = d));
     sortTmp = sortTmp.filter((d) => !!d);
-    const inputParamsStr = (sortTmp as (typeof i)['inputParams'])
+    const inputParamsStr = (sortTmp as typeof i['inputParams'])
       .map((d) => {
         const type =
           isGenerateRPC && keyInNs.indexOf(d.type) !== -1
@@ -352,7 +349,7 @@ export function printCommentLine(comment: CommentLine): string {
   if (!comment.value) {
     return '';
   }
-  return `/** ${comment.value} */\n`;
+  return `/** ${comment.value.replace(/\*\/+/g, '')} */`;
 }
 
 export function printCommentBlock(comment: CommentBlock): string {
@@ -377,8 +374,8 @@ export function printComments(
   comments.forEach((comment, idx) => {
     const sameLine =
       loc &&
-      (comment.loc.start.line === comment.loc.end.line &&
-        comment.loc.start.line === loc.end.line);
+      comment.loc.start.line === comment.loc.end.line &&
+      comment.loc.start.line === loc.end.line;
     const lastOne = idx === comments.length - 1;
     if (sameLine) {
       if (comment.type === SyntaxType.CommentLine) {
@@ -446,12 +443,9 @@ export function printEnumsObject(includeMap: {
   });
   const sortedRes = Object.keys(res)
     .sort()
-    .reduce(
-      (pre, cur) => {
-        pre[cur] = res[cur];
-        return pre;
-      },
-      {} as typeof res
-    );
+    .reduce((pre, cur) => {
+      pre[cur] = res[cur];
+      return pre;
+    }, {} as typeof res);
   return sortedRes;
 }
