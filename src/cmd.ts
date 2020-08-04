@@ -59,7 +59,8 @@ commander
     '-o, --out [out dir]',
     '输出 d.ts 文件根目录',
     path.resolve(process.cwd(), 'typings')
-  );
+  )
+  .option('--bail', 'exit with 1 when error occurs.');
 
 commander.parse(process.argv);
 
@@ -86,6 +87,7 @@ const options: CMDOptions = {
   strictReq: commander.strictRequest,
   enumJson: commander.enum_json || 'enums.json',
   i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
+  bail: !!commander.bail,
   mapType:
     commander.map === true || commander.map === 'Record' ? 'Record' : 'Map',
 };

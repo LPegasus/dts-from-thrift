@@ -93,6 +93,7 @@ export interface CMDOptions {
   enumJson?: string;
   i64Type?: string;
   mapType?: string;
+  bail?: boolean;
 }
 
 export type PbNodeEntity = (
@@ -111,4 +112,5 @@ export type PbNodeEntity = (
   | {
       type: 'enum';
       meta: pb.Enum;
-    }) & { filename: string };
+    }
+) & { filename: string };

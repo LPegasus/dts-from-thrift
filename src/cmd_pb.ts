@@ -10,6 +10,7 @@ import combine from './tools/combine';
 import { loadPb } from './protobufNew/index';
 import { updateNotify } from './tools/updateNotify';
 import { replaceTsHelperInt64 } from './tools/utils';
+import chalk from 'chalk';
 
 const packageJSON = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8')
@@ -38,7 +39,8 @@ commander
     '-o, --out [out dir]',
     '输出 d.ts 文件根目录',
     path.resolve(process.cwd(), 'typings')
-  );
+  )
+  .option('--bail', 'exit with 1 when error occurs.');
 
 commander.parse(process.argv);
 
@@ -52,8 +54,9 @@ const options: Partial<CMDOptions> &
   enumJson: commander.enumJson || 'enums.json',
   i64_as_number: !!commander.i64_as_number,
   i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
+  bail: !!commander.bail,
   mapType:
-    commander.map === true || commander.map === 'Record' ? 'Record' : 'Map'
+    commander.map === true || commander.map === 'Record' ? 'Record' : 'Map',
 };
 
 fs.ensureDirSync(options.tsRoot);
@@ -81,9 +84,9 @@ if (commander.new) {
 } else {
   const protofiles = glob
     .sync('**/*.proto', { cwd: options.root })
-    .map(d => path.resolve(options.root, d));
+    .map((d) => path.resolve(options.root, d));
 
-  const tasks = protofiles.map(async filename => {
+  const tasks = protofiles.map(async (filename) => {
     let entity: RpcEntity | null = null;
     try {
       entity = await readCode(filename, options, includeMap);
@@ -97,9 +100,9 @@ if (commander.new) {
   });
 
   Promise.all(tasks)
-    .then(async entityList => {
+    .then(async (entityList) => {
       return Promise.all(
-        entityList.map(async entity => {
+        entityList.map(async (entity) => {
           try {
             return print(entity!, options, includeMap);
           } catch (e) {
@@ -116,3 +119,9 @@ if (commander.new) {
       );
     });
 }
+
+process.on('unhandledRejection', (reason) => {
+  console.log(chalk.yellow('convert pb -> d.ts error:'));
+  console.log(reason);
+  process.exit(1);
+});

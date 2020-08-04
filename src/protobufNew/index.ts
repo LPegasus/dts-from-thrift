@@ -13,12 +13,12 @@ import {
   InterfaceEntity,
   InterfacePropertyEntity,
   PbNodeEntity,
-  ServiceEntity
+  ServiceEntity,
 } from '../interfaces';
 import {
   attachComment,
   printEnums,
-  printInternalInterfacesAndEnums
+  printInternalInterfacesAndEnums,
 } from '../protobuf/print';
 import { typeMapping } from './typeMapping';
 import combine from '../tools/combine';
@@ -31,13 +31,13 @@ export async function loadPb(
   const rootDir = (options && options.root) || process.cwd();
   const files = glob
     .sync('**/*.proto', { cwd: rootDir })
-    .map(d => path.resolve(rootDir, d));
+    .map((d) => path.resolve(rootDir, d));
 
   let fileList = await Promise.all(
-    files.map(async filename => {
+    files.map(async (filename) => {
       return {
         code: (await fs.readFile(filename, 'utf8')).replace(/singular /g, ''), // FIXME: singular 解析报错，先删掉这个关键词
-        filename
+        filename,
       };
     })
   );
@@ -47,7 +47,7 @@ export async function loadPb(
   const nodeMap = new Map<string, PbNodeEntity[]>([]);
   const pbParseOptions: pb.IParseOptions = {
     keepCase: true,
-    alternateCommentMode: false
+    alternateCommentMode: false,
   };
   const astList: pb.IParserResult[] = [];
 
@@ -64,6 +64,9 @@ export async function loadPb(
       if (options.lint) {
         process.stderr.write(`pb lint ERROR: ${filename}${os.EOL}`);
         console.error((e && e.message) || '');
+      }
+      if (options.bail) {
+        throw e;
       }
       return;
     }
@@ -135,7 +138,7 @@ export async function loadPb(
   }
 
   // 收集完所有文件的 nodeMap，就可以去处理 import 进来的 namespace 的类型，转成 namespace.type
-  astList.forEach(ast => {
+  astList.forEach((ast) => {
     crawlAstAndAttachNamespace(ast, nodeMap, outConstMap);
   });
 
@@ -160,7 +163,7 @@ export async function loadPb(
       //   return;
       // }
       const namespace = (astList.filter(
-        d => (d as any)._filename === filename
+        (d) => (d as any)._filename === filename
       )[0] as any)._ns;
 
       await fs.ensureDir(path.parse(targetFilename).dir);
@@ -171,22 +174,22 @@ export async function loadPb(
         `declare namespace ${namespace} {`,
         printEnums(
           data
-            .filter(d => d.type === 'enum')
-            .map(d => convertToEnumEntity(d.meta as pb.Enum))
+            .filter((d) => d.type === 'enum')
+            .map((d) => convertToEnumEntity(d.meta as pb.Enum))
         ),
         printInterfaces(
           data
-            .filter(d => d.type === 'message')
-            .map(d =>
+            .filter((d) => d.type === 'message')
+            .map((d) =>
               convertMessageToInterfaceEntity(d.meta as pb.Type, options)
             )
         ),
         printServices(
           data
-            .filter(d => d.type === 'service')
-            .map(d => convertServiceToServiceEntity(d.meta as pb.Service))
+            .filter((d) => d.type === 'service')
+            .map((d) => convertServiceToServiceEntity(d.meta as pb.Service))
         ),
-        '}'
+        '}',
       ];
 
       await fs.writeFile(
@@ -231,21 +234,21 @@ function crawlAST(
       data.push({
         meta: current,
         type: 'enum',
-        filename
+        filename,
       });
     } else if (isMessage(current)) {
       // 处理 message
       data.push({
         filename,
         meta: current,
-        type: 'message'
+        type: 'message',
       });
     } else if (isService(current)) {
       // 处理 service
       data.push({
         meta: current,
         type: 'service',
-        filename
+        filename,
       });
     } /* else if (isNamespace(current)) {
       // 处理 namespace
@@ -292,11 +295,11 @@ export function convertMethodToFunctionEntity(node: pb.Method): FunctionEntity {
           {
             type: node.requestType,
             index: 1,
-            name: 'req'
-          }
+            name: 'req',
+          },
         ]
       : [],
-    returnType: node.responseType
+    returnType: node.responseType,
   };
 }
 
@@ -308,12 +311,12 @@ export function convertMessageToInterfaceEntity(
     name: node.name,
     properties: {},
     childrenInterfaces: [],
-    childrenEnums: []
+    childrenEnums: [],
   };
 
   // 获取内嵌类型
   const nested = node.nestedArray;
-  nested.forEach(d => {
+  nested.forEach((d) => {
     if (isEnum(d)) {
       rtn.childrenEnums.push(convertToEnumEntity(d));
     } else if (isMessage(d)) {
@@ -322,7 +325,7 @@ export function convertMessageToInterfaceEntity(
   });
 
   // 获取所有字段
-  node.fieldsArray.forEach(d => {
+  node.fieldsArray.forEach((d) => {
     const fieldname = d.name;
     rtn.properties[fieldname] = convertFieldToInterfacePropertyEntity(
       d,
@@ -335,16 +338,13 @@ export function convertMessageToInterfaceEntity(
 export function convertToEnumEntity(node: pb.Enum): EnumEntity {
   return {
     name: node.name,
-    properties: Object.keys(node.values).reduce(
-      (rtn, acc) => {
-        rtn[acc] = {
-          value: node.values[acc],
-          comment: '' // 暂时不要取 comment，comment 的解析比较死板，不准确
-        };
-        return rtn;
-      },
-      {} as { [key: string]: EnumEntityMember }
-    )
+    properties: Object.keys(node.values).reduce((rtn, acc) => {
+      rtn[acc] = {
+        value: node.values[acc],
+        comment: '', // 暂时不要取 comment，comment 的解析比较死板，不准确
+      };
+      return rtn;
+    }, {} as { [key: string]: EnumEntityMember }),
   };
 }
 
@@ -364,13 +364,13 @@ export function convertFieldToInterfacePropertyEntity(
       d.map ? ((d as any) as pb.MapField).keyType : ''
     ),
     optional: true,
-    required: d.required
+    required: d.required,
   };
 }
 
 function printInterfaces(data: InterfaceEntity[]): string {
   const lines: string[] = [];
-  data.forEach(datum => {
+  data.forEach((datum) => {
     if (datum.childrenEnums.length + datum.childrenInterfaces.length > 0) {
       lines.push(printInternalInterfacesAndEnums(datum));
     }
@@ -395,13 +395,10 @@ function printInterfaces(data: InterfaceEntity[]): string {
 export function convertServiceToServiceEntity(data: pb.Service): ServiceEntity {
   return {
     name: data.name,
-    interfaces: data.methodsArray.reduce(
-      (rtn, acc) => {
-        rtn[acc.name] = convertMethodToFunctionEntity(acc);
-        return rtn;
-      },
-      {} as ServiceEntity['interfaces']
-    )
+    interfaces: data.methodsArray.reduce((rtn, acc) => {
+      rtn[acc.name] = convertMethodToFunctionEntity(acc);
+      return rtn;
+    }, {} as ServiceEntity['interfaces']),
   };
 }
 
@@ -409,13 +406,13 @@ export function printServices(data: ServiceEntity[]): string {
   return data.reduce((rtn, cur) => {
     rtn += `  export interface ${cur.name} {
 ${Object.keys(cur.interfaces)
-  .map(key => {
+  .map((key) => {
     const i = cur.interfaces[key];
     let sortTmp: any[] = [];
-    i.inputParams.forEach(d => (sortTmp[d.index] = d));
-    sortTmp = sortTmp.filter(d => !!d);
-    const inputParamsStr = (sortTmp as (typeof i)['inputParams'])
-      .map(d => {
+    i.inputParams.forEach((d) => (sortTmp[d.index] = d));
+    sortTmp = sortTmp.filter((d) => !!d);
+    const inputParamsStr = (sortTmp as typeof i['inputParams'])
+      .map((d) => {
         const type = d.type;
         return `${d.name}: ${type}`;
       })
@@ -446,9 +443,9 @@ export function crawlAstAndAttachNamespace(
   (ast.package
     ? (ast.root.lookup(ast.package) as pb.Namespace)
     : ast.root
-  ).nestedArray.forEach(d => {
+  ).nestedArray.forEach((d) => {
     if (isMessage(d)) {
-      d.fieldsArray.forEach(field => {
+      d.fieldsArray.forEach((field) => {
         if (
           !field.resolved &&
           !field.resolvedType &&
@@ -458,54 +455,56 @@ export function crawlAstAndAttachNamespace(
           // TODO: 由于 import 语句的文件取决于 protoc 的 proto_path 参数
           // 所以我们并不能确切定位未知类型到底属于哪个 namespace，只能先以策略
           // 形式去猜
-          [(ast as any)._ns + '.' + field.type, field.type].some(fieldType => {
-            const ff =
-              fieldType.indexOf('.') !== -1 ? fieldType : `.${fieldType}`;
-            for (const tmp of nodeMap) {
-              const [ns, node] = tmp as [string, PbNodeEntity[]];
-              if (ns.indexOf(ff) === -1) {
-                continue;
-              }
-
-              // 此时已找到 fullname 与 field.type 匹配的类型了，从 fullname 找 meta 信息匹配的类就行了
-              const filteredData = node.filter(
-                d =>
-                  (d.type === 'enum' && d.meta.name === field.type) ||
-                  (d.type === 'message' && d.meta.name === field.type)
-              );
-
-              if (!filteredData.length) {
-                continue;
-              }
-              const absName = (filteredData[0].meta.root as any)._hasPackage
-                ? filteredData[0].meta.fullName.replace(/^\./, '')
-                : ns;
-              // console.log(`${field.type} => ${absName}`);
-              field.type = absName;
-
-              // 处理 enum.json 问题
-              node.forEach(d => {
-                if (d.type === 'enum') {
-                  Object.keys(d.meta.values).forEach(dd => {
-                    const v = d.meta.values[dd];
-                    const k = `${absName}.${dd}`;
-                    if (
-                      Object.prototype.hasOwnProperty.call(outConstMap, k) &&
-                      outConstMap[k] !== v
-                    ) {
-                      console.warn(
-                        '--enum-json received duplicated value with the same key. It may cause critical error. Please check ' +
-                          chalk.red(absName)
-                      );
-                    }
-                    outConstMap[k] = v;
-                  });
+          [(ast as any)._ns + '.' + field.type, field.type].some(
+            (fieldType) => {
+              const ff =
+                fieldType.indexOf('.') !== -1 ? fieldType : `.${fieldType}`;
+              for (const tmp of nodeMap) {
+                const [ns, node] = tmp as [string, PbNodeEntity[]];
+                if (ns.indexOf(ff) === -1) {
+                  continue;
                 }
-              });
 
-              return;
+                // 此时已找到 fullname 与 field.type 匹配的类型了，从 fullname 找 meta 信息匹配的类就行了
+                const filteredData = node.filter(
+                  (d) =>
+                    (d.type === 'enum' && d.meta.name === field.type) ||
+                    (d.type === 'message' && d.meta.name === field.type)
+                );
+
+                if (!filteredData.length) {
+                  continue;
+                }
+                const absName = (filteredData[0].meta.root as any)._hasPackage
+                  ? filteredData[0].meta.fullName.replace(/^\./, '')
+                  : ns;
+                // console.log(`${field.type} => ${absName}`);
+                field.type = absName;
+
+                // 处理 enum.json 问题
+                node.forEach((d) => {
+                  if (d.type === 'enum') {
+                    Object.keys(d.meta.values).forEach((dd) => {
+                      const v = d.meta.values[dd];
+                      const k = `${absName}.${dd}`;
+                      if (
+                        Object.prototype.hasOwnProperty.call(outConstMap, k) &&
+                        outConstMap[k] !== v
+                      ) {
+                        console.warn(
+                          '--enum-json received duplicated value with the same key. It may cause critical error. Please check ' +
+                            chalk.red(absName)
+                        );
+                      }
+                      outConstMap[k] = v;
+                    });
+                  }
+                });
+
+                return;
+              }
             }
-          });
+          );
         }
       });
     }
@@ -531,7 +530,7 @@ export function isOriginType(type: string) {
       'bytes',
       'string',
       'list',
-      'map'
+      'map',
     ].indexOf(type) !== -1
   );
 }
