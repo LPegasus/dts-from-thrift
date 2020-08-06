@@ -254,11 +254,16 @@ export interface BizRequest {
   });
 
   it('fixIncludeNamespace success with nest path', () => {
-    const res = fixIncludeNamespace(
-      `interface interface1 {
+    // 这里是基于字符串的替换，在识别的时候，如果前面有"."，如果life.item.demo，item也不应该被替换
+    let res = fixIncludeNamespace(
+      `
+    declare namespace life.item.demo {
+      interface interface1 {
         data: list<detail.PackedItem>;
-        sort: item.SortType
-      }`,
+        sort: item.SortType;
+      }
+    }
+      `,
       {
         enums: [],
         fileName: '/test/root/demo.thrift',
@@ -289,10 +294,16 @@ export interface BizRequest {
         },
       }
     );
-    expect(res).not.eq(`interface interface1 {
-      data: list<life.item.detail.PackedItem>;
-      sort: life.demo.item.SortType
-    }`);
+    res = res.replace('// prettier-ignore', '').replace(/\s+/g, '');
+    expect(res).eq(
+      `
+    declare namespace life.item.demo {
+      interface interface1 {
+        data: list<life.item.detail.PackedItem>;
+        sort: life.demo.item.SortType;
+      }
+    }`.replace(/\s+/g, '')
+    );
   });
 
   it('printService success', () => {
