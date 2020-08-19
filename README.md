@@ -14,6 +14,12 @@ thrift RPC 定义文件转 d.ts 工具
 
 # 变更历史（ChangeLog)
 
+## 1.1.10 - 2020.08.19
+
+### Fixed
+
+- thrift 文件带下划线的 namespace 匹配错误问题
+
 ## 1.1.7 - 2020.08.04
 
 ### Added
