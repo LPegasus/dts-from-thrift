@@ -254,12 +254,12 @@ export interface BizRequest {
   });
 
   it('fixIncludeNamespace success with nest path', () => {
-    // 这里是基于字符串的替换，在识别的时候，如果前面有"."，如果life.item.demo，item也不应该被替换
+    // 这里是基于字符串的替换，在识别的时候，如果前面有"."，如果life_example.item.demo，item也不应该被替换
     let res = fixIncludeNamespace(
       `
-    declare namespace life.item.demo {
+    declare namespace life_example.item.demo {
       interface interface1 {
-        data: list<detail.PackedItem>;
+        data: list<item_detail.PackedItem>;
         sort: item.SortType;
       }
     }
@@ -267,19 +267,19 @@ export interface BizRequest {
       {
         enums: [],
         fileName: '/test/root/demo.thrift',
-        includes: ['/test/root/detail.thrift', '/test/root/item.thrift'],
+        includes: ['/test/root/item_detail.thrift', '/test/root/item.thrift'],
         ns: 'life.demo',
         interfaces: [],
         typeDefs: [],
         services: [],
       },
       {
-        '/test/root/detail.thrift': {
+        '/test/root/item_detail.thrift': {
           enums: [],
           services: [],
-          fileName: '/test/root/detail.thrift',
+          fileName: '/test/root/item_detail.thrift',
           includes: [],
-          ns: 'life.item.detail',
+          ns: 'life.item.item_detail',
           interfaces: [],
           typeDefs: [],
         },
@@ -297,9 +297,9 @@ export interface BizRequest {
     res = res.replace('// prettier-ignore', '').replace(/\s+/g, '');
     expect(res).eq(
       `
-    declare namespace life.item.demo {
+    declare namespace life_example.item.demo {
       interface interface1 {
-        data: list<life.item.detail.PackedItem>;
+        data: list<life.item.item_detail.PackedItem>;
         sort: life.demo.item.SortType;
       }
     }`.replace(/\s+/g, '')

@@ -257,7 +257,7 @@ export function fixIncludeNamespace(
 
     result = result.replace(
       new RegExp(
-        `([^A-Za-z0-9\\.])((?<!__SEGMENT__.*)${shouldReplaceNS}\\.|${shouldReplaceNS}(?!.*__SEGMENT__)\\.)`,
+        `([^\w\\.])((?<!__SEGMENT__.*)${shouldReplaceNS}\\.|${shouldReplaceNS}(?!.*__SEGMENT__)\\.)`,
         'g'
       ),
       `__SEGMENT__$1${shouldBeNS}__SEGMENT__.`
