@@ -23,7 +23,6 @@ commander
   .option('-p, --project [dir]', 'pb 根目录，默认为当前目录', process.cwd())
   .option('-e --entry [filename]', '指定入口文件名', 'index.d.ts')
   .option('--lint', '检查 pb 文件是否规范，不输出内容')
-  .option('--new', '使用新版')
   .option('--i64_as_number', '将 i64 类型设置为 number')
   .option('--enum-json [filename]', '以json的形式输出所有的enum到输出目录', '')
   .option(
@@ -70,7 +69,7 @@ if (options.i64Type === 'string') {
 
 const includeMap: { [key: string]: RpcEntity } = {};
 
-if (commander.new) {
+if (commander.new || true) {
   console.log('protobuf => d.ts using protobuf.js...');
   const outConstMap = Object.create(null);
   (async () => {

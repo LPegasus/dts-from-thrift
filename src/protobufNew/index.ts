@@ -507,6 +507,16 @@ export function crawlAstAndAttachNamespace(
           );
         }
       });
+    } else if (isEnum(d)) {
+      try {
+        Object.keys(d.values).forEach((key) => {
+          outConstMap[(ast as any)._ns + '.' + d.name + '.' + key] =
+            d.values[key];
+        });
+      } catch (e) {
+        // eslint-disable-next-line
+        debugger;
+      }
     }
   });
 }
