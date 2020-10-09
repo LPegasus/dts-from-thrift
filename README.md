@@ -6,13 +6,25 @@ thrift RPC 定义文件转 d.ts 工具
 
 **安装(install)：** `npm install dts-from-thrift -g`
 
-**运行(exec)：**`dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-ts-repo/typings`
-
-由于实现全靠正则，特殊 case 无法避免，可以提 issue 或者 PR。
-
-(The tool use RegExp to generate d.ts file. If some special statement cases causes bugs, an issue or a PR is welcome.)
+**运行(exec)：**
+```sh
+# for thrift
+dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-ts-repo/typings
+# for pb
+dts-from-protobuf -p ~/git/my-protobuf-repo/proto -o ~/git/my-ts-repo/typings
+```
 
 # 变更历史（ChangeLog)
+
+## 1.2.0 - 2020.10.09
+
+### Changed
+
+- pb 强制使用 protobuf.js 解析
+
+### Fixed
+
+- pb 文件中的 enum 没有在 message 中使用，也会在 enums.json 中生成，之前没有生成
 
 ## 1.1.10 - 2020.08.19
 
