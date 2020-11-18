@@ -56,10 +56,23 @@ describe('thrift - read code file', () => {
               end: { line: 13, column: 62, index: 331 },
             },
           },
+          list: {
+            type: 'string[]',
+            index: 4,
+            optional: true,
+            defaultValue: '',
+            comments: [],
+            commentsBefore: [],
+            commentsAfter: [],
+            loc: {
+              start: { line: 14, column: 5, index: 336 },
+              end: { line: 14, column: 34, index: 365 },
+            },
+          },
         },
         loc: {
           start: { line: 10, column: 1, index: 153 },
-          end: { line: 14, column: 2, index: 333 },
+          end: { line: 15, column: 2, index: 367 },
         },
         comments: [
           {
@@ -86,8 +99,8 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 19, column: 5, index: 403 },
-              end: { line: 19, column: 34, index: 432 },
+              start: { line: 20, column: 5, index: 437 },
+              end: { line: 20, column: 34, index: 466 },
             },
           },
           offset: {
@@ -99,8 +112,8 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 20, column: 5, index: 437 },
-              end: { line: 20, column: 28, index: 460 },
+              start: { line: 21, column: 5, index: 471 },
+              end: { line: 21, column: 28, index: 494 },
             },
           },
           count: {
@@ -112,8 +125,8 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 21, column: 5, index: 465 },
-              end: { line: 21, column: 27, index: 487 },
+              start: { line: 22, column: 5, index: 499 },
+              end: { line: 22, column: 27, index: 521 },
             },
           },
           user_id: {
@@ -125,30 +138,30 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 22, column: 5, index: 492 },
-              end: { line: 22, column: 29, index: 516 },
+              start: { line: 23, column: 5, index: 526 },
+              end: { line: 23, column: 29, index: 550 },
             },
           },
         },
         loc: {
-          start: { line: 18, column: 1, index: 369 },
-          end: { line: 23, column: 2, index: 518 },
+          start: { line: 19, column: 1, index: 403 },
+          end: { line: 24, column: 2, index: 552 },
         },
         comments: [
           {
             type: 'CommentLine',
             value: '@method: GET',
             loc: {
-              start: { line: 16, column: 1, index: 335 },
-              end: { line: 16, column: 16, index: 350 },
+              start: { line: 17, column: 1, index: 369 },
+              end: { line: 17, column: 16, index: 384 },
             },
           },
           {
             type: 'CommentLine',
             value: '@brief: 获取收藏清单',
             loc: {
-              start: { line: 17, column: 1, index: 351 },
-              end: { line: 17, column: 18, index: 368 },
+              start: { line: 18, column: 1, index: 385 },
+              end: { line: 18, column: 18, index: 402 },
             },
           },
         ],
@@ -158,16 +171,16 @@ describe('thrift - read code file', () => {
             type: 'CommentLine',
             value: '@method: GET',
             loc: {
-              start: { line: 16, column: 1, index: 335 },
-              end: { line: 16, column: 16, index: 350 },
+              start: { line: 17, column: 1, index: 369 },
+              end: { line: 17, column: 16, index: 384 },
             },
           },
           {
             type: 'CommentLine',
             value: '@brief: 获取收藏清单',
             loc: {
-              start: { line: 17, column: 1, index: 351 },
-              end: { line: 17, column: 18, index: 368 },
+              start: { line: 18, column: 1, index: 385 },
+              end: { line: 18, column: 18, index: 402 },
             },
           },
         ],
@@ -187,14 +200,14 @@ describe('thrift - read code file', () => {
                 type: 'CommentLine',
                 value: '是否种草',
                 loc: {
-                  start: { line: 41, column: 45, index: 828 },
-                  end: { line: 41, column: 52, index: 835 },
+                  start: { line: 42, column: 45, index: 862 },
+                  end: { line: 42, column: 52, index: 869 },
                 },
               },
             ],
             loc: {
-              start: { line: 41, column: 5, index: 788 },
-              end: { line: 41, column: 43, index: 826 },
+              start: { line: 42, column: 5, index: 822 },
+              end: { line: 42, column: 43, index: 860 },
             },
           },
           has_more: {
@@ -207,16 +220,16 @@ describe('thrift - read code file', () => {
                 type: 'CommentLine',
                 value: '是否种草',
                 loc: {
-                  start: { line: 41, column: 45, index: 828 },
-                  end: { line: 41, column: 52, index: 835 },
+                  start: { line: 42, column: 45, index: 862 },
+                  end: { line: 42, column: 52, index: 869 },
                 },
               },
             ],
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 42, column: 5, index: 840 },
-              end: { line: 42, column: 31, index: 866 },
+              start: { line: 43, column: 5, index: 874 },
+              end: { line: 43, column: 31, index: 900 },
             },
           },
           offset: {
@@ -228,14 +241,14 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 43, column: 5, index: 871 },
-              end: { line: 43, column: 28, index: 894 },
+              start: { line: 44, column: 5, index: 905 },
+              end: { line: 44, column: 28, index: 928 },
             },
           },
         },
         loc: {
-          start: { line: 40, column: 1, index: 753 },
-          end: { line: 44, column: 2, index: 896 },
+          start: { line: 41, column: 1, index: 787 },
+          end: { line: 45, column: 2, index: 930 },
         },
         comments: [
           {
@@ -255,8 +268,8 @@ describe('thrift - read code file', () => {
               '}',
             ],
             loc: {
-              start: { line: 25, column: 1, index: 520 },
-              end: { line: 38, column: 4, index: 751 },
+              start: { line: 26, column: 1, index: 554 },
+              end: { line: 39, column: 4, index: 785 },
             },
           },
         ],
@@ -279,8 +292,8 @@ describe('thrift - read code file', () => {
               '}',
             ],
             loc: {
-              start: { line: 25, column: 1, index: 520 },
-              end: { line: 38, column: 4, index: 751 },
+              start: { line: 26, column: 1, index: 554 },
+              end: { line: 39, column: 4, index: 785 },
             },
           },
         ],
@@ -297,8 +310,8 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 52, column: 5, index: 1001 },
-              end: { line: 52, column: 105, index: 1101 },
+              start: { line: 53, column: 5, index: 1035 },
+              end: { line: 53, column: 105, index: 1135 },
             },
           },
           biz_id: {
@@ -310,8 +323,8 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 53, column: 5, index: 1106 },
-              end: { line: 53, column: 31, index: 1132 },
+              start: { line: 54, column: 5, index: 1140 },
+              end: { line: 54, column: 31, index: 1166 },
             },
           },
           collect: {
@@ -323,38 +336,38 @@ describe('thrift - read code file', () => {
             commentsBefore: [],
             commentsAfter: [],
             loc: {
-              start: { line: 54, column: 5, index: 1137 },
-              end: { line: 54, column: 30, index: 1162 },
+              start: { line: 55, column: 5, index: 1171 },
+              end: { line: 55, column: 30, index: 1196 },
             },
           },
         },
         loc: {
-          start: { line: 50, column: 1, index: 973 },
-          end: { line: 55, column: 2, index: 1164 },
+          start: { line: 51, column: 1, index: 1007 },
+          end: { line: 56, column: 2, index: 1198 },
         },
         comments: [
           {
             type: 'CommentLine',
             value: '@url: life/client/favorite/collect',
             loc: {
-              start: { line: 46, column: 1, index: 898 },
-              end: { line: 46, column: 38, index: 935 },
+              start: { line: 47, column: 1, index: 932 },
+              end: { line: 47, column: 38, index: 969 },
             },
           },
           {
             type: 'CommentLine',
             value: '@method: POST',
             loc: {
-              start: { line: 47, column: 1, index: 936 },
-              end: { line: 47, column: 17, index: 952 },
+              start: { line: 48, column: 1, index: 970 },
+              end: { line: 48, column: 17, index: 986 },
             },
           },
           {
             type: 'CommentLine',
             value: '@brief: 新增/删除收藏',
             loc: {
-              start: { line: 48, column: 1, index: 953 },
-              end: { line: 48, column: 19, index: 971 },
+              start: { line: 49, column: 1, index: 987 },
+              end: { line: 49, column: 19, index: 1005 },
             },
           },
         ],
@@ -364,24 +377,24 @@ describe('thrift - read code file', () => {
             type: 'CommentLine',
             value: '@url: life/client/favorite/collect',
             loc: {
-              start: { line: 46, column: 1, index: 898 },
-              end: { line: 46, column: 38, index: 935 },
+              start: { line: 47, column: 1, index: 932 },
+              end: { line: 47, column: 38, index: 969 },
             },
           },
           {
             type: 'CommentLine',
             value: '@method: POST',
             loc: {
-              start: { line: 47, column: 1, index: 936 },
-              end: { line: 47, column: 17, index: 952 },
+              start: { line: 48, column: 1, index: 970 },
+              end: { line: 48, column: 17, index: 986 },
             },
           },
           {
             type: 'CommentLine',
             value: '@brief: 新增/删除收藏',
             loc: {
-              start: { line: 48, column: 1, index: 953 },
-              end: { line: 48, column: 19, index: 971 },
+              start: { line: 49, column: 1, index: 987 },
+              end: { line: 49, column: 19, index: 1005 },
             },
           },
         ],
@@ -442,8 +455,8 @@ describe('thrift - read code file', () => {
         commentsAfter: [],
         commentsBefore: [],
         loc: {
-          start: { line: 62, column: 1, index: 1337 },
-          end: { line: 62, column: 35, index: 1371 },
+          start: { line: 63, column: 1, index: 1371 },
+          end: { line: 63, column: 35, index: 1405 },
         },
       },
     ]);
@@ -456,8 +469,8 @@ describe('thrift - read code file', () => {
             inputParams: [{ type: 'PackTagRequest', index: 1, name: 'req' }],
             comments: [],
             loc: {
-              start: { line: 57, column: 5, index: 1193 },
-              end: { line: 57, column: 68, index: 1256 },
+              start: { line: 58, column: 5, index: 1227 },
+              end: { line: 58, column: 68, index: 1290 },
             },
             commentsBefore: [],
             commentsAfter: [],
@@ -469,8 +482,8 @@ describe('thrift - read code file', () => {
             ],
             comments: [],
             loc: {
-              start: { line: 58, column: 5, index: 1261 },
-              end: { line: 58, column: 76, index: 1332 },
+              start: { line: 59, column: 5, index: 1295 },
+              end: { line: 59, column: 76, index: 1366 },
             },
             commentsBefore: [],
             commentsAfter: [],
@@ -480,8 +493,8 @@ describe('thrift - read code file', () => {
         commentsAfter: [],
         commentsBefore: [],
         loc: {
-          start: { line: 56, column: 1, index: 1165 },
-          end: { line: 59, column: 2, index: 1334 },
+          start: { line: 57, column: 1, index: 1199 },
+          end: { line: 60, column: 2, index: 1368 },
         },
       },
     ] as RpcEntity['services']);

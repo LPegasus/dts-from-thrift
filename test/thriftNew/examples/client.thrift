@@ -11,6 +11,7 @@ struct Collection {
     1: optional BizType biz_type (go.tag="json:\"biz_type_go\""),
     2: optional string biz_id,
     3: optional pack_goods.ExtensiveGoodsItem sku_collection,
+    4: optional list<string> list
 }
 
 // @method: GET
