@@ -16,6 +16,12 @@ dts-from-protobuf -p ~/git/my-protobuf-repo/proto -o ~/git/my-ts-repo/typings
 
 # 变更历史（ChangeLog)
 
+## 1.2.1 - 2020.11.18
+
+### Fixed
+
+- 修复 thrift `--bail` 没效果的 bug
+
 ## 1.2.0 - 2020.10.09
 
 ### Changed
