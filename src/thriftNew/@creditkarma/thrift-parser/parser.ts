@@ -773,7 +773,12 @@ export function createParser(
         const fieldID: FieldID | null = parseFieldId()
         const fieldRequired: FieldRequired | null = parserequireValuedness()
         const fieldType: FieldType = parseFieldType()
-        const _nameToken: Token | null = consume(SyntaxType.Identifier)
+        // 在scanner处理的时候，把list直接识别成SyntaxType.ListKeyword，但是根据idl来看这样是合法的
+        // 实际应该集合parse的上下文进行修正
+        const _nameToken: Token | null = consume(SyntaxType.Identifier, SyntaxType.ListKeyword)
+        if (_nameToken && _nameToken.type === SyntaxType.ListKeyword) {
+            _nameToken.type = SyntaxType.Identifier;
+        }
         const nameToken: Token = requireValue(
             _nameToken,
             `Unable to find identifier for field`,
