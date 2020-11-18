@@ -33,6 +33,7 @@
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.0.0",
     "@types/prettier": "^2.0.2",
+    "@types/rimraf": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^3.7.1",
     "@typescript-eslint/parser": "^3.7.1",
     "chai": "^4.2.0",
@@ -51,6 +52,7 @@
     "glob": "^7.1.6",
     "prettier": "^2.0.5",
     "protobufjs": "^6.10.1",
+    "rimraf": "^3.0.2",
     "tslib": "^2.0.0"
   },
   "files": [

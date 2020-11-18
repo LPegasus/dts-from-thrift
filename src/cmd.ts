@@ -111,6 +111,9 @@ const tasks = thriftFiles.map(async (filename) => {
   try {
     entity = await readCode(filename, options, includeMap);
   } catch (e) {
+    if (options.bail) {
+      throw e;
+    }
     console.error(e);
     console.error(`read file fail.(${filename})`);
     return;
@@ -135,6 +138,7 @@ rTasks.push(
         } catch (e) {
           console.error(e);
           console.error(`write file fail.(${entity!.fileName})`);
+          throw new Error(e);
         }
       })
     );
@@ -196,14 +200,20 @@ declare namespace ${options.rpcNamespace} {\n${rtn}
   );
 }
 
-Promise.all(rTasks).then(async () => {
-  combine(options);
-  console.log(
-    `${chalk.green('Finished.')} Please check the d.ts files in ${chalk.cyan(
-      options.tsRoot
-    )}.`
-  );
-});
+Promise.all(rTasks)
+  .then(async () => {
+    combine(options);
+    console.log(
+      `${chalk.green('Finished.')} Please check the d.ts files in ${chalk.cyan(
+        options.tsRoot
+      )}.`
+    );
+  })
+  .catch((reason) => {
+    if (options.bail) {
+      throw reason;
+    }
+  });
 
 process.on('unhandledRejection', (reason) => {
   console.log(chalk.red('dts-from-thrift exit with following errors:'));
