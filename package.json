@@ -4,6 +4,7 @@
   "description": "typescript,thrift,protobuf",
   "main": "lib/index.js",
   "scripts": {
+    "test:pb_new": "nyc -e=.ts --require ts-node/register mocha ./test/protobufNew/*.test.ts",
     "test_old": "nyc -e=.ts --require ts-node/register mocha ./test/**/*.test.ts",
     "test": "nyc -e=.ts --require ts-node/register mocha ./test/thriftNew/*.test.ts",
     "cov": "nyc --reporter=text-lcov report > coverage.lcov && codecov",
