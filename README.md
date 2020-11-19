@@ -16,6 +16,14 @@ dts-from-protobuf -p ~/git/my-protobuf-repo/proto -o ~/git/my-ts-repo/typings
 
 # 变更历史（ChangeLog)
 
+## 1.2.2 - 2020.11.19
+
+### Fixed
+
+- 修复 pb message 下的 enum 没有输出在 enums.json 中的问题 ([#39](https://github.com/LPegasus/dts-from-thrift/pull/39/commits/3fc0624f32b9cc79b6e6865c5803c20e77d726f6) by [@chengcyber](https://github.com/chengcyber))
+
+- 修复 pb 变量名不能是 list 的 bug ([#37](https://github.com/LPegasus/dts-from-thrift/pull/37/commits/60c934943a9b82328d5d7939aa95856b5a6c607c) by [@nameliuqi](https://github.com/nameliuqi))
+
 ## 1.2.1 - 2020.11.18
 
 ### Fixed
