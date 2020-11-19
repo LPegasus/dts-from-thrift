@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package nested_enum;
+
+enum Other {
+    OK = 0;
+    ERR = 1;
+}
+
+message Message {
+    enum Status {
+        SUCCESS = 0;
+        FAILURE = 1;
+    }
+
+    Status status = 1;
+}
