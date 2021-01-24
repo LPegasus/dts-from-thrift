@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 declare var Int64: {
   prototype: Int64;
   new (): Int64;
@@ -21,7 +22,7 @@ declare type WrapperRespNumber<T> = T extends number
   : T;
 
 declare type WrapperResponse<P> = {
-  [key in keyof P]: WrapperRespNumber<P[key]>
+  [key in keyof P]: WrapperRespNumber<P[key]>;
 };
 
 declare type WrapperInterface<T> = T extends (req: infer Q) => Promise<infer R>
@@ -34,7 +35,7 @@ declare type WrapperRequest<
   },
   PK extends PartialKeys<P> = PartialKeys<P>
 > = { Base?: P['Base'] } & {
-  [key in Exclude<PK, 'Base'>]+?: WrapperReqNumber<P[key]>
+  [key in Exclude<PK, 'Base'>]+?: WrapperReqNumber<P[key]>;
 } &
   { [key in Exclude<keyof P, PK | 'Base'>]: WrapperReqNumber<P[key]> };
 

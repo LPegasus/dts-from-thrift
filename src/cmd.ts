@@ -177,6 +177,14 @@ declare namespace ${options.rpcNamespace} {\n${rtn}
       .map((d) => {
         let rtn = `${d.name}: WrapperService<${d.name}>;`;
         if (tempMap[d.name] === true) {
+          if (options.bail) {
+            console.error(
+              `\u001b[43;30mduplicate service name "${d.name}" when build _Summary_\u001b[0m`
+            );
+            throw new Error(
+              `duplicate service name "${d.name}" when build _Summary_`
+            );
+          }
           rtn = '';
           console.warn(
             `\u001b[43;30mduplicate service name "${d.name}" when build _Summary_\u001b[0m`
