@@ -7,6 +7,7 @@ thrift RPC 定义文件转 d.ts 工具
 **安装(install)：** `npm install dts-from-thrift -g`
 
 **运行(exec)：**
+
 ```sh
 # for thrift
 dts-from-thrift -p ~/git/my-thrift-repo/thrift -o ~/git/my-ts-repo/typings
@@ -15,6 +16,12 @@ dts-from-protobuf -p ~/git/my-protobuf-repo/proto -o ~/git/my-ts-repo/typings
 ```
 
 # 变更历史（ChangeLog)
+
+## 1.2.4 - 2022.02.15
+
+### Fixed
+
+- 修复 pb 生成的 enums.json 文件路径
 
 ## 1.2.2 - 2020.11.19
 

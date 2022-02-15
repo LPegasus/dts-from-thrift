@@ -75,8 +75,8 @@ if (commander.new || true) {
   (async () => {
     await loadPb(options, outConstMap);
     if (options.enumJson) {
-      const tar = path.resolve(options.root, options.enumJson);
-      await fs.ensureFile(path.resolve(options.root, options.enumJson));
+      const tar = path.resolve(options.tsRoot, options.enumJson);
+      await fs.ensureFile(tar);
       await fs.writeFile(tar, JSON.stringify(outConstMap, null, '  '), 'utf8');
     }
   })();
