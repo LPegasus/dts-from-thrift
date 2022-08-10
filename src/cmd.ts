@@ -55,6 +55,7 @@ commander
     ''
   )
   .option('--enum-json [filename]', '以json的形式输出所有的enum到输出目录', '')
+  .option('--reserved-word <type>', '控制当 reserved word 出现在 namespace 中的时候的行为。error: 报错, escape: 转换成首字符大写。', 'error')
   .option(
     '-o, --out [out dir]',
     '输出 d.ts 文件根目录',
@@ -86,6 +87,7 @@ const options: CMDOptions = {
     : undefined,
   strictReq: commander.strictRequest,
   enumJson: commander.enum_json || 'enums.json',
+  reservedWord: commander.reservedWord || 'error',
   i64Type: commander.i64 === 'string' ? 'string' : 'Int64',
   bail: !!commander.bail,
   mapType:

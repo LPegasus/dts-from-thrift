@@ -24,6 +24,7 @@ export interface ParseOptions {
     outDir: string
     files: Array<string>
     organize: boolean
+    reservedWord?: string
 }
 
 export const defaultOptions: ParseOptions = {
@@ -32,6 +33,7 @@ export const defaultOptions: ParseOptions = {
     outDir: '.',
     files: [],
     organize: true,
+    reservedWord: 'error'
 }
 
 export function parseFiles(
@@ -62,7 +64,9 @@ export function parse(
     const scanner: Scanner = createScanner(source, handleError)
     const tokens: Array<Token> = scanner.scan()
 
-    const parser: Parser = createParser(tokens, handleError)
+    const parser: Parser = createParser(tokens, handleError, {
+        reservedWord: options.reservedWord
+    })
     const intermediate: ThriftDocument = parser.parse()
     const thrift: ThriftDocument = mergedOptions.organize
         ? organize(intermediate)
