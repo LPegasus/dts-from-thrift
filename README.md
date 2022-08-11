@@ -17,6 +17,16 @@ dts-from-protobuf -p ~/git/my-protobuf-repo/proto -o ~/git/my-ts-repo/typings
 
 # 变更历史（ChangeLog)
 
+## 1.3.0 - 2022.08.11
+
+### Fixed
+
+- 修复 thrift 中关键字作为 struct 属性名出现的时，会报错的问题
+
+### Added
+
+- 新增 `--reserved-word` 支持关键字在 namespace 名称中出现时候的行为模式，`error`: 报错，`escape`: 转换成首字母大写。
+
 ## 1.2.4 - 2022.02.15
 
 ### Fixed

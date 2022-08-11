@@ -91,7 +91,7 @@ export interface CMDOptions {
   annotationConfig?: IAnnotationConfig;
   strictReq?: boolean;
   enumJson?: string;
-  reservedWord?: string,
+  reservedWord?: 'error' | 'escape',
   i64Type?: string;
   mapType?: string;
   bail?: boolean;

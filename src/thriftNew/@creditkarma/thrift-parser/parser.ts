@@ -98,7 +98,7 @@ export function createParser(
     tokens: Array<Token>,
     report: ErrorReporter = noopReporter,
     options?: {
-        reservedWord?: string
+        reservedWord?: 'error' | 'escape'
     }
 ): Parser {
     let comments: Array<Comment> = []
@@ -1062,16 +1062,16 @@ export function createParser(
     const IdentifierRegExp = /^[_a-zA-Z][-._a-zA-Z0-9]*$/;
 
     function parseValidIdentifier(): Token | null {
-        const token = advance()
+        const token = advance();
 
         // 参看 scanner 的 identifier 的判断
         if (IdentifierRegExp.test(token.text)) {
-            token.type = SyntaxType.Identifier
+            token.type = SyntaxType.Identifier;
 
-            return token
+            return token;
         }
 
-        return null
+        return null;
     }
 
     // FieldType → Identifier | BaseType | ContainerType
@@ -1224,7 +1224,7 @@ export function createParser(
             (value: string) => {
                 replaceCount++;
 
-                return `${value[0].toUpperCase()}${value.slice(1)}`;
+                return `${value[0].toUpperCase()}${value.substring(1)}`;
             }
         );
 

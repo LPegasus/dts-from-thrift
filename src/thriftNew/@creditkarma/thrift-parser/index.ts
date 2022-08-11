@@ -24,7 +24,7 @@ export interface ParseOptions {
     outDir: string
     files: Array<string>
     organize: boolean
-    reservedWord?: string
+    reservedWord?: 'error' | 'escape'
 }
 
 export const defaultOptions: ParseOptions = {
