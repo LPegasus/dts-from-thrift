@@ -59,6 +59,7 @@ import {
 } from './factory'
 
 import { ErrorReporter, noopReporter } from './debugger'
+import { RESERVEDWORDS } from './keywords'
 
 export interface Parser {
     parse(): ThriftDocument
@@ -96,6 +97,9 @@ class ParseError extends Error {
 export function createParser(
     tokens: Array<Token>,
     report: ErrorReporter = noopReporter,
+    options?: {
+        reservedWord?: 'error' | 'escape'
+    }
 ): Parser {
     let comments: Array<Comment> = []
     let currentIndex: number = 0
@@ -310,8 +314,8 @@ export function createParser(
             listSeparator !== null
                 ? listSeparator.loc
                 : throws !== null
-                ? throws.loc
-                : params.loc
+                    ? throws.loc
+                    : params.loc
 
         return {
             type: SyntaxType.FunctionDefinition,
@@ -408,6 +412,12 @@ export function createParser(
         )
 
         const _nameToken: Token | null = consume(SyntaxType.Identifier)
+
+        if (_nameToken && options?.reservedWord === 'escape') {
+            const nameTokenText = escapeReservedWordForIdentifier(_nameToken.text);
+            _nameToken.text = nameTokenText;
+        }
+
         const nameToken: Token = requireValue(
             _nameToken,
             `Unable to find name identifier for namespace`,
@@ -775,10 +785,8 @@ export function createParser(
         const fieldType: FieldType = parseFieldType()
         // 在scanner处理的时候，把list直接识别成SyntaxType.ListKeyword，但是根据idl来看这样是合法的
         // 实际应该集合parse的上下文进行修正
-        const _nameToken: Token | null = consume(SyntaxType.Identifier, SyntaxType.ListKeyword)
-        if (_nameToken && _nameToken.type === SyntaxType.ListKeyword) {
-            _nameToken.type = SyntaxType.Identifier;
-        }
+        let _nameToken: Token | null = parseValidIdentifier();
+
         const nameToken: Token = requireValue(
             _nameToken,
             `Unable to find identifier for field`,
@@ -792,8 +800,8 @@ export function createParser(
             listSeparator !== null
                 ? listSeparator.loc
                 : defaultValue !== null
-                ? defaultValue.loc
-                : nameToken.loc
+                    ? defaultValue.loc
+                    : nameToken.loc
 
         const location: TextLocation = createTextLocation(
             startLoc.start,
@@ -1051,13 +1059,34 @@ export function createParser(
         }
     }
 
+    const IdentifierRegExp = /^[_a-zA-Z][-._a-zA-Z0-9]*$/;
+
+    function parseValidIdentifier(): Token | null {
+        const token = advance();
+
+        // 参看 scanner 的 identifier 的判断
+        if (IdentifierRegExp.test(token.text)) {
+            token.type = SyntaxType.Identifier;
+
+            return token;
+        }
+
+        return null;
+    }
+
     // FieldType → Identifier | BaseType | ContainerType
     function parseFieldType(): FieldType {
         const typeToken: Token = advance()
         switch (typeToken.type) {
             case SyntaxType.Identifier:
+                // eslint-disable-next-line no-case-declarations
+                let text = typeToken.text;
+                if (options?.reservedWord === 'escape') {
+                    text = escapeReservedWordForIdentifier(typeToken.text);
+                }
+
                 return createIdentifier(
-                    typeToken.text,
+                    text,
                     typeToken.loc,
                     parseAnnotations(),
                 )
@@ -1178,6 +1207,32 @@ export function createParser(
             },
             annotations: parseAnnotations(),
         }
+    }
+
+
+    const ReservedWordsForIdentifierRegExp = new RegExp(
+        `\\.?${RESERVEDWORDS.map((v) => `(${v})`).join('|')}\\.?`,
+        'g'
+    );
+
+    function escapeReservedWordForIdentifier(text: string): string {
+        const originText = text;
+        let replaceCount = 0;
+
+        const replacedText = originText.replace(
+            ReservedWordsForIdentifierRegExp,
+            (value: string) => {
+                replaceCount++;
+
+                return `${value[0].toUpperCase()}${value.substring(1)}`;
+            }
+        );
+
+        if (replaceCount) {
+            return replacedText;
+        }
+
+        return originText;
     }
 
     function consumeComments(): void {

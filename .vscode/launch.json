@@ -1,5 +1,5 @@
 {
-  // 使用 IntelliSense 了解相关属性。 
+  // 使用 IntelliSense 了解相关属性。
   // 悬停以查看现有属性的描述。
   // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
@@ -16,15 +16,7 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/bin/dts-from-protobuf",
       "cwd": "/Users/pegasusknight/git/anote_idl",
-      "args": [
-        "-p",
-        "./",
-        "-o",
-        "typings",
-        "-e",
-        "index.d.ts",
-        "--new"
-      ]
+      "args": ["-p", "./", "-o", "typings", "-e", "index.d.ts", "--new"]
     },
     {
       "type": "node",

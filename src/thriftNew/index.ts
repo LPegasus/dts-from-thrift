@@ -11,7 +11,7 @@ import {
   ConstDefinition,
   DoubleConstant,
   IntConstant,
-  StringLiteral
+  StringLiteral,
 } from './@creditkarma/thrift-parser';
 import {
   RpcEntity,
@@ -24,7 +24,7 @@ import {
   EnumEntity,
   EnumEntityMember,
   ConstantEntity,
-  ConstantEntityType
+  ConstantEntityType,
 } from './interfaces';
 import { handleComments } from './handleComments';
 import * as fs from 'fs-extra';
@@ -45,7 +45,10 @@ export function parser(
   options?: Partial<CMDOptions>, // TODO 添加option支持
   includeMap?: { [key: string]: RpcEntity }
 ): RpcEntity {
-  const ast: ThriftDocument | ThriftErrors = parse(source);
+  const ast: ThriftDocument | ThriftErrors = parse(source, {
+    reservedWord: options?.reservedWord || 'error',
+  });
+  
   if (!isThritDocument(ast)) {
     throw new Error('thrift parser error:' + filefullname);
   }
@@ -70,7 +73,7 @@ export function parser(
     enums: [],
     typeDefs: [],
     services: [],
-    consts: []
+    consts: [],
   };
 
   const namespaces: { [key: string]: string } = {};
@@ -99,7 +102,7 @@ export function parser(
         loc: ts.loc,
         comments: ts.comments,
         commentsAfter: ts.commentsAfter,
-        commentsBefore: ts.commentsBefore
+        commentsBefore: ts.commentsBefore,
       };
       // 添加属性
       ts.fields.forEach((field: any) => {
@@ -121,7 +124,7 @@ export function parser(
         comments: ts.comments,
         commentsAfter: ts.commentsAfter,
         commentsBefore: ts.commentsBefore,
-        loc: ts.loc
+        loc: ts.loc,
       };
       aTypeDef.alias = ts.name.value;
       aTypeDef.type = getFieldTypeString(ts.definitionType, options);
@@ -136,9 +139,9 @@ export function parser(
         comments: ts.comments,
         commentsAfter: ts.commentsAfter,
         commentsBefore: ts.commentsBefore,
-        loc: ts.loc
+        loc: ts.loc,
       };
-      ts.functions.forEach(func => {
+      ts.functions.forEach((func) => {
         aService.interfaces[func.name.value] = handleFunction(func, options);
       });
       rtn.services.push(aService);
@@ -206,7 +209,7 @@ function getFieldTypeString(
     [SyntaxType.MapKeyword]: 'Map',
     [SyntaxType.SetKeyword]: 'Set',
     // UPDATE 添加void
-    [SyntaxType.VoidKeyword]: 'void'
+    [SyntaxType.VoidKeyword]: 'void',
   };
 
   if (options)
@@ -312,12 +315,11 @@ function handleField(
       (Array.isArray(fieldComment) || fieldKey)
     ) {
       let comment = '';
-      field.annotations.annotations.forEach(annotation => {
+      field.annotations.annotations.forEach((annotation) => {
         if (Array.isArray(fieldComment)) {
           if (fieldComment.indexOf(annotation.name.value) > -1) {
-            comment += `@${annotation.name.value}:${
-              annotation!.value!.value
-            }    `;
+            comment += `@${annotation.name.value}:${annotation!.value!.value
+              }    `;
           }
         }
         let fieldKeyArr: string[];
@@ -337,7 +339,7 @@ function handleField(
       commentsBefore.push({
         type: SyntaxType.CommentLine,
         value: comment,
-        loc: field.loc
+        loc: field.loc,
       });
     }
   }
@@ -377,7 +379,7 @@ function handleField(
     commentsBefore.push({
       type: SyntaxType.CommentLine,
       value: `@default: ${value}`,
-      loc: field.loc
+      loc: field.loc,
     });
   } else {
     defaultValue = '';
@@ -392,9 +394,9 @@ function handleField(
       comments: field.comments,
       commentsBefore,
       commentsAfter: field.commentsAfter,
-      loc: field.loc
+      loc: field.loc,
     },
-    name
+    name,
   };
 }
 
@@ -417,7 +419,7 @@ function handleFunction(
     return {
       type: temp.type,
       index: temp.index,
-      name
+      name,
     };
   });
   let comment = '';
@@ -426,7 +428,7 @@ function handleFunction(
     const { functionMethod, functionUri } = options.annotationConfig;
     if (functionMethod || functionUri) {
       if (func.annotations && Array.isArray(func.annotations.annotations)) {
-        func.annotations.annotations.forEach(annotation => {
+        func.annotations.annotations.forEach((annotation) => {
           if (functionMethod) {
             if (annotation.name.value === functionMethod) {
               comment += `@method: ${annotation!.value!.value}    `;
@@ -446,12 +448,11 @@ function handleFunction(
       Array.isArray(func.annotations.annotations) &&
       Array.isArray(fieldComment)
     ) {
-      func.annotations.annotations.forEach(annotation => {
+      func.annotations.annotations.forEach((annotation) => {
         if (Array.isArray(fieldComment)) {
           if (fieldComment.indexOf(annotation.name.value) > -1) {
-            comment += `@${annotation.name.value}: ${
-              annotation!.value!.value
-            }    `;
+            comment += `@${annotation.name.value}: ${annotation!.value!.value
+              }    `;
           }
         }
       });
@@ -462,7 +463,7 @@ function handleFunction(
     commentsBefore.push({
       loc: func.loc,
       value: comment,
-      type: SyntaxType.CommentLine
+      type: SyntaxType.CommentLine,
     });
   }
   return {
@@ -471,7 +472,7 @@ function handleFunction(
     comments: [],
     loc: func.loc,
     commentsBefore,
-    commentsAfter: func.commentsAfter
+    commentsAfter: func.commentsAfter,
   };
 }
 
@@ -516,7 +517,7 @@ function handleConst(
     name,
     comments: c.comments,
     loc: c.loc,
-    typeString
+    typeString,
   };
 }
 
@@ -526,7 +527,7 @@ function handleEnum(e: EnumDefinition, options?: CMDOptions): EnumEntity {
     [key: string]: EnumEntityMember;
   } = {};
   let currentValue = 0;
-  e.members.forEach(member => {
+  e.members.forEach((member) => {
     /**
      * https://wiki.apache.org/thrift/Tutorial
      * You can define enums, which are just 32 bit integers. Values are optional
@@ -547,7 +548,7 @@ function handleEnum(e: EnumDefinition, options?: CMDOptions): EnumEntity {
       loc: member.loc,
       comments: member.comments,
       commentsBefore: member.commentsBefore,
-      commentsAfter: member.commentsAfter
+      commentsAfter: member.commentsAfter,
     };
   });
   return {
@@ -556,6 +557,6 @@ function handleEnum(e: EnumDefinition, options?: CMDOptions): EnumEntity {
     loc: e.loc,
     comments: e.comments,
     commentsBefore: e.commentsBefore,
-    commentsAfter: e.commentsAfter
+    commentsAfter: e.commentsAfter,
   };
 }

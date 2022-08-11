@@ -9,14 +9,8 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "rootDirs": [
-      "src/",
-      "test/"
-    ]
+    "useUnknownInCatchVariables": false,
+    "rootDirs": ["src/", "test/"]
   },
-  "exclude": [
-    "./test/",
-    "./lib",
-    "./typings"
-  ]
+  "exclude": ["./test/", "./lib", "./typings"]
 }
