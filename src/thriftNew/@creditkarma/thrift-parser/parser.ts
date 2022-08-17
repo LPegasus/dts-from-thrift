@@ -1211,7 +1211,7 @@ export function createParser(
 
 
     const ReservedWordsForIdentifierRegExp = new RegExp(
-        `\\.?${RESERVEDWORDS.map((v) => `(${v})`).join('|')}\\.?`,
+        `(?<=\\.|^)(?:${RESERVEDWORDS.map((v) => `(${v})`).join('|')})(?=\\.|$)`,
         'g'
     );
 
