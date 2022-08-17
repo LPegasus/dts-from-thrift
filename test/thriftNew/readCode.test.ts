@@ -778,4 +778,15 @@ describe('thrift - read code file', () => {
 
     expect(struct.myMap.type).to.eq('Record<string, Int64>');
   });
+
+  it('support reserved word', async () => {
+    const res = await readCode(
+      path.resolve(__dirname, './examples/reserved_word_test.thrift'),
+      { reservedWord: 'escape' }
+    );
+
+    expect(res.ns).to.eq('If.Const.letenum.If.enum_d.enum_if.enum0.Enum');
+    expect(res.interfaces[0].properties).to.have.property('debugger');
+    expect(res.interfaces[0].properties.debugger.type).to.eq('reserved_word.Enum.Debugger');
+  });
 });
