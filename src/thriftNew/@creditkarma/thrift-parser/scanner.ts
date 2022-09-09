@@ -339,14 +339,14 @@ export function createScanner(
                 cursor += 1
             }
 
-            advance()
-
             // A comment goes until we find a comment terminator (*/).
             if ((peek() === '*' && peekNext() === '/') || isAtEnd()) {
                 advance()
                 advance()
                 break
             }
+
+            advance()
         }
 
         addToken(SyntaxType.CommentBlock, comment.trim())
