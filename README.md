@@ -16,7 +16,11 @@ dts-from-protobuf -p ~/git/my-protobuf-repo/proto -o ~/git/my-ts-repo/typings
 ```
 
 # 变更历史（ChangeLog)
+## 1.3.3 - 2023.07.17
 
+### Fixed
+
+- 修复 thrift 中对注释处理的报错
 ## 1.3.0 - 2022.08.11
 
 ### Fixed
