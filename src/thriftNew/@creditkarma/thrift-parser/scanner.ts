@@ -216,11 +216,12 @@ export function createScanner(
         }
 
         const literal: string = source.substring(startIndex, currentIndex)
-        const type: SyntaxType = KEYWORDS[literal]
 
-        if (type == null) {
+        const isKeyword = Object.keys(KEYWORDS).includes(literal)
+        if (!isKeyword) {
             addToken(SyntaxType.Identifier, literal)
         } else {
+            const type: SyntaxType = KEYWORDS[literal]
             addToken(type, literal)
         }
     }
@@ -305,6 +306,7 @@ export function createScanner(
         addToken(SyntaxType.CommentLine, comment.trim())
     }
 
+    // TODO: optimize the logic
     function multilineComment(): void {
         let comment: string = ''
         let cursor: number = 0
@@ -313,7 +315,8 @@ export function createScanner(
             if (
                 current() === '\n' ||
                 isAtEnd() ||
-                (current() !== '/' && current() !== '*' && current() !== ' ')
+                (current() !== '/' && current() !== '*') ||
+                (current() === '*' && peek() === '*' && peekNext() === '/')
             ) {
                 break
             } else {
@@ -324,6 +327,13 @@ export function createScanner(
         while (true) {
             if (current() === '\n') {
                 nextLine()
+            }
+
+            // A comment goes until we find a comment terminator (*/).
+            if ((peek() === '*' && peekNext() === '/') || isAtEnd()) {
+                advance()
+                advance()
+                break
             }
 
             if (
@@ -339,14 +349,14 @@ export function createScanner(
                 cursor += 1
             }
 
+            advance()
+
             // A comment goes until we find a comment terminator (*/).
             if ((peek() === '*' && peekNext() === '/') || isAtEnd()) {
                 advance()
                 advance()
                 break
             }
-
-            advance()
         }
 
         addToken(SyntaxType.CommentBlock, comment.trim())
